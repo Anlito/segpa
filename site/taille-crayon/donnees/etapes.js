@@ -3,8 +3,9 @@
 // la suite de la phrase va dans « detail » (lue aussi à voix haute).
 //
 // Types d'écran : regle (bouton « J'ai compris ») · consigne (« C'est fait ») · photo · cases (lignes à cocher) ·
-// bilan (phrases + trois visages). Écrans propres au taille-crayon, construits au jalon 2 : ouverture, pieces,
-// mesure, remontage, questions (tant qu'ils n'existent pas, le site les saute).
+// bilan (phrases + trois visages). Écrans propres au taille-crayon (js/ecrans.js) : ouverture (la présentation),
+// pieces (tableau des pièces), mesure (une pièce au réglet), remontage (le tableau à l'envers), questions.
+// Les noms des pièces, longueurs de référence et phrases-cartes sont dans donnees/modele.js.
 // bravo : ce qui s'affiche sur l'écran « Bravo » quand l'étape est faite.
 // minuteur : minutes du bloc (déroulé minuté de la préparation) ; le cercle se vide pendant le bloc.
 (function () {
@@ -19,7 +20,14 @@
       {
         "id": "s1", "titre": "Je démonte", "sousTitre": "et j’observe", "picto": "tournevis",
         "etapes": [
-          { "id": "ouverture", "type": "ouverture" },
+          { "id": "ouverture", "type": "ouverture", "pages": [
+            { "titre": "C’est quoi, un objet technique ?", "detail": "Un objet fabriqué par l’Homme, qui répond à un besoin.",
+              "images": [{ "picto": "velo", "mot": "Le vélo" }, { "picto": "stylo", "mot": "Le stylo" }, { "picto": "jouet", "mot": "Le jouet" }, { "picto": "taille-crayon", "mot": "Le taille-crayon" }] },
+            { "titre": "Notre mission", "detail": "Toujours en binôme, une pièce à la fois.", "numeros": true,
+              "images": [{ "picto": "tournevis", "mot": "Démonter" }, { "picto": "oeil", "mot": "Observer et dessiner" }, { "picto": "regle", "mot": "Mesurer" }, { "picto": "remonter", "mot": "Remonter" }] },
+            { "titre": "L’objet du jour", "revele": { "picto": "taille-crayon", "mot": "Le taille-crayon à manivelle" } },
+            { "titre": "Le programme", "detail": "3 séances de 55 minutes.", "programme": true }
+          ] },
           ...REGLES,
           { "id": "materiel", "type": "consigne", "picto": "tournevis", "texte": "Je prépare mon matériel.", "detail": "1 taille-crayon, 1 tournevis, 1 boîte." },
           { "id": "une-case", "type": "consigne", "picto": "boite", "texte": "Une pièce = une case dans la boîte.", "detail": "Pas de mélange avec le binôme voisin." },
@@ -63,7 +71,11 @@
             ] },
           { "id": "remonte", "type": "photo", "picto": "taille-crayon", "texte": "Prends le taille-crayon remonté en photo.", "legende": "Mon taille-crayon remonté" },
           { "id": "crayon", "type": "photo", "picto": "crayon", "texte": "Prends un crayon taillé en photo.", "legende": "Un crayon taillé" },
-          { "id": "questions", "type": "questions", "minuteur": 10 },
+          { "id": "questions", "type": "questions", "minuteur": 10, "questions": [
+            { "id": "manivelle", "texte": "À quoi sert la manivelle ?", "choix": "phrases" },
+            { "id": "tourner", "texte": "Quelle pièce fait tourner l’autre pièce ?", "choix": "mes-pieces" },
+            { "id": "difficile", "texte": "Quelle pièce était la plus dure à remonter ?", "choix": "mes-pieces" }
+          ] },
           { "id": "bilan", "type": "bilan", "texte": "Mon bilan", "bravo": "Mon bilan est fait",
             "phrases": [
               "J’ai réussi à démonter puis remonter mon objet.",

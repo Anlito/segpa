@@ -1,0 +1,488 @@
+// Écrans propres au taille-crayon (brief §4) : la présentation d'ouverture, le tableau des pièces (séance 1),
+// la mesure d'une pièce au réglet (séance 2), le tableau à l'envers et les questions (séance 3).
+// Chaque écran se fait en plusieurs temps (une seule chose à faire à la fois) ; le temps en cours est gardé dans
+// O.sous() et le travail dans la sauvegarde (brouillon de l'étape), pour reprendre après une fermeture de la page.
+// Les noms des pièces, les longueurs de référence et les phrases-cartes viennent de donnees/modele.js.
+(function (global) {
+  'use strict';
+
+  const S = global.Segpa;
+  const M = () => S.modele || {};
+  const deux = (n) => String(n).padStart(2, '0');
+
+  // Brouillon d'une étape (copie modifiable), avec des valeurs par défaut.
+  function brouillon(O, etape, defaut) {
+    const v = S.valeurEtape(O.D(), O.seance().id, etape.id);
+    return v && typeof v === 'object' ? JSON.parse(JSON.stringify(v)) : defaut;
+  }
+  function garderBrouillon(O, etape, valeur) {
+    S.noterBrouillon(O.D(), O.seance().id, etape.id, valeur);
+    O.enregistrer(true);
+  }
+
+  // Les pièces démontées en séance 1, dans l'ordre (tableau de la fiche).
+  function piecesDemontees(d) {
+    const s1 = d.seances.s1 && d.seances.s1.etapes.pieces;
+    return (s1 && s1.valeur && Array.isArray(s1.valeur.pieces) && s1.valeur.pieces) || [];
+  }
+  const nomPiece = (p) => p.nom || `Pièce ${p.numero}`;
+
+  // Remplit les <img data-photo="…"> avec les photos du dossier de l'équipe.
+  async function chargerPhotos(O) {
+    for (const img of O.racine.querySelectorAll('img[data-photo]')) {
+      const u = await O.urlPhoto(img.dataset.photo);
+      if (u) img.src = u;
+      else img.replaceWith(Object.assign(document.createElement('span'), { className: 'sans-image', innerHTML: S.picto('photo') }));
+    }
+  }
+
+  const vignette = (O, fichier, alt) => (fichier ? `<img data-photo="${O.ech(fichier)}" alt="${O.ech(alt || '')}">` : `<span class="sans-image">${S.picto('photo')}</span>`);
+
+  // ---------- Ouverture : la présentation du projet, page par page ----------
+
+  S.ajouterEcran('ouverture', (etape, O) => {
+    const sous = O.sous();
+    sous.page = sous.page || 0;
+    const pages = etape.pages || [];
+    const page = pages[sous.page];
+    const derniere = sous.page === pages.length - 1;
+    let contenu = '';
+    let aLire = O.lisible(page.titre, page.detail);
+    if (page.images) {
+      contenu = `<div class="tuiles-ouverture">${page.images
+        .map((im, i) => `<div class="tuile-ouverture">${page.numeros ? `<span class="numero-mission">${i + 1}</span>` : ''}${S.picto(im.picto)}<span>${O.ech(im.mot)}</span></div>`)
+        .join('')}</div>`;
+      aLire = O.lisible(page.titre, page.images.map((im) => im.mot).join(', ') + '.', page.detail);
+    } else if (page.revele) {
+      contenu = sous.vu
+        ? `<div class="revele">${S.picto(page.revele.picto)}<strong>${O.ech(page.revele.mot)}</strong></div>`
+        : `<button type="button" class="btn btn-principal" data-action="decouvrir">${S.picto('oeil')}Je découvre</button>`;
+      if (sous.vu) aLire = O.lisible(page.titre, page.revele.mot + '.');
+    } else if (page.programme) {
+      const seances = S.etapes.seances;
+      contenu = `<div class="tuiles-ouverture">${seances
+        .map((s, i) => `<div class="tuile-ouverture"><span class="numero-mission">${i + 1}</span>${S.picto(s.picto)}<span>${O.ech(s.titre)}<br><small>${O.ech(s.sousTitre || '')}</small></span></div>`)
+        .join('')}</div>`;
+      aLire = O.lisible(page.titre, seances.map((s, i) => `Séance ${i + 1} : ${s.titre} ${s.sousTitre || ''}.`).join(' '), page.detail);
+    }
+    const visible = !page.revele || sous.vu;
+    return {
+      milieu: `<div class="colonne ouverture" style="align-items:center;text-align:center">
+          <span class="pastille">${sous.page + 1} sur ${pages.length}</span>
+          <div class="consigne-ligne" style="align-items:center"><p class="consigne-texte">${O.ech(page.titre)}</p>${O.boutonVoix(aLire)}</div>
+          ${contenu}
+          ${page.detail ? `<p class="consigne-detail">${O.ech(page.detail)}</p>` : ''}
+        </div>`,
+      gauche: O.boutonRetour('retour-sous'),
+      principal: visible ? O.boutonPrincipal('suivant-page', derniere ? 'C’est parti !' : 'Suivant', derniere ? 'lecture' : 'suivant') : '',
+      actions: {
+        decouvrir: () => {
+          sous.vu = true;
+          S.voix.son('ok');
+          O.rafraichir();
+        },
+        'suivant-page': () => {
+          if (derniere) return O.suivant();
+          sous.page++;
+          sous.vu = false;
+          O.rafraichir();
+        },
+        'retour-sous': () => {
+          if (sous.page === 0) return O.etat.actions.precedent();
+          sous.page--;
+          sous.vu = true;
+          O.rafraichir();
+        },
+      },
+    };
+  });
+
+  // ---------- Séance 1 : le tableau des pièces ----------
+  // Pour chaque pièce : je dévisse → je photographie → je nomme → je range dans la case n. Retour au tableau.
+
+  S.ajouterEcran('pieces', (etape, O) => {
+    const sous = O.sous();
+    const valeur = brouillon(O, etape, { pieces: [] });
+    const pieces = valeur.pieces;
+    const max = M().maxPieces || 10;
+    const n = pieces.length + 1;
+    sous.temps = sous.temps || 'tableau';
+    const vers = (temps) => () => {
+      sous.temps = temps;
+      O.rafraichir();
+    };
+
+    if (sous.temps === 'devisser')
+      return {
+        milieu: O.blocConsigne({ picto: 'tournevis', texte: 'Je dévisse une pièce.', detail: 'Si ça bloque, je lève la main.' }, `Pièce ${n}`),
+        gauche: O.boutonRetour('tableau'),
+        principal: O.boutonPrincipal('devissee', 'C’est fait'),
+        actions: { tableau: vers('tableau'), devissee: vers('photo') },
+      };
+
+    if (sous.temps === 'photo') {
+      const vue = O.vuePhoto({
+        texte: 'Je prends la pièce en photo.',
+        detail: 'Pose-la sur la feuille blanche.',
+        legende: `Pièce ${n}`,
+        etapeId: `piece-${deux(n)}`,
+        retour: 'retour-photo',
+        garder: (p) => {
+          sous.photo = p.fichier;
+          vers('nom')();
+        },
+        plusTard: () => {
+          sous.photo = null;
+          vers('nom')();
+        },
+      });
+      vue.actions['retour-photo'] = vers('devisser');
+      return vue;
+    }
+
+    if (sous.temps === 'nom' && (M().pieces || []).length) {
+      const pris = new Set(pieces.map((p) => p.nom));
+      return {
+        milieu: `<div class="colonne" style="gap:1.25rem">
+            <div class="consigne-ligne" style="align-items:center"><span class="pastille">Pièce ${n}</span><p class="consigne-texte" style="font-size:2.75rem">Quel est son nom ?</p>${O.boutonVoix('Quel est son nom ?')}</div>
+            <div class="cartes-noms">${M()
+              .pieces.map((p, i) => `<button type="button" class="carte-nom${pris.has(p.nom) ? ' deja' : ''}" data-action="nom" data-i="${i}">${p.image ? `<img src="${O.ech(p.image)}" alt="">` : ''}<span>${O.ech(p.nom)}</span></button>`)
+              .join('')}<button type="button" class="carte-nom autre" data-action="autre">${S.picto('crayon')}<span>Un autre nom</span></button></div>
+          </div>`,
+        gauche: O.boutonRetour('retour-nom'),
+        principal: '',
+        actions: {
+          'retour-nom': vers('photo'),
+          nom: (b) => {
+            sous.nom = M().pieces[Number(b.dataset.i)].nom;
+            sous.autre = false;
+            vers('ranger')();
+          },
+          autre: vers('autre-nom'),
+        },
+      };
+    }
+
+    if (sous.temps === 'nom' || sous.temps === 'autre-nom')
+      return {
+        milieu: `<div class="colonne" style="gap:2rem;max-width:56rem">
+            <div class="consigne-ligne" style="align-items:center"><span class="pastille">Pièce ${n}</span><p class="consigne-texte" style="font-size:2.75rem">Écris le nom de la pièce.</p>${O.boutonVoix('Écris le nom de la pièce.')}</div>
+            <input class="champ-libre" maxlength="40" autocomplete="off" aria-label="Nom de la pièce" value="${O.ech(sous.saisie || '')}">
+          </div>`,
+        gauche: `<div class="gauche" style="display:flex;gap:1rem">${O.boutonRetour('retour-nom').replace(' gauche', '')}<button type="button" class="btn btn-second" data-action="sais-pas">${S.picto('question')}Je ne sais pas</button></div>`,
+        principal: O.boutonPrincipal('nomme', 'C’est son nom', 'coche', !(sous.saisie || '').trim()),
+        actions: {
+          'retour-nom': vers((M().pieces || []).length ? 'nom' : 'photo'),
+          nomme: () => {
+            sous.nom = S.majuscule(O.racine.querySelector('.champ-libre').value);
+            sous.autre = true;
+            sous.saisie = '';
+            vers('ranger')();
+          },
+          'sais-pas': () => {
+            sous.nom = null;
+            sous.autre = false;
+            vers('ranger')();
+          },
+        },
+        apres: () => {
+          const champ = O.racine.querySelector('.champ-libre');
+          champ.focus();
+          champ.addEventListener('input', () => {
+            sous.saisie = champ.value;
+            O.racine.querySelector('[data-action="nomme"]').disabled = !champ.value.trim();
+          });
+          champ.addEventListener('keydown', (e) => e.key === 'Enter' && champ.value.trim() && O.etat.actions.nomme());
+        },
+      };
+
+    if (sous.temps === 'ranger')
+      return {
+        milieu: O.blocConsigne({ picto: 'boite', texte: `Je range la pièce dans la case ${n}.`, detail: sous.nom ? `${sous.nom}.` : '' }, `Pièce ${n}`),
+        gauche: O.boutonRetour('retour-ranger'),
+        principal: O.boutonPrincipal('rangee', 'C’est rangé'),
+        actions: {
+          'retour-ranger': vers('nom'),
+          rangee: () => {
+            pieces.push({ numero: n, photo: sous.photo || null, nom: sous.nom || null, autreNom: !!sous.autre, date: S.maintenant() });
+            // La photo prend le nom de la pièce dans l'album.
+            const ph = sous.photo && O.D().photos.find((p) => p.fichier === sous.photo);
+            if (ph && sous.nom) ph.legende = `Pièce ${n} : ${sous.nom}`;
+            garderBrouillon(O, etape, valeur);
+            S.voix.son('ok');
+            Object.assign(sous, { temps: 'tableau', photo: null, nom: null, autre: false });
+            O.rafraichir();
+          },
+        },
+      };
+
+    // Le tableau : les pièces rangées, dans l'ordre, et la case suivante.
+    const cases = Math.max(M().nombrePieces || 8, Math.min(max, pieces.length + 1));
+    const grille = Array.from({ length: cases }, (_, i) => {
+      const p = pieces[i];
+      if (p)
+        return `<div class="case-piece faite">${vignette(O, p.photo, nomPiece(p))}<span class="num">${p.numero}</span><span class="nom">${S.picto('coche')}${O.ech(nomPiece(p))}</span></div>`;
+      if (i === pieces.length) return `<div class="case-piece ici"><span class="num">${i + 1}</span><strong>À toi !</strong>${S.picto('tournevis')}</div>`;
+      return `<div class="case-piece vide"><span class="num">${i + 1}</span></div>`;
+    }).join('');
+    const texte = pieces.length ? `${pieces.length} pièce${pieces.length > 1 ? 's' : ''} dans la boîte` : 'Une pièce à la fois';
+    return {
+      milieu: `<div class="colonne" style="gap:1rem;align-self:stretch;justify-content:center">
+          <div class="consigne-ligne" style="align-items:center"><p class="consigne-texte" style="font-size:2.25rem">${texte}</p>${O.boutonVoix('Je dévisse une pièce, je la photographie, je la range. ' + texte + '.')}</div>
+          <div class="grille-pieces${cases > 8 ? ' cinq' : ''}">${grille}</div>
+        </div>`,
+      gauche: `<div class="gauche" style="display:flex;gap:1rem">${O.boutonRetour('precedent').replace(' gauche', '')}<button type="button" class="btn btn-second" data-action="fin-demontage"${pieces.length ? '' : ' disabled'}>${S.picto('coche')}J’ai fini de démonter</button></div>`,
+      principal: pieces.length < max ? O.boutonPrincipal('piece', `Pièce ${n}`, 'tournevis') : '',
+      actions: {
+        piece: vers('devisser'),
+        'fin-demontage': () => O.suivant(valeur),
+      },
+      apres: () => chargerPhotos(O),
+    };
+  });
+
+  // ---------- Séance 2 : mesurer et dessiner une pièce ----------
+  // Je sors une pièce → je mesure (vérification douce) → je dessine sur papier → photo du dessin → je la remets.
+
+  S.ajouterEcran('mesure', (etape, O) => {
+    const sous = O.sous();
+    const info = (M().mesures || {})[etape.piece] || { titre: etape.piece, nom: etape.piece };
+    const plage = S.plageDe(info.reference, M().tolerance);
+    const essaisMax = M().essaisMesure || 2;
+    const valeur = brouillon(O, etape, { essais: [], longueur: null, verdict: null, tropDehors: false, photo: null });
+    sous.temps = sous.temps || 'sortir';
+    const vers = (temps) => () => {
+      sous.temps = temps;
+      O.rafraichir();
+    };
+    const pastille = info.titre;
+    const dehors = `<span class="pastille" style="background:#fff;border:0.125rem solid var(--trait);color:var(--encre)">Pièces dehors : 1 sur 2</span>`;
+
+    if (sous.temps === 'sortir')
+      return {
+        milieu: `${O.blocConsigne({ picto: 'boite', texte: 'Je sors une seule pièce de la boîte.', detail: `${info.nom.charAt(0).toUpperCase() + info.nom.slice(1)}.` }, pastille)}
+          ${sous.trop ? `<div class="msg msg-ambre msg-flottant" role="alert">${S.picto('boite')}Remets les pièces en trop dans la boîte.</div>` : ''}`,
+        gauche: `<div class="gauche" style="display:flex;gap:1rem">${O.boutonRetour('precedent').replace(' gauche', '')}<button type="button" class="btn btn-second" data-action="trop">J’en ai sorti plus</button></div>`,
+        principal: O.boutonPrincipal('sortie', 'J’ai sorti 1 pièce'),
+        actions: {
+          trop: () => {
+            sous.trop = true;
+            valeur.tropDehors = true;
+            garderBrouillon(O, etape, valeur);
+            O.rafraichir();
+          },
+          sortie: vers('mesurer'),
+        },
+      };
+
+    if (sous.temps === 'mesurer') {
+      sous.saisie = sous.saisie || '';
+      const essais = valeur.essais.length;
+      let msg = '';
+      if (sous.verdict === 'dedans') msg = `<div class="msg msg-ok" role="status">${S.picto('coche')}Bien mesuré !</div>`;
+      else if (sous.verdict === 'dehors' && essais < essaisMax) msg = `<div class="msg msg-ambre" role="alert">${S.picto('remonter')}Mesure encore une fois, en partant du 0 du réglet.</div>`;
+      else if (sous.verdict === 'dehors') msg = `<div class="msg msg-ambre" role="alert">${S.picto('aide')}Montre ta mesure au professeur.</div>`;
+      const termine = sous.verdict === 'dedans' || (sous.verdict === 'dehors' && essais >= essaisMax);
+      return {
+        milieu: `<div class="colonne" style="gap:1.5rem">
+            <div style="display:flex;gap:1rem;align-items:center"><span class="pastille">${O.ech(pastille)}</span>${dehors}</div>
+            <div class="consigne-ligne" style="align-items:center"><span class="tuile-picto">${S.picto('regle')}</span><p class="consigne-texte" style="font-size:2.75rem">Je mesure avec mon réglet.</p>${O.boutonVoix('Je mesure avec mon réglet. Je tape la longueur en centimètres.')}</div>
+            <div class="ligne-mesure">Longueur : <output class="affichage-mesure" aria-live="polite">${O.ech(sous.saisie) || '&nbsp;'}</output><span class="unite">cm</span></div>
+            ${msg}
+          </div>
+          ${termine ? '' : O.pave.html()}`,
+        gauche: O.boutonRetour('retour-mesure'),
+        principal: termine ? O.boutonPrincipal('mesure-suivant', 'Suivant', 'suivant') : O.boutonPrincipal('mesure', 'C’est mesuré', 'coche', S.lireNombre(sous.saisie) === null),
+        actions: {
+          'retour-mesure': vers('sortir'),
+          touche: (b) => {
+            sous.saisie = O.pave.appui(sous.saisie, b.dataset.c);
+            if (sous.verdict === 'dehors') sous.verdict = null;
+            O.racine.querySelector('.affichage-mesure').innerHTML = O.ech(sous.saisie) || '&nbsp;';
+            O.racine.querySelector('[data-action="mesure"]').disabled = S.lireNombre(sous.saisie) === null;
+            const m = O.racine.querySelector('.colonne .msg');
+            if (m) m.remove();
+          },
+          mesure: () => {
+            const n = S.lireNombre(sous.saisie);
+            const verdict = S.verifierMesure(n, plage);
+            valeur.essais.push(n);
+            valeur.longueur = n;
+            valeur.verdict = verdict;
+            garderBrouillon(O, etape, valeur);
+            if (verdict === 'sans-reference') return vers('dessiner')();
+            sous.verdict = verdict;
+            if (verdict === 'dehors' && valeur.essais.length < essaisMax) sous.saisie = '';
+            S.voix.son(verdict === 'dedans' ? 'ok' : 'aide');
+            O.rafraichir();
+          },
+          'mesure-suivant': vers('dessiner'),
+        },
+      };
+    }
+
+    if (sous.temps === 'dessiner')
+      return {
+        milieu: O.blocConsigne({ picto: 'crayon', texte: 'Je dessine la pièce sur ma feuille.', detail: '1 carreau = 1 cm. J’écris la longueur avec une flèche.' }, pastille),
+        gauche: O.boutonRetour('retour-dessin'),
+        principal: O.boutonPrincipal('dessinee', 'C’est dessiné'),
+        actions: { 'retour-dessin': vers('mesurer'), dessinee: vers('photo') },
+      };
+
+    if (sous.temps === 'photo') {
+      const vue = O.vuePhoto({
+        texte: 'Je prends mon dessin en photo.',
+        detail: 'Avec la pièce à côté du dessin.',
+        legende: `Dessin : ${info.nom}`,
+        etapeId: etape.id,
+        retour: 'retour-photo',
+        garder: (p) => {
+          valeur.photo = p.fichier;
+          garderBrouillon(O, etape, valeur);
+          vers('remettre')();
+        },
+        plusTard: vers('remettre'),
+      });
+      vue.actions['retour-photo'] = vers('dessiner');
+      return vue;
+    }
+
+    // remettre
+    return {
+      milieu: O.blocConsigne({ picto: 'boite', texte: 'Je remets la pièce dans sa case.' }, pastille),
+      gauche: O.boutonRetour('retour-remettre'),
+      principal: O.boutonPrincipal('remise', 'C’est fait'),
+      actions: { 'retour-remettre': vers('photo'), remise: () => O.suivant(valeur) },
+    };
+  });
+
+  // ---------- Séance 3 : le tableau à l'envers ----------
+  // Les photos de la séance 1, de la dernière pièce à la première, une à la fois (aide visuelle, pas de contrôle).
+
+  S.ajouterEcran('remontage', (etape, O) => {
+    const sous = O.sous();
+    const pieces = piecesDemontees(O.D()).slice().reverse();
+    sous.i = sous.i || 0;
+    if (!pieces.length)
+      return {
+        milieu: O.blocConsigne({ picto: 'remonter', texte: 'Je remonte le taille-crayon.', detail: 'Je commence par la dernière pièce.' }),
+        principal: O.boutonPrincipal('fait', 'C’est remonté'),
+        actions: { fait: () => O.suivant({ remises: 0 }) },
+      };
+    const p = pieces[sous.i];
+    return {
+      milieu: `<div class="zone-camera photo-piece">${vignette(O, p.photo, nomPiece(p))}<span class="num-grand">${p.numero}</span></div>
+        <div class="colonne">
+          <span class="pastille">${sous.i + 1} sur ${pieces.length}</span>
+          <div class="consigne-ligne"><p class="consigne-texte" style="font-size:2.875rem">Je remets cette pièce.</p>${O.boutonVoix(`Je remets cette pièce : ${nomPiece(p)}.`)}</div>
+          <p class="consigne-detail">${O.ech(nomPiece(p))}</p>
+          <p class="consigne-detail" style="font-size:1.5rem">Si ça bloque, je lève la main. Je ne force pas.</p>
+        </div>`,
+      gauche: O.boutonRetour('retour-remontage'),
+      principal: O.boutonPrincipal('remise', 'C’est remis'),
+      actions: {
+        'retour-remontage': () => {
+          if (sous.i === 0) return O.etat.actions.precedent();
+          sous.i--;
+          O.rafraichir();
+        },
+        remise: () => {
+          S.voix.son('ok');
+          if (sous.i + 1 >= pieces.length) return O.suivant({ remises: pieces.length });
+          sous.i++;
+          O.rafraichir();
+        },
+      },
+      apres: () => chargerPhotos(O),
+    };
+  });
+
+  // ---------- Séance 3 : les questions de compréhension ----------
+  // Répondre en choisissant (phrases-cartes ou ses propres photos), en écrivant, ou à l'oral (le professeur valide).
+  // Pas de correction : le professeur lit les réponses.
+
+  S.ajouterEcran('questions', (etape, O) => {
+    const sous = O.sous();
+    const questions = etape.questions || [];
+    const valeur = brouillon(O, etape, { reponses: {} });
+    sous.q = sous.q || 0;
+    const q = questions[sous.q];
+    const rep = valeur.reponses[q.id] || null;
+    const derniere = sous.q === questions.length - 1;
+    const choisir = (reponse) => {
+      valeur.reponses[q.id] = reponse;
+      garderBrouillon(O, etape, valeur);
+      sous.ecrire = false;
+      O.rafraichir();
+    };
+    const presse = (mode, v) => !!(rep && rep.mode === mode && (v === undefined || rep.valeur === v));
+    const titre = `<div class="consigne-ligne" style="align-items:center"><span class="pastille">Question ${sous.q + 1} sur ${questions.length}</span><p class="consigne-texte" style="font-size:2.5rem">${O.ech(q.texte)}</p>${O.boutonVoix(q.texte)}</div>`;
+
+    if (sous.ecrire)
+      return {
+        milieu: `<div class="colonne" style="gap:1.5rem;max-width:66rem">${titre}<textarea class="champ-libre" rows="3" maxlength="300" aria-label="Ma réponse">${O.ech((rep && rep.mode === 'texte' && rep.valeur) || '')}</textarea></div>`,
+        gauche: O.boutonRetour('retour-ecrire'),
+        principal: O.boutonPrincipal('ecrit', 'C’est écrit', 'coche', !(rep && rep.mode === 'texte' && rep.valeur)),
+        actions: {
+          'retour-ecrire': () => {
+            sous.ecrire = false;
+            O.rafraichir();
+          },
+          ecrit: () => choisir({ mode: 'texte', valeur: O.racine.querySelector('.champ-libre').value.trim() }),
+        },
+        apres: () => {
+          const t = O.racine.querySelector('.champ-libre');
+          t.focus();
+          t.addEventListener('input', () => (O.racine.querySelector('[data-action="ecrit"]').disabled = !t.value.trim()));
+        },
+      };
+
+    let cartes = '';
+    if (q.choix === 'phrases')
+      cartes = (M().phrasesManivelle || [])
+        .map((ph, i) => `<button type="button" class="carte-choix phrase" data-action="phrase" data-i="${i}" aria-pressed="${presse('carte', ph)}">${O.ech(ph)}</button>`)
+        .join('');
+    if (q.choix === 'mes-pieces')
+      cartes = piecesDemontees(O.D())
+        .map(
+          (p, i) => `<button type="button" class="carte-choix piece" data-action="choix-piece" data-i="${i}" aria-pressed="${presse('photo', p.numero)}">${vignette(O, p.photo, nomPiece(p))}<span>${O.ech(nomPiece(p))}</span></button>`
+        )
+        .join('');
+    const ecrite = rep && rep.mode === 'texte';
+    return {
+      milieu: `<div class="colonne" style="gap:1.25rem;align-self:stretch;justify-content:center">
+          ${titre}
+          ${cartes ? `<div class="grille-choix${q.choix === 'mes-pieces' ? ' pieces' : ''}">${cartes}</div>` : ''}
+          <div class="autres-reponses">
+            ${q.choix === 'phrases' ? `<button type="button" class="carte-choix mode" data-action="ecrire" aria-pressed="${!!ecrite}">${S.picto('texte')}${ecrite ? O.ech(rep.valeur) : 'J’écris ma réponse'}</button>` : ''}
+            <button type="button" class="carte-choix mode" data-action="oral" aria-pressed="${presse('oral')}">${S.picto('oral')}Je réponds à l’oral</button>
+          </div>
+        </div>`,
+      gauche: O.boutonRetour('retour-question'),
+      principal: O.boutonPrincipal('question-suivante', derniere ? 'C’est fini' : 'Suivant', derniere ? 'coche' : 'suivant', !rep),
+      actions: {
+        phrase: (b) => choisir({ mode: 'carte', valeur: M().phrasesManivelle[Number(b.dataset.i)] }),
+        'choix-piece': (b) => {
+          const p = piecesDemontees(O.D())[Number(b.dataset.i)];
+          choisir({ mode: 'photo', valeur: p.numero, nom: p.nom || null });
+        },
+        ecrire: () => {
+          sous.ecrire = true;
+          O.rafraichir();
+        },
+        oral: () => choisir({ mode: 'oral', valeur: null }),
+        'retour-question': () => {
+          if (sous.q === 0) return O.etat.actions.precedent();
+          sous.q--;
+          O.rafraichir();
+        },
+        'question-suivante': () => {
+          if (derniere) return O.suivant(valeur);
+          sous.q++;
+          O.rafraichir();
+        },
+      },
+      apres: () => chargerPhotos(O),
+    };
+  });
+})(window);

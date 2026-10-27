@@ -467,6 +467,9 @@
 
   function ecranEtape() {
     const etape = etapes()[etat.index];
+    // État d'un écran à plusieurs temps (pièce par pièce…) : remis à zéro quand on change d'étape.
+    const cle = etat.seance.id + '/' + etape.id;
+    if (!etat.sous || etat.sous.cle !== cle) etat.sous = { cle };
     const vue = TYPES[etape.type](etape);
     afficher(
       `<div class="ecran">
@@ -585,119 +588,131 @@
     },
 
     // Photo : aperçu de la caméra, gros bouton, puis « Je garde » / « Je recommence ».
-    photo: (etape) => {
-      const vue = { capture: null, cameras: [], choisie: '' };
-      const zone = () => racine.querySelector('.zone-camera');
-      const colonne = () => racine.querySelector('.colonne');
-      const consigne = `<div class="consigne-ligne"><p class="consigne-texte" style="font-size:2.875rem">${ech(etape.texte)}</p>${boutonVoix(lisible(etape.texte, 'Les mains, oui. Les visages, non.'))}</div>`;
-
-      function direct(erreur) {
-        vue.capture = null;
-        colonne().innerHTML = `${consigne}
-          <p class="consigne-detail">${ech(etape.detail || 'Les mains, oui. Les visages, non.')}</p>
-          ${erreur ? `<div class="msg msg-ambre" role="alert">${pic('camera')}${ech(erreur)}</div>
-            <button type="button" class="btn btn-principal" data-action="allumer" style="align-self:flex-start">${pic('remonter')}Réessayer</button>`
-            : `<button type="button" class="declencheur" data-action="prendre" aria-label="Prendre la photo">${pic('photo')}</button>`}`;
-        const basGauche = racine.querySelector('.bas .gauche');
-        basGauche.innerHTML =
-          boutonRetour('precedent').replace(' gauche', '') +
-          (vue.cameras.length > 1 ? `<button type="button" class="btn btn-second" data-action="autre-camera">${pic('camera')}Autre caméra</button>` : '') +
-          (erreur ? '<button type="button" class="btn btn-second" data-action="plus-tard">Plus tard</button>' : '');
-      }
-
-      async function allumer(id) {
-        zone().innerHTML = `<div class="vide">${pic('camera')}La caméra s’allume…</div>`;
-        const video = document.createElement('video');
-        video.muted = true;
-        video.playsInline = true;
-        video.setAttribute('aria-label', 'Image de la caméra');
-        const r = await S.camera.allumer(video, id);
-        if (!racine.contains(zone())) return S.camera.arreter();
-        if (!r.ok) {
-          zone().innerHTML = `<div class="vide">${pic('camera')}Pas d’image</div>`;
-          return direct(r.message);
-        }
-        vue.cameras = r.cameras;
-        vue.choisie = r.choisie;
-        zone().innerHTML = '';
-        zone().append(video);
-        zone().insertAdjacentHTML('beforeend', '<span class="coin hg"></span><span class="coin hd"></span><span class="coin bg"></span><span class="coin bd"></span><span class="flash"></span>');
-        direct();
-      }
-
-      async function prendre() {
-        const video = zone().querySelector('video');
-        if (!video) return;
-        let r;
-        try {
-          r = await S.camera.prendre(video);
-        } catch {
-          return message('La caméra démarre… Réessaie dans une seconde.');
-        }
-        S.voix.son('photo');
-        const flash = zone().querySelector('.flash');
-        flash.classList.add('on');
-        setTimeout(() => flash.classList.remove('on'), 30);
-        vue.capture = r.blob;
-        S.camera.arreter();
-        const img = document.createElement('img');
-        img.alt = 'Ta photo';
-        img.src = URL.createObjectURL(r.blob);
-        zone().innerHTML = '';
-        zone().append(img);
-        colonne().innerHTML = `<div class="consigne-ligne"><p class="consigne-texte" style="font-size:2.875rem">Ta photo est bien ?</p>${boutonVoix('Ta photo est bien ?')}</div>
-          <button type="button" class="btn btn-principal" data-action="garder" style="align-self:flex-start">${pic('coche')}Je garde</button>
-          <button type="button" class="btn btn-second" data-action="recommencer" style="align-self:flex-start">${pic('photo')}Je recommence</button>`;
-        racine.querySelector('.bas .gauche').innerHTML = '';
-      }
-
-      async function garder(b) {
-        b.disabled = true;
-        try {
-          const p = await etat.session.ajouterPhoto(vue.capture, etat.seance.id, etape.id, etape.legende || etape.texte);
-          suivant({ fichier: p.fichier });
-        } catch {
-          b.disabled = false;
-          message('La photo ne s’enregistre pas. Touche « Autoriser », ou touche Aide.', 5000);
-        }
-      }
-
-      function touche(e) {
-        if (e.code === 'Space' && !vue.capture && racine.querySelector('[data-action="prendre"]')) {
-          e.preventDefault();
-          prendre();
-        }
-      }
-
-      return {
-        milieu: `<div class="zone-camera"><div class="vide">${pic('camera')}La caméra s’allume…</div></div><div class="colonne">${consigne}</div>`,
-        gauche: `<div class="gauche" style="display:flex;gap:1rem">${boutonRetour('precedent').replace(' gauche', '')}</div>`,
-        principal: '',
-        actions: {
-          prendre,
-          allumer: () => allumer(),
-          garder,
-          recommencer: () => allumer(vue.choisie),
-          'autre-camera': () => {
-            const i = vue.cameras.findIndex((c) => c.deviceId === vue.choisie);
-            allumer(vue.cameras[(i + 1) % vue.cameras.length].deviceId);
-          },
-          'plus-tard': () => {
-            S.passerEtape(D(), etat.seance.id, etape.id);
-            etat.session.aEnregistrer(true);
-            etat.index++;
-            if (etat.index >= etapes().length) return ecranBravo();
-            ecranEtape();
-          },
+    photo: (etape) =>
+      vuePhoto({
+        texte: etape.texte,
+        detail: etape.detail,
+        legende: etape.legende,
+        etapeId: etape.id,
+        garder: (p) => suivant({ fichier: p.fichier }),
+        plusTard: () => {
+          S.passerEtape(D(), etat.seance.id, etape.id);
+          etat.session.aEnregistrer(true);
+          etat.index++;
+          if (etat.index >= etapes().length) return ecranBravo();
+          ecranEtape();
         },
-        apres: () => {
-          allumer();
-          document.addEventListener('keydown', touche);
-          nettoyage = () => document.removeEventListener('keydown', touche);
-        },
-      };
-    },
+      }),
   };
+
+  // Écran photo réutilisable (étape « photo », photo d'une pièce, photo d'un dessin…).
+  // o : { texte, detail, legende, etapeId (nom des fichiers), garder(photo), plusTard() facultatif, retour (action) }
+  function vuePhoto(o) {
+    const vue = { capture: null, cameras: [], choisie: '' };
+    const zone = () => racine.querySelector('.zone-camera');
+    const colonne = () => racine.querySelector('.colonne');
+    const consigne = `<div class="consigne-ligne"><p class="consigne-texte" style="font-size:2.875rem">${ech(o.texte)}</p>${boutonVoix(lisible(o.texte, 'Les mains, oui. Les visages, non.'))}</div>`;
+
+    function direct(erreur) {
+      vue.capture = null;
+      colonne().innerHTML = `${consigne}
+        <p class="consigne-detail">${ech(o.detail || 'Les mains, oui. Les visages, non.')}</p>
+        ${erreur ? `<div class="msg msg-ambre" role="alert">${pic('camera')}${ech(erreur)}</div>
+          <button type="button" class="btn btn-principal" data-action="allumer" style="align-self:flex-start">${pic('remonter')}Réessayer</button>`
+          : `<button type="button" class="declencheur" data-action="prendre" aria-label="Prendre la photo">${pic('photo')}</button>`}`;
+      const basGauche = racine.querySelector('.bas .gauche');
+      basGauche.innerHTML =
+        boutonRetour(o.retour || 'precedent').replace(' gauche', '') +
+        (vue.cameras.length > 1 ? `<button type="button" class="btn btn-second" data-action="autre-camera">${pic('camera')}Autre caméra</button>` : '') +
+        (erreur && o.plusTard ? '<button type="button" class="btn btn-second" data-action="plus-tard">Plus tard</button>' : '');
+    }
+
+    async function allumer(id) {
+      zone().innerHTML = `<div class="vide">${pic('camera')}La caméra s’allume…</div>`;
+      const video = document.createElement('video');
+      video.muted = true;
+      video.playsInline = true;
+      video.setAttribute('aria-label', 'Image de la caméra');
+      const r = await S.camera.allumer(video, id);
+      if (!racine.contains(zone())) return S.camera.arreter();
+      if (!r.ok) {
+        zone().innerHTML = `<div class="vide">${pic('camera')}Pas d’image</div>`;
+        return direct(r.message);
+      }
+      vue.cameras = r.cameras;
+      vue.choisie = r.choisie;
+      zone().innerHTML = '';
+      zone().append(video);
+      zone().insertAdjacentHTML('beforeend', '<span class="coin hg"></span><span class="coin hd"></span><span class="coin bg"></span><span class="coin bd"></span><span class="flash"></span>');
+      direct();
+    }
+
+    async function prendre() {
+      const video = zone().querySelector('video');
+      if (!video) return;
+      let r;
+      try {
+        r = await S.camera.prendre(video);
+      } catch {
+        return message('La caméra démarre… Réessaie dans une seconde.');
+      }
+      S.voix.son('photo');
+      const flash = zone().querySelector('.flash');
+      flash.classList.add('on');
+      setTimeout(() => flash.classList.remove('on'), 30);
+      vue.capture = r.blob;
+      S.camera.arreter();
+      const img = document.createElement('img');
+      img.alt = 'Ta photo';
+      img.src = URL.createObjectURL(r.blob);
+      zone().innerHTML = '';
+      zone().append(img);
+      colonne().innerHTML = `<div class="consigne-ligne"><p class="consigne-texte" style="font-size:2.875rem">Ta photo est bien ?</p>${boutonVoix('Ta photo est bien ?')}</div>
+        <button type="button" class="btn btn-principal" data-action="garder" style="align-self:flex-start">${pic('coche')}Je garde</button>
+        <button type="button" class="btn btn-second" data-action="recommencer" style="align-self:flex-start">${pic('photo')}Je recommence</button>`;
+      racine.querySelector('.bas .gauche').innerHTML = '';
+    }
+
+    async function garder(b) {
+      b.disabled = true;
+      try {
+        const p = await etat.session.ajouterPhoto(vue.capture, etat.seance.id, o.etapeId, o.legende || o.texte);
+        o.garder(p);
+      } catch {
+        b.disabled = false;
+        message('La photo ne s’enregistre pas. Touche « Autoriser », ou touche Aide.', 5000);
+      }
+    }
+
+    function touche(e) {
+      if (e.code === 'Space' && !vue.capture && racine.querySelector('[data-action="prendre"]')) {
+        e.preventDefault();
+        prendre();
+      }
+    }
+
+    return {
+      milieu: `<div class="zone-camera"><div class="vide">${pic('camera')}La caméra s’allume…</div></div><div class="colonne">${consigne}</div>`,
+      gauche: `<div class="gauche" style="display:flex;gap:1rem">${boutonRetour(o.retour || 'precedent').replace(' gauche', '')}</div>`,
+      principal: '',
+      actions: {
+        prendre,
+        allumer: () => allumer(),
+        garder,
+        recommencer: () => allumer(vue.choisie),
+        'autre-camera': () => {
+          const i = vue.cameras.findIndex((c) => c.deviceId === vue.choisie);
+          allumer(vue.cameras[(i + 1) % vue.cameras.length].deviceId);
+        },
+        'plus-tard': () => o.plusTard && o.plusTard(),
+      },
+      apres: () => {
+        allumer();
+        document.addEventListener('keydown', touche);
+        nettoyage = () => document.removeEventListener('keydown', touche);
+      },
+    };
+  }
 
   // Les projets ajoutent leurs propres écrans (pieces, mesure…) : Segpa.ajouterEcran('mesure', (etape, outils) => vue).
   S.ajouterEcran = (type, fabrique) => {
@@ -823,7 +838,45 @@
   }
 
   // Outils prêtés aux écrans propres d'un projet.
-  const OUTILS = { etat, D, suivant, message, pic, ech, boutonVoix, boutonPrincipal, boutonRetour, blocConsigne, racine };
+  // ---------- Pavé numérique à l'écran (aucun clavier) ----------
+  // Une décimale au plus, 4 caractères au plus (« 12,5 »).
+  const TOUCHES = ['7', '8', '9', '4', '5', '6', '1', '2', '3', ',', '0', 'effacer'];
+  const paveHtml = () =>
+    `<div class="pave">${TOUCHES.map((c) =>
+      c === 'effacer'
+        ? `<button type="button" class="touche" data-action="touche" data-c="effacer" aria-label="Effacer">${pic('effacer')}</button>`
+        : `<button type="button" class="touche" data-action="touche" data-c="${c}" aria-label="${c === ',' ? 'Virgule' : c}">${c}</button>`
+    ).join('')}</div>`;
+  function paveAppui(valeur, c) {
+    const v = String(valeur || '');
+    if (c === 'effacer') return v.slice(0, -1);
+    if (c === ',') return v && !v.includes(',') ? v + ',' : v;
+    if (v.includes(',') && v.split(',')[1].length >= 1) return v;
+    if (v.length >= 4 || (v === '0' && c !== ',')) return v === '0' ? c : v;
+    return v + c;
+  }
+
+  const OUTILS = {
+    etat,
+    D,
+    suivant,
+    message,
+    pic,
+    ech,
+    lisible,
+    boutonVoix,
+    boutonPrincipal,
+    boutonRetour,
+    blocConsigne,
+    vuePhoto,
+    racine,
+    seance: () => etat.seance,
+    sous: () => etat.sous,
+    rafraichir: () => ecranEtape(),
+    enregistrer: (geste) => etat.session.aEnregistrer(geste),
+    urlPhoto: (fichier) => etat.session.urlPhoto(fichier),
+    pave: { html: paveHtml, appui: paveAppui },
+  };
 
   // ---------- Démarrage ----------
 

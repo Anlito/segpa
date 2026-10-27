@@ -9,6 +9,7 @@ const SITE = path.join(__dirname, '..', 'site');
 function moteur() {
   require(path.join(SITE, 'commun/js/outils.js'));
   require(path.join(SITE, 'commun/js/moteur/sauvegarde.js'));
+  require(path.join(SITE, 'commun/js/moteur/mesure.js'));
   return require(path.join(SITE, 'commun/js/moteur/etapes.js'));
 }
 
@@ -20,9 +21,10 @@ function donnees(projet) {
     definirEtapes: (e) => (lu.etapes = e),
     definirReglagesAtelier: (r) => (lu.reglages = r),
     definirCollege: (c) => (lu.college = c),
+    definirModele: (m) => (lu.modele = m),
   };
   vm.createContext(bac);
-  for (const f of ['projet.js', 'classes.js', 'etapes.js']) vm.runInContext(fs.readFileSync(path.join(SITE, projet, 'donnees', f), 'utf8'), bac, { filename: f });
+  for (const f of ['projet.js', 'classes.js', 'modele.js', 'etapes.js']) vm.runInContext(fs.readFileSync(path.join(SITE, projet, 'donnees', f), 'utf8'), bac, { filename: f });
   vm.runInContext(fs.readFileSync(path.join(SITE, 'commun/donnees/college.js'), 'utf8'), bac);
   return JSON.parse(JSON.stringify(lu));
 }

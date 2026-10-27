@@ -46,10 +46,12 @@
   S.etapes = null;
   S.reglages = null;
   S.college = null;
+  S.modele = null;
   global.definirProjet = (p) => (S.projet = p);
   global.definirEtapes = (e) => (S.etapes = e);
   global.definirReglagesAtelier = (r) => (S.reglages = r);
   global.definirCollege = (c) => (S.college = c);
+  global.definirModele = (m) => (S.modele = m);
 
   Object.assign(S, { simplifierNom, nomEquipe, majuscule, remplirChemin, echapper, maintenant });
 

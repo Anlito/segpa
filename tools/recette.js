@@ -13,6 +13,7 @@ const { chromium } = require('playwright');
 
 const RACINE = path.join(__dirname, '..');
 const SORTIE = path.join(RACINE, '.cache', 'recette');
+fs.rmSync(SORTIE, { recursive: true, force: true });
 fs.mkdirSync(SORTIE, { recursive: true });
 const PORT = 8137;
 const lignes = [];
@@ -26,7 +27,10 @@ async function nouvellePage(navigateur, taille) {
   const page = await contexte.newPage();
   const erreurs = [];
   const horsSite = [];
-  page.on('pageerror', (e) => erreurs.push(e.message));
+  page.on('pageerror', (e) => {
+    erreurs.push(e.message);
+    if (process.env.TRACE) console.log('ERREUR PAGE', e.message);
+  });
   page.on('dialog', (d) => {
     erreurs.push('fenêtre inattendue : ' + d.type());
     d.accept();
@@ -58,19 +62,23 @@ async function cliquer(page, selecteur) {
   await page.locator(selecteur).first().click();
 }
 
+const visible = async (page, selecteur) => (await page.locator(selecteur).count()) > 0;
+
 // Fait l'écran affiché, quel que soit son type. Renvoie false sur l'écran « Bravo ».
-async function faireEcran(page, nom, captures) {
-  await page.waitForTimeout(150);
-  if (await page.locator('[data-action="fini"]').count()) return false;
+// demo : modèle de démonstration chargé (cartes de noms, plage de mesure, phrases-cartes).
+async function faireEcran(page, nom, captures, demo) {
+  await page.waitForTimeout(120);
+  if (await visible(page, '[data-action="fini"]')) return false;
   await sansDefilement(page, nom);
   if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '.png') });
-  if (await page.locator('.ligne').count()) {
+  if (process.env.TRACE) console.log(nom, await page.locator('.consigne-texte').first().textContent().catch(() => '-'));
+  if (await visible(page, '.ligne')) {
     for (const l of await page.locator('.ligne').all()) await l.click();
     await cliquer(page, '[data-action="fait"]');
-  } else if (await page.locator('.visage').count()) {
+  } else if (await visible(page, '.visage')) {
     for (const q of await page.locator('.question-bilan').all()) await q.locator('.visage').first().click();
     await cliquer(page, '[data-action="fait"]');
-  } else if (await page.locator('.zone-camera').count()) {
+  } else if (await visible(page, '.zone-camera:not(.photo-piece)')) {
     await page.locator('[data-action="prendre"]').waitFor({ timeout: 10000 });
     await page.waitForFunction(() => document.querySelector('.zone-camera video') && document.querySelector('.zone-camera video').videoWidth > 0);
     await sansDefilement(page, nom + '-camera');
@@ -79,22 +87,72 @@ async function faireEcran(page, nom, captures) {
     await page.locator('[data-action="garder"]').waitFor();
     await sansDefilement(page, nom + '-apercu');
     await cliquer(page, '[data-action="garder"]');
+  } else if (await visible(page, '[data-action="decouvrir"]')) {
+    await cliquer(page, '[data-action="decouvrir"]');
+  } else if (await visible(page, '[data-action="piece"]')) {
+    // Tableau des pièces : deux pièces, puis « J'ai fini de démonter ».
+    if ((await page.locator('.case-piece.faite').count()) >= 2) await cliquer(page, '[data-action="fin-demontage"]');
+    else await cliquer(page, '[data-action="piece"]');
+  } else if (await visible(page, '.cartes-noms')) {
+    await cliquer(page, '.carte-nom');
+  } else if (await visible(page, 'input.champ-libre')) {
+    await page.locator('input.champ-libre').fill('Ressort');
+    await cliquer(page, '[data-action="nomme"]');
+  } else if (await visible(page, '.pave')) {
+    // Démonstration : une première mesure hors de la plage (message ambre), puis la bonne.
+    const premiere = demo && !(await visible(page, '.msg-ambre'));
+    for (const c of premiere ? ['9', ',', '5'] : ['7', ',', '5']) await cliquer(page, `[data-c="${c}"]`);
+    await cliquer(page, '[data-action="mesure"]');
+    if (premiere) {
+      await page.locator('.msg-ambre').waitFor();
+      await sansDefilement(page, nom + '-ecart');
+      if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '-ecart.png') });
+    }
+  } else if (await visible(page, '[data-action="oral"]')) {
+    if (await visible(page, '.carte-choix.phrase')) await cliquer(page, '.carte-choix.phrase');
+    else if (await visible(page, '.carte-choix.piece')) {
+      await cliquer(page, '.carte-choix.piece');
+      if (process.env.TRACE) console.log('  choisi', await page.locator('[aria-pressed="true"]').count(), await page.locator('[data-action="question-suivante"]').isDisabled());
+    }
+    else await cliquer(page, '[data-action="oral"]');
+    await cliquer(page, '[data-action="question-suivante"]');
   } else {
-    await cliquer(page, '[data-action="fait"]');
+    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'remise', 'fait'];
+    for (const a of suite)
+      if (await visible(page, `[data-action="${a}"]`)) {
+        await cliquer(page, `[data-action="${a}"]`);
+        return true;
+      }
+    throw new Error(`${nom} : écran inconnu`);
   }
   return true;
 }
 
-async function faireSeance(page, prefixe, captures) {
+async function faireSeance(page, prefixe, captures, demo) {
   let n = 0;
-  while (await faireEcran(page, `${prefixe}-${String(++n).padStart(2, '0')}`, captures)) assert.ok(n < 40, 'séance sans fin');
+  while (await faireEcran(page, `${prefixe}-${String(++n).padStart(2, '0')}`, captures, demo)) assert.ok(n < 90, 'séance sans fin');
   await sansDefilement(page, prefixe + '-bravo');
   if (captures) await page.screenshot({ path: path.join(SORTIE, prefixe + '-bravo.png') });
   return n - 1;
 }
 
-async function scenarioEnseignant(navigateur, base, taille, captures) {
+// Modèle de démonstration (fictif) : pour essayer les cartes de noms, la vérification de mesure et les phrases-cartes.
+const MODELE_DEMO = {
+  pieces: [{ nom: 'Pièce A' }, { nom: 'Pièce B' }, { nom: 'Pièce C' }, { nom: 'Pièce D' }],
+  nombrePieces: 8,
+  maxPieces: 10,
+  mesures: {
+    corps: { titre: 'Pièce 1 : le corps', nom: 'le corps du taille-crayon', reference: { longueur: 7.5 } },
+    manivelle: { titre: 'Pièce 2 : la manivelle', nom: 'la manivelle', reference: { min: 7, max: 8 } },
+  },
+  tolerance: 0.5,
+  essaisMesure: 2,
+  phrasesManivelle: ['[Phrase-carte 1]', '[Phrase-carte 2]', '[Phrase-carte 3]'],
+};
+
+async function scenarioEnseignant(navigateur, base, taille, captures, demo) {
   const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
+  if (demo) await page.addInitScript((m) => document.addEventListener('DOMContentLoaded', () => (window.Segpa.modele = m)), MODELE_DEMO);
   await page.goto(base + 'taille-crayon/index.html?enseignant=1');
   await sansDefilement(page, 'accueil');
   if (captures) await page.screenshot({ path: path.join(SORTIE, 'accueil.png') });
@@ -114,7 +172,7 @@ async function scenarioEnseignant(navigateur, base, taille, captures) {
   const ecrans = [];
   for (const s of ['s1', 's2', 's3']) {
     await cliquer(page, '[data-action="continuer"]');
-    ecrans.push(await faireSeance(page, s, captures));
+    ecrans.push(await faireSeance(page, s, captures, demo));
     await cliquer(page, '[data-action="album"]');
     await sansDefilement(page, s + '-album');
     if (captures && s === 's3') await page.screenshot({ path: path.join(SORTIE, 'album.png') });
@@ -186,7 +244,9 @@ async function scenarioDossier(navigateur, base, taille) {
   assert.equal(d.application, 'segpa');
   assert.equal(d.projet, 'taille-crayon');
   assert.deepEqual(d.equipe, { eleves: ['Ines', 'Noah'], classe: '6A' });
-  assert.equal(d.photos[0].fichier, 'photos/s1-boite-01.jpg');
+  assert.ok(d.photos.some((p) => p.fichier === 'photos/s1-boite-01.jpg'), 'photo de la boîte notée');
+  assert.ok(d.photos.some((p) => p.fichier === 'photos/s1-piece-01-01.jpg' && p.legende === 'Pièce 1 : Ressort'), 'photo de la pièce 1 notée avec son nom');
+  assert.equal(d.seances.s1.etapes.pieces.valeur.pieces.length, 2, 'deux pièces dans le tableau');
   assert.deepEqual(fichiers.debut, [0xff, 0xd8, 0xff], 'la photo est un JPEG');
   assert.ok(fichiers.taille > 5000);
   assert.ok(!fichiers.json.includes('data:image'), 'aucune image dans le .json');
@@ -236,12 +296,15 @@ async function scenarioDossier(navigateur, base, taille) {
     for (const [nomBase, base] of bases)
       for (const taille of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
         const t = `${taille.width}×${taille.height}`;
-        try {
-          const ecrans = await scenarioEnseignant(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
-          noter(`- OK ${nomBase} ${t} · mode enseignant : séances de ${ecrans.join(', ')} écrans faites jusqu’à « Bravo », album, aide demandée puis résolue, rien ne dépasse, aucune erreur, aucune requête hors du site.`);
-        } catch (e) {
-          ok = false;
-          noter(`- ÉCHEC ${nomBase} ${t} · mode enseignant : ${e.message}`);
+        for (const demo of [false, true]) {
+          const quoi = demo ? 'modèle de démonstration' : 'modele.js vide';
+          try {
+            const ecrans = await scenarioEnseignant(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366 && demo, demo);
+            noter(`- OK ${nomBase} ${t} · mode enseignant, ${quoi} : séances de ${ecrans.join(', ')} écrans faites jusqu’à « Bravo » (présentation, 2 pièces démontées, 2 mesures${demo ? ' dont une hors plage' : ''}, remontage, questions), album, aide, rien ne dépasse, aucune erreur, aucune requête hors du site.`);
+          } catch (e) {
+            ok = false;
+            noter(`- ÉCHEC ${nomBase} ${t} · mode enseignant, ${quoi} : ${e.message.split('\n')[0]}`);
+          }
         }
       }
     // Le dossier privé du navigateur n'existe pas en file:// : ce scénario passe par le serveur local.

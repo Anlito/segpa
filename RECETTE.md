@@ -1,10 +1,12 @@
-# Recette manuelle — jalon 1 (socle élève, taille-crayon)
+# Recette manuelle — jalons 1 et 2 (écrans élèves du taille-crayon)
 
 À faire par Thomas sur **un poste élève du collège** (Chrome ou Edge), avant la première séance.
 La recette automatique (`npm run recette`, résultat dans `RECETTE-AUTO.md`) a déjà vérifié le parcours complet avec une
 caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifier.
 
 ## Préparer
+0. Remplir `site/taille-crayon/donnees/modele.js` (noms des pièces, longueurs du corps et de la manivelle,
+   3 phrases-cartes) — l'outil marche aussi sans, mais sans aide au nom ni vérification de la mesure.
 1. Copier le dossier `site/` du dépôt sur le réseau (ou ouvrir `site/index.html` depuis une clé USB).
 2. Dans `Bureau › Classe › 6A › COMMUN › TECHNOLOGIE`, créer le dossier **`Taille-crayon`**.
 3. Y déposer **`classe.json`** avec les prénoms de la classe (modèle : `docs/exemple-classe.json`) :
@@ -18,8 +20,19 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
 - [ ] **Je commence** → le chemin s'affiche → « Ouvrir le dossier » → choisir `Taille-crayon` → **Autoriser**.
 - [ ] Les **boutons-prénoms** de `classe.json` s'affichent ; choisir **deux prénoms avec accent** (ex. Léa, Inès).
 - [ ] Le dossier `Taille-crayon › Léa_Inès` est créé, avec `Léa_Inès.json` dedans.
-- [ ] Ma mission → Je continue → les 3 règles, le matériel, « une pièce = une case », le rangement (les 3 lignes se
-      cochent en touchant la ligne), la photo.
+- [ ] Ma mission → Je continue → la **présentation** (objet technique, mission, « Je découvre » l'objet du jour,
+      programme), les 3 règles, le matériel, « une pièce = une case ».
+- [ ] **Tableau des pièces** avec un vrai taille-crayon : « Pièce 1 » → je dévisse → photo → nom (cartes de
+      `modele.js`, ou clavier tant qu'il est vide, ou « Je ne sais pas ») → je range dans la case 1 → la photo et le
+      nom apparaissent dans la case 1. Faire 3 ou 4 pièces, puis « J'ai fini de démonter ».
+- [ ] Le rangement (les 3 lignes se cochent en touchant la ligne), la photo de la boîte.
+- [ ] **Séance 2** (Ma mission → toucher « Je mesure ») : je sors une seule pièce (« J'en ai sorti plus » → message
+      ambre), je mesure au pavé (« 7,5 »), je dessine sur papier, photo du dessin, je remets la pièce. Deux fois.
+      Avec les longueurs de référence dans `modele.js` : une mesure fausse donne « Mesure encore une fois, en partant
+      du 0 du réglet », la deuxième fausse « Montre ta mesure au professeur ».
+- [ ] **Séance 3** : les photos de la séance 1 reviennent **de la dernière à la première** ; vérification (3 cases) ;
+      photos du taille-crayon remonté et d'un crayon taillé ; 3 questions (cartes, « J'écris ma réponse »,
+      « Je réponds à l'oral », ou ses propres photos) ; le bilan.
 - [ ] **Webcam** : l'image s'affiche ; « Autre caméra » apparaît s'il y en a plusieurs ; la photo est prise
       (bouton ou barre d'espace) → « Je garde » → le fichier `photos/s1-boite-01.jpg` est dans le dossier de l'équipe.
 - [ ] Webcam débranchée : message « Je ne vois pas la caméra. Branche-la, puis appuie sur Réessayer. »

@@ -52,3 +52,31 @@ test('les trois règles reviennent au début de chaque séance', () => {
     assert.deepEqual(regles, ['regle-force', 'regle-vis', 'regle-lames'], s.id);
   }
 });
+
+test('modèle du taille-crayon : forme attendue (même vide, en attendant les mesures de Thomas)', () => {
+  const { modele } = donnees('taille-crayon');
+  assert.ok(Array.isArray(modele.pieces));
+  for (const p of modele.pieces) assert.ok(p.nom && S.nombreDeMots(p.nom) <= 4, `nom de pièce : ${p.nom}`);
+  assert.ok(modele.nombrePieces >= 1 && modele.maxPieces >= modele.nombrePieces);
+  for (const cle of ['corps', 'manivelle']) {
+    const m = modele.mesures[cle];
+    assert.ok(m && m.titre && m.nom, cle);
+    if (m.reference !== null) assert.ok(S.plageDe(m.reference, modele.tolerance), `${cle} : référence lisible`);
+  }
+  assert.ok(Array.isArray(modele.phrasesManivelle) && modele.phrasesManivelle.length <= 3);
+  const mesures = etapes.seances.find((s) => s.id === 's2').etapes.filter((e) => e.type === 'mesure').map((e) => e.piece);
+  assert.deepEqual(mesures, ['corps', 'manivelle'], 'les étapes de mesure correspondent au modèle');
+});
+
+test('présentation d’ouverture et questions : textes courts, pictogrammes dessinés', () => {
+  const ouverture = etapes.seances[0].etapes.find((e) => e.type === 'ouverture');
+  assert.equal(ouverture.pages.length, 4);
+  for (const p of ouverture.pages) {
+    assert.ok(S.nombreDeMots(p.titre) <= 8, p.titre);
+    for (const im of p.images || []) assert.ok(PICTOS.has(im.picto), im.picto);
+    if (p.revele) assert.ok(PICTOS.has(p.revele.picto));
+  }
+  const questions = etapes.seances[2].etapes.find((e) => e.type === 'questions').questions;
+  assert.deepEqual(questions.map((q) => q.choix), ['phrases', 'mes-pieces', 'mes-pieces']);
+  for (const q of questions) assert.ok(S.nombreDeMots(q.texte) <= 8, q.texte);
+});
