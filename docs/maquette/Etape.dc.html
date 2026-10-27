@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Une étape : une règle</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.ecran{width:1366px;height:768px;box-sizing:border-box;background:#F3F5F9;color:#172033;font-family:'Lexend',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+.barre{box-sizing:border-box;padding:16px 28px;display:flex;align-items:center;gap:24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:14px;border-radius:20px;font-family:inherit;font-weight:600;font-size:26px;border:3px solid transparent;cursor:pointer;min-height:72px;padding:0 28px;box-sizing:border-box;text-decoration:none}
+.btn svg{width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.btn-maison{background:#fff;color:#172033;border-color:#C9D2DF}
+.btn-second{background:#fff;color:#1D5FB4;border-color:#1D5FB4}
+.btn-principal{background:#1D5FB4;color:#fff;min-height:96px;font-size:32px;padding:0 44px;border-radius:24px;box-shadow:0 6px 0 #123F7A}
+.btn-aide{background:#fff;color:#5B2F9E;border-color:#5B2F9E;width:112px;height:112px;border-radius:56px;flex-direction:column;gap:2px;font-size:20px;padding:0}
+.btn-voix{background:#E6EEF9;color:#1D5FB4;width:88px;height:88px;border-radius:44px;padding:0;flex-shrink:0}
+.btn-voix svg{width:44px;height:44px}
+.equipe{font-size:24px;font-weight:600;background:#fff;border:2px solid #C9D2DF;border-radius:40px;padding:10px 24px}
+.point{width:22px;height:22px;border-radius:11px;border:3px solid #1D5FB4;box-sizing:border-box}
+</style>
+</helmet>
+<div class="ecran">
+  <div class="barre" style="height:112px">
+    <a class="btn btn-maison" href="Mission.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h5v-6h4v6h5V10"></path></svg>Ma mission</a>
+    <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:12px">
+      <div class="point" style="background:#1D5FB4"></div>
+      <div class="point" style="background:#1D5FB4;width:44px"></div>
+      <div class="point"></div>
+      <span style="font-size:24px;font-weight:600;margin-left:12px">Règle 2 sur 3</span>
+    </div>
+    <div class="equipe">Léa · Tom</div>
+    <div style="position:relative;width:72px;height:72px" aria-label="Minuteur : 12 minutes restantes">
+      <svg viewBox="0 0 36 36" width="72" height="72" aria-hidden="true"><circle cx="18" cy="18" r="15" style="fill:#fff;stroke:#DDE3EC;stroke-width:5"></circle><circle cx="18" cy="18" r="15" style="fill:none;stroke:#1D5FB4;stroke-width:5;stroke-dasharray:47 94;transform:rotate(-90deg);transform-origin:center"></circle></svg>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700">12</div>
+    </div>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:64px;padding:0 96px">
+    <div style="width:340px;height:340px;border-radius:48px;background:#fff;border:3px solid #C9D2DF;display:flex;align-items:center;justify-content:center;gap:8px;color:#1D5FB4;flex-shrink:0">
+      <svg viewBox="0 0 24 24" width="120" height="120" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M9 3h6"></path><path d="M12 3v3"></path><path d="M10 6h4l-.5 12-1.5 2-1.5-2z"></path><path d="M10.2 9l3.6 1.5M10.2 12l3.6 1.5M10.3 15l3.4 1.4"></path></svg>
+      <svg viewBox="0 0 24 24" width="56" height="56" aria-hidden="true" style="fill:none;stroke:#172033;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"><path d="M4 12h14"></path><path d="M13 7l5 5-5 5"></path></svg>
+      <svg viewBox="0 0 24 24" width="120" height="120" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-4 9 4v9l-9 4-9-4z"></path><path d="M3 9l9 4 9-4"></path><path d="M12 13v9"></path></svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:28px">
+      <div style="display:inline-flex;align-self:flex-start;align-items:center;gap:10px;font-size:22px;font-weight:700;color:#123F7A;background:#E6EEF9;border-radius:30px;padding:8px 20px">Règle du matériel</div>
+      <div style="display:flex;align-items:flex-start;gap:24px">
+        <p style="margin:0;font-size:52px;font-weight:700;line-height:1.25;max-width:560px">Chaque vis va tout de suite dans la boîte.</p>
+        <button class="btn btn-voix" aria-label="Lire à voix haute"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"></path><path d="M16.5 9a4 4 0 010 6"></path><path d="M19.5 6a8 8 0 010 12"></path></svg></button>
+      </div>
+      <p style="margin:0;font-size:30px;color:#3D4A5C;line-height:1.4">Jamais dans les mains.</p>
+    </div>
+  </div>
+  <div class="barre" style="height:144px;justify-content:flex-end">
+    <a class="btn btn-second" href="Mission.dc.html" style="margin-right:auto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Retour</a>
+    <a class="btn btn-principal" href="Photo.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>J'ai compris</a>
+    <div style="width:40px"></div>
+    <button class="btn btn-aide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 13V6a1.5 1.5 0 013 0v5"></path><path d="M11 11V4a1.5 1.5 0 013 0v7"></path><path d="M14 11V5.5a1.5 1.5 0 013 0V12"></path><path d="M17 10a1.5 1.5 0 013 0v5a7 7 0 01-7 7h-1a7 7 0 01-5.6-2.8L3 15.5a1.6 1.6 0 012.4-2L8 16"></path></svg>Aide</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1366,"height":768}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

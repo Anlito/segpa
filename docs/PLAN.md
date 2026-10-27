@@ -1,6 +1,6 @@
 # Plan court — dépôt SEGPA, premier projet : le taille-crayon
 
-Version 1 · 27/10/2026 · **à valider par Thomas avant d'écrire du code** (brief taille-crayon §10, étape 1).
+Version 2 · 27/10/2026 · **validé par Thomas le 27/10/2026** (plan, organisation du dépôt). Maquette : `docs/MAQUETTE.md`.
 
 ## 0. Ce qui change par rapport au cahier des charges
 
@@ -72,12 +72,12 @@ Non repris : `exercices.js`, `mise-a-jour.js`, `notation.js`, `carnet*.js`, `cat
 
 ## 3. Formats
 
-**Sauvegarde** `Prénom_Prénom.json` (dossier `… › COMMUN › TECHNOLOGIE › DEMONTAGE TAILLE-CRAYON › Prénom_Prénom`, photos dans `photos/`) :
+**Sauvegarde** `Prénom_Prénom.json` (dossier `Bureau › Classe › 6A › COMMUN › TECHNOLOGIE › Taille-crayon › Prénom_Prénom`, photos dans `photos/`) :
 
 ```js
 {
   application: 'segpa', projet: 'taille-crayon', formatVersion: 1,
-  equipe: { eleves: ['Léa', 'Tom'], classe: '6S' }, creeLe, modifieLe,
+  equipe: { eleves: ['Léa', 'Tom'], classe: '6A' }, creeLe, modifieLe,
   seances: {
     s1: { etapes: { 'regle-1': { fait: '2026-11-03T10:12' } , … },
           pieces: [{ numero: 1, photo: 'photos/s1-piece-01.jpg', nom: 'Manivelle', autreNom: null, rangee: true }],
@@ -116,16 +116,23 @@ Puis voiture à ballon, puis stop motion, chacun avec son propre plan court.
 
 Tests `node:test` à chaque jalon (CLAUDE.md).
 
-## 5. Ce qu'il me faut avant de coder
+## 5. Décisions et ce qu'il reste à obtenir
 
-**Bloquant pour J1**
-1. Créer le dépôt vide **`Anlito/segpa`** sur GitHub (public) et l'ajouter à la session : je n'ai pas le droit de le créer.
-2. Les **documents sources** du taille-crayon (dans `docs/sources/`) : `Fiche_eleve_demontage_taille-crayon.docx`,
-   `Introduction_projet_demontage.pptx`, `Preparation_enseignant_demontage.docx`, `Evaluation_projet_demontage.xlsx`.
-3. La **maquette Claude Design** des écrans SEGPA (`BRIEF-CLAUDE-DESIGN-6e-segpa.md`) : existe-t-elle ? Sinon je pose le
-   squelette avec une charte neutre et la couleur d'accent s'ajoute ensuite.
-4. Les **classes** concernées (nom : `6S` ? `6SEGPA` ?) et le niveau à mettre dans `classes.js` ; le chemin réseau exact
-   (`… › COMMUN › TECHNOLOGIE › DEMONTAGE TAILLE-CRAYON`).
+**Réglé le 27/10/2026**
+- Dépôt `Anlito/segpa` créé ; plan validé.
+- Documents sources reçus, rangés dans `docs/sources/` (fiche élève, introduction, préparation, grille d'évaluation).
+- Pas de maquette Claude Design : Claude propose la maquette (`docs/MAQUETTE.md`), à valider par Thomas.
+- Classe : **6A**. Dossier réseau : même structure, nom de dossier projet simplifié → `… › 6A › COMMUN › TECHNOLOGIE › Taille-crayon`
+  (de même `Voiture-ballon`, `Stop-motion` plus tard). `donnees/classes.js` : `definirReglagesAtelier({ classes: ['6A'], cheminProjet: ['Taille-crayon'] })`.
+
+**Relevé dans les documents reçus** (complète le §7 du brief)
+- La préparation enseignant reçue a bien ses 4 objectifs (le 3e est « Suivre une procédure dans l'ordre, puis dans l'ordre
+  inverse ») : le constat 1 du brief ne s'applique plus.
+- Grille Excel : la ligne 3 (élève n° 1) contient des couleurs et entre dans la synthèse ; la « ligne Ex. » annoncée par la
+  légende n'existe pas. L'export de l'outil ajoute une vraie ligne d'exemple grise hors synthèse (cahier des charges §8.5).
+- Synthèse : les pourcentages divisent par 16 en dur (`=B8/16`) ; l'export divisera par le nombre d'élèves évalués.
+- Les pictogrammes du PowerPoint ressemblent à ceux de Font Awesome (licence libre avec attribution) : l'outil dessine ses
+  propres pictogrammes, dans le même esprit.
 
 **Bloquant pour J2** (questions du brief §9) : modèle exact du taille-crayon, liste et noms des pièces, longueurs de
 référence du corps et de la manivelle ; les 3 phrases-cartes « À quoi sert la manivelle ? ».
@@ -133,4 +140,4 @@ référence du corps et de la manivelle ; les 3 phrases-cartes « À quoi sert l
 **Bloquant pour J4** : noms et couleurs des 4 ceintures et règle exacte ; validation du rattachement critères → compétences
 (cahier des charges §8.4).
 
-**Non bloquant** : postes fixes ou portables, fiches papier gardées ou non, origine des images du PowerPoint.
+**Non bloquant** : postes fixes ou portables, fiches papier gardées ou non.

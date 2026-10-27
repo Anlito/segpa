@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Mes pièces</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.ecran{width:1366px;height:768px;box-sizing:border-box;background:#F3F5F9;color:#172033;font-family:'Lexend',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+.barre{box-sizing:border-box;padding:16px 28px;display:flex;align-items:center;gap:24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:14px;border-radius:20px;font-family:inherit;font-weight:600;font-size:26px;border:3px solid transparent;cursor:pointer;min-height:72px;padding:0 28px;box-sizing:border-box;text-decoration:none}
+.btn svg,.piece svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.btn svg{width:36px;height:36px}
+.btn-maison{background:#fff;color:#172033;border-color:#C9D2DF}
+.btn-second{background:#fff;color:#1D5FB4;border-color:#1D5FB4}
+.btn-principal{background:#1D5FB4;color:#fff;min-height:96px;font-size:32px;padding:0 44px;border-radius:24px;box-shadow:0 6px 0 #123F7A}
+.btn-aide{background:#fff;color:#5B2F9E;border-color:#5B2F9E;width:112px;height:112px;border-radius:56px;flex-direction:column;gap:2px;font-size:20px;padding:0}
+.btn-voix{background:#E6EEF9;color:#1D5FB4;width:80px;height:80px;border-radius:40px;padding:0}
+.equipe{font-size:24px;font-weight:600;background:#fff;border:2px solid #C9D2DF;border-radius:40px;padding:10px 24px}
+.piece{height:220px;border-radius:24px;background:#fff;border:3px solid #C9D2DF;box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden}
+.num{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700}
+</style>
+</helmet>
+<div class="ecran">
+  <div class="barre" style="height:112px">
+    <a class="btn btn-maison" href="Mission.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h5v-6h4v6h5V10"></path></svg>Ma mission</a>
+    <h1 style="margin:0;font-size:40px;font-weight:700">Mes pièces</h1>
+    <button class="btn btn-voix" aria-label="Lire à voix haute"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"></path><path d="M16.5 9a4 4 0 010 6"></path><path d="M19.5 6a8 8 0 010 12"></path></svg></button>
+    <div style="flex:1;text-align:center;font-size:26px;font-weight:600">3 pièces dans la boîte</div>
+    <div class="equipe">Léa · Tom</div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:20px;padding:12px 48px;align-content:center">
+    <sc-for list="{{pieces}}" as="p" hint-placeholder-count="8">
+      <sc-if value="{{p.fait}}" hint-placeholder-val="{{true}}">
+        <div class="piece" style="border-color:#1E7A46">
+          <div style="flex:1;background:#E9ECEF;display:flex;align-items:center;justify-content:center;position:relative">
+            <div style="width:90px;height:40px;border-radius:20px;background:#9AA5B4;transform:rotate({{p.angle}}deg)"></div>
+            <div class="num" style="position:absolute;top:10px;left:10px;background:#1E7A46;color:#fff">{{p.numero}}</div>
+          </div>
+          <div style="height:72px;display:flex;align-items:center;gap:10px;padding:0 16px;font-size:24px;font-weight:600">
+            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" style="color:#1E7A46;stroke-width:3;flex-shrink:0"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>{{p.nom}}
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{p.courante}}" hint-placeholder-val="{{false}}">
+        <div class="piece" style="border:4px dashed #1D5FB4;background:#F5F8FD;align-items:center;justify-content:center;gap:14px">
+          <div class="num" style="background:#1D5FB4;color:#fff">{{p.numero}}</div>
+          <div style="font-size:26px;font-weight:700;color:#123F7A">À toi !</div>
+          <svg viewBox="0 0 24 24" width="48" height="48" aria-hidden="true" style="color:#1D5FB4"><path d="M20 4l-6 6"></path><path d="M13 9l2 2-7.5 7.5a2.1 2.1 0 01-3-3z"></path></svg>
+        </div>
+      </sc-if>
+      <sc-if value="{{p.vide}}" hint-placeholder-val="{{false}}">
+        <div class="piece" style="border-style:dashed;align-items:center;justify-content:center;background:transparent">
+          <div class="num" style="background:#E6EAF0;color:#3D4A5C">{{p.numero}}</div>
+        </div>
+      </sc-if>
+    </sc-for>
+  </div>
+  <div class="barre" style="height:144px;justify-content:flex-end">
+    <button class="btn btn-second" style="margin-right:auto">J'ai fini de démonter</button>
+    <a class="btn btn-principal" href="Mesure.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4l-6 6"></path><path d="M13 9l2 2-7.5 7.5a2.1 2.1 0 01-3-3z"></path></svg>Pièce 4</a>
+    <div style="width:40px"></div>
+    <button class="btn btn-aide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 13V6a1.5 1.5 0 013 0v5"></path><path d="M11 11V4a1.5 1.5 0 013 0v7"></path><path d="M14 11V5.5a1.5 1.5 0 013 0V12"></path><path d="M17 10a1.5 1.5 0 013 0v5a7 7 0 01-7 7h-1a7 7 0 01-5.6-2.8L3 15.5a1.6 1.6 0 012.4-2L8 16"></path></svg>Aide</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1366,"height":768}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const noms = ['[Pièce A]', '[Pièce B]', '[Pièce C]'];
+    const pieces = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
+      numero: n,
+      nom: noms[n - 1] || '',
+      angle: (n * 23) % 40 - 20,
+      fait: n <= 3,
+      courante: n === 4,
+      vide: n > 4,
+    }));
+    return { pieces };
+  }
+}
+</script>
+</body>
+</html>

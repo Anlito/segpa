@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Qui êtes-vous ?</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.ecran{width:1366px;height:768px;box-sizing:border-box;background:#F3F5F9;color:#172033;font-family:'Lexend',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+.barre{box-sizing:border-box;padding:16px 28px;display:flex;align-items:center;gap:24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:14px;border-radius:20px;font-family:inherit;font-weight:600;font-size:26px;border:3px solid transparent;cursor:pointer;min-height:72px;padding:0 28px;box-sizing:border-box;text-decoration:none}
+.btn svg{width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.btn-second{background:#fff;color:#1D5FB4;border-color:#1D5FB4}
+.btn-principal{background:#1D5FB4;color:#fff;min-height:96px;font-size:32px;padding:0 44px;border-radius:24px;box-shadow:0 6px 0 #123F7A}
+.btn-aide{background:#fff;color:#5B2F9E;border-color:#5B2F9E;width:112px;height:112px;border-radius:56px;flex-direction:column;gap:2px;font-size:20px;padding:0}
+.btn-voix{background:#E6EEF9;color:#1D5FB4;width:80px;height:80px;border-radius:40px;padding:0}
+.prenom{height:80px;border-radius:20px;border:3px solid #C9D2DF;background:#fff;font-family:inherit;font-size:28px;font-weight:600;color:#172033;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.prenom.choisi{border-color:#1D5FB4;background:#E6EEF9;color:#123F7A;border-width:4px}
+.prenom svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.case{width:300px;height:96px;border-radius:24px;border:3px dashed #8A97AA;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:700;background:#fff}
+</style>
+</helmet>
+<div class="ecran">
+  <div class="barre" style="height:112px">
+    <a class="btn btn-second" href="Main.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Retour</a>
+    <h1 style="margin:0;font-size:40px;font-weight:700">Touche vos deux prénoms</h1>
+    <button class="btn btn-voix" aria-label="Lire à voix haute"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"></path><path d="M16.5 9a4 4 0 010 6"></path><path d="M19.5 6a8 8 0 010 12"></path></svg></button>
+  </div>
+  <div style="display:flex;justify-content:center;align-items:center;gap:24px;height:120px">
+    <div class="case" style="border-style:solid;border-color:#1D5FB4;color:#123F7A">Léa</div>
+    <div style="font-size:40px;font-weight:700;color:#3D4A5C">+</div>
+    <div class="case" style="border-style:solid;border-color:#1D5FB4;color:#123F7A">Tom</div>
+  </div>
+  <div style="flex:1;padding:8px 120px;display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:16px;align-content:center">
+    <sc-for list="{{prenoms}}" as="p" hint-placeholder-count="16">
+      <sc-if value="{{p.choisi}}" hint-placeholder-val="{{false}}">
+        <button class="prenom choisi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>{{p.nom}}</button>
+      </sc-if>
+      <sc-if value="{{p.libre}}" hint-placeholder-val="{{true}}">
+        <button class="prenom">{{p.nom}}</button>
+      </sc-if>
+    </sc-for>
+  </div>
+  <div class="barre" style="height:144px;justify-content:flex-end">
+    <span style="margin-right:auto;font-size:22px;color:#3D4A5C">Ton prénom n'est pas là ? Touche Aide.</span>
+    <a class="btn btn-principal" href="Mission.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>C'est nous !</a>
+    <div style="width:40px"></div>
+    <button class="btn btn-aide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 13V6a1.5 1.5 0 013 0v5"></path><path d="M11 11V4a1.5 1.5 0 013 0v7"></path><path d="M14 11V5.5a1.5 1.5 0 013 0V12"></path><path d="M17 10a1.5 1.5 0 013 0v5a7 7 0 01-7 7h-1a7 7 0 01-5.6-2.8L3 15.5a1.6 1.6 0 012.4-2L8 16"></path></svg>Aide</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1366,"height":768}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const noms = ['Adam','Chloé','Emma','Ilyes','Inès','Jade','Léa','Lina','Manon','Noah','Nolan','Rayan','Sami','Tom','Yanis','Zoé'];
+    const choisis = ['Léa','Tom'];
+    return { prenoms: noms.map((nom) => ({ nom, choisi: choisis.includes(nom), libre: !choisis.includes(nom) })) };
+  }
+}
+</script>
+</body>
+</html>
