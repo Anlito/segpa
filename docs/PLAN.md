@@ -106,7 +106,7 @@ fichier des élèves, qui l'écrivent au même moment) + copie dans le navigateu
 
 | Jalon | Contenu | Recette |
 |---|---|---|
-| **J1 — Socle élève** | portail, accueil (boutons-prénoms), ma mission, écran d'étape, 🔊, 🙋, minuteur, photo, album, rangement, bilan, bravo, sauvegarde ; données de la **séance 1** | essai sur un poste du collège : **webcam, voix française, droits d'écriture du dossier réseau** |
+| **J1 — Socle élève** ✓ 27/10 | portail, accueil (boutons-prénoms), ma mission, écran d'étape, 🔊, 🙋, minuteur, photo, album, rangement, bilan, bravo, sauvegarde ; données de la **séance 1** | essai sur un poste du collège : **webcam, voix française, droits d'écriture du dossier réseau** |
 | **J2 — Taille-crayon complet** | ouverture S1, tableau des pièces, S2 (pièces dehors, pavé, vérification douce), S3 (tableau à l'envers, questions, bilan) | parcours complet d'une équipe fictive |
 | **J3 — Outil professeur** | classe (tuiles, alertes 🙋 et « plus de 2 pièces dehors »), équipe (bilan, album, historique), onglet Séance 2, drapeaux de différenciation | suivi en direct avec 2 postes |
 | **J4 — Évaluation et exports** | grille 7 critères, observations, note /20, ceinture, Excel (4 onglets + Pronote), Carnet de classe, CSV, feuille ceinture N&B, album A4 | Excel ouvert dans Excel/LibreOffice, fichier relu par le Carnet |

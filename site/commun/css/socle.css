@@ -1,0 +1,266 @@
+/* Socle commun des outils SEGPA : mêmes écrans, mêmes boutons, aux mêmes endroits dans tous les projets.
+   Maquette : docs/MAQUETTE.md. Tout est en rem : 1 rem = 16 px sur un écran 1366 × 768 et l'écran entier se réduit
+   un peu si la fenêtre est plus petite (barre d'adresse), pour qu'il n'y ait jamais de défilement. */
+
+@font-face { font-family: 'Lexend'; font-weight: 400; font-display: swap; src: url('../polices/lexend-400.woff2') format('woff2'); }
+@font-face { font-family: 'Lexend'; font-weight: 600; font-display: swap; src: url('../polices/lexend-600.woff2') format('woff2'); }
+@font-face { font-family: 'Lexend'; font-weight: 700; font-display: swap; src: url('../polices/lexend-700.woff2') format('woff2'); }
+
+:root {
+  --fond: #F3F5F9;
+  --surface: #FFFFFF;
+  --encre: #172033;
+  --encre-douce: #3D4A5C;
+  --trait: #C9D2DF;
+  --trait-doux: #DDE3EC;
+  --gris-clair: #EEF1F5;
+  /* couleur du projet (donnees/projet.js) */
+  --accent: #1D5FB4;
+  --accent-fonce: #123F7A;
+  --accent-clair: #E6EEF9;
+  /* fait */
+  --vert: #1E7A46;
+  --vert-fonce: #14532D;
+  --vert-clair: #E3F2E9;
+  /* écart : toujours ambre, jamais rouge */
+  --ambre: #D97706;
+  --ambre-fonce: #78350F;
+  --ambre-clair: #FEF3C7;
+  /* aide */
+  --aide: #5B2F9E;
+  --aide-clair: #EFE8FA;
+}
+
+html { font-size: clamp(13px, min(1.171vw, 2.083vh), 24px); }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: 'Lexend', system-ui, 'Segoe UI', sans-serif;
+  line-height: 1.3;
+}
+button, input { font-family: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 0.25rem solid var(--accent); outline-offset: 0.2rem; }
+
+.picto { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+/* ---------- Les trois zones ---------- */
+.ecran { height: 100vh; display: flex; flex-direction: column; }
+.haut { height: 7rem; flex-shrink: 0; display: flex; align-items: center; gap: 1.5rem; padding: 1rem 1.75rem; }
+.milieu { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; gap: 3rem; padding: 0 4rem; }
+.bas { height: 9rem; flex-shrink: 0; display: flex; align-items: center; justify-content: flex-end; gap: 1.5rem; padding: 1rem 1.75rem; }
+.bas .gauche { margin-right: auto; }
+.espace { flex: 1; }
+
+/* ---------- Boutons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.875rem;
+  min-height: 4.5rem; padding: 0 1.75rem; border-radius: 1.25rem;
+  border: 0.1875rem solid transparent; font-size: 1.625rem; font-weight: 600; text-decoration: none;
+}
+.btn .picto { width: 2.25rem; height: 2.25rem; }
+.btn-maison { background: var(--surface); color: var(--encre); border-color: var(--trait); }
+.btn-second { background: var(--surface); color: var(--accent); border-color: var(--accent); }
+.btn-principal {
+  background: var(--accent); color: #fff; min-height: 6rem; padding: 0 2.75rem; border-radius: 1.5rem;
+  font-size: 2rem; box-shadow: 0 0.375rem 0 var(--accent-fonce);
+}
+.btn-principal:active { transform: translateY(0.25rem); box-shadow: 0 0.125rem 0 var(--accent-fonce); }
+.btn-principal:disabled { background: #8EA6C6; box-shadow: 0 0.375rem 0 #6F86A6; cursor: default; transform: none; }
+.btn-aide {
+  width: 7rem; height: 7rem; border-radius: 50%; flex-direction: column; gap: 0.125rem; padding: 0;
+  background: var(--surface); color: var(--aide); border-color: var(--aide); font-size: 1.25rem; margin-left: 2.5rem;
+}
+.btn-aide.demandee { background: var(--aide); color: #fff; width: 9rem; border-radius: 3.5rem; font-size: 1.125rem; text-align: center; line-height: 1.1; }
+.btn-voix { width: 5rem; height: 5rem; border-radius: 50%; padding: 0; background: var(--accent-clair); color: var(--accent); flex-shrink: 0; min-height: 0; }
+.btn-voix .picto { width: 2.5rem; height: 2.5rem; }
+body.sans-voix .btn-voix { display: none; }
+.btn-petit { min-height: 3.5rem; font-size: 1.375rem; padding: 0 1.25rem; }
+
+/* ---------- Haut : où je suis ---------- */
+.titre-ecran { margin: 0; font-size: 2.5rem; font-weight: 700; }
+.equipe { font-size: 1.5rem; font-weight: 600; background: var(--surface); border: 0.125rem solid var(--trait); border-radius: 2.5rem; padding: 0.625rem 1.5rem; white-space: nowrap; }
+.progression { flex: 1; display: flex; justify-content: center; align-items: center; gap: 0.75rem; }
+.progression .point { width: 1.375rem; height: 1.375rem; border-radius: 0.6875rem; border: 0.1875rem solid var(--accent); }
+.progression .point.fait { background: var(--accent); }
+.progression .point.ici { background: var(--accent); width: 2.75rem; }
+.progression .texte { font-size: 1.5rem; font-weight: 600; margin-left: 0.75rem; }
+.etiquette-seance { font-size: 1.5rem; font-weight: 700; background: var(--accent); color: #fff; border-radius: 0.875rem; padding: 0.375rem 1rem; }
+.minuteur { position: relative; width: 4.5rem; height: 4.5rem; flex-shrink: 0; }
+.minuteur svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.minuteur .fond { fill: #fff; stroke: var(--trait-doux); stroke-width: 5; }
+.minuteur .reste { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; }
+.minuteur span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.125rem; font-weight: 700; }
+.etat-enregistrement { display: flex; align-items: center; gap: 0.625rem; font-size: 1.25rem; font-weight: 600; border-radius: 2rem; padding: 0.5rem 1rem; color: var(--vert-fonce); background: var(--vert-clair); }
+.etat-enregistrement .picto { width: 1.75rem; height: 1.75rem; }
+.etat-enregistrement.a-faire { color: var(--ambre-fonce); background: var(--ambre-clair); }
+
+/* ---------- Milieu : une consigne ---------- */
+.picto-grand {
+  width: 21rem; height: 21rem; border-radius: 3rem; background: var(--surface); border: 0.1875rem solid var(--trait);
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: var(--accent); flex-shrink: 0;
+}
+.picto-grand .picto { width: 9rem; height: 9rem; stroke-width: 1.8; }
+.picto-grand .picto-fleche { width: 3.5rem; height: 3.5rem; color: var(--encre); stroke-width: 2.4; }
+.picto-grand.seul .picto { width: 13rem; height: 13rem; }
+.consigne { display: flex; flex-direction: column; gap: 1.75rem; max-width: 46rem; }
+.consigne-ligne { display: flex; align-items: flex-start; gap: 1.5rem; }
+.consigne-texte { margin: 0; font-size: 3.25rem; font-weight: 700; line-height: 1.25; }
+.consigne-detail { margin: 0; font-size: 1.875rem; color: var(--encre-douce); line-height: 1.4; }
+.pastille { display: inline-flex; align-self: flex-start; align-items: center; gap: 0.625rem; font-size: 1.375rem; font-weight: 700; color: var(--accent-fonce); background: var(--accent-clair); border-radius: 2rem; padding: 0.5rem 1.25rem; }
+
+/* ---------- Messages : ambre (écart, jamais rouge), vert (réussi) ---------- */
+.msg { display: flex; align-items: center; gap: 1rem; border-radius: 1.25rem; padding: 1.125rem 1.5rem; font-size: 1.75rem; font-weight: 600; line-height: 1.3; border: 0.1875rem solid; }
+.msg .picto { width: 2.75rem; height: 2.75rem; }
+.msg-ambre { background: var(--ambre-clair); color: var(--ambre-fonce); border-color: var(--ambre); }
+.msg-ok { background: var(--vert-clair); color: var(--vert-fonce); border-color: var(--vert); }
+
+/* ---------- Accueil ---------- */
+.accueil-titre { display: flex; align-items: center; justify-content: center; gap: 1.75rem; height: 12.5rem; padding-top: 2.5rem; flex-shrink: 0; }
+.logo-projet { width: 7.5rem; height: 7.5rem; border-radius: 1.75rem; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; }
+.logo-projet .picto { width: 5rem; height: 5rem; stroke-width: 1.8; }
+.sur-titre { font-size: 1.375rem; font-weight: 600; color: var(--encre-douce); }
+.grand-titre { margin: 0; font-size: 3.25rem; font-weight: 700; line-height: 1.1; }
+.choix {
+  width: 27.5rem; height: 20.5rem; border-radius: 2rem; background: var(--surface); border: 0.1875rem solid var(--trait);
+  box-shadow: 0 0.375rem 0 var(--trait); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem;
+  font-size: 2.5rem; font-weight: 700;
+}
+.choix:hover { border-color: var(--accent); box-shadow: 0 0.375rem 0 var(--accent); }
+.rond { width: 9.375rem; height: 9.375rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--accent-clair); color: var(--accent); }
+.rond.plein { background: var(--accent); color: #fff; }
+.rond .picto { width: 5.25rem; height: 5.25rem; }
+
+/* ---------- Dossier ---------- */
+.chemin { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 600; }
+.chemin span { background: var(--surface); border: 0.125rem solid var(--trait); border-radius: 0.75rem; padding: 0.375rem 0.875rem; }
+.chemin span.cible { background: var(--accent); color: #fff; border-color: var(--accent); font-size: 1.875rem; padding: 0.5rem 1.125rem; }
+.chemin .sep { border: 0; background: none; padding: 0; color: var(--encre-douce); }
+
+/* ---------- Prénoms et équipes ---------- */
+.binome { display: flex; justify-content: center; align-items: center; gap: 1.5rem; height: 7rem; flex-shrink: 0; }
+.case-prenom { width: 18.75rem; height: 6rem; border-radius: 1.5rem; border: 0.1875rem dashed #8A97AA; display: flex; align-items: center; justify-content: center; font-size: 2.125rem; font-weight: 700; background: var(--surface); color: var(--encre-douce); }
+.case-prenom.rempli { border-style: solid; border-color: var(--accent); color: var(--accent-fonce); }
+.plus-binome { font-size: 2.5rem; font-weight: 700; color: var(--encre-douce); }
+.grille-prenoms { flex: 1; min-height: 0; padding: 0.5rem 7.5rem; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; align-content: center; }
+.grille-prenoms.cinq { grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 0.5rem 4rem; }
+.prenom { height: 5rem; border-radius: 1.25rem; border: 0.1875rem solid var(--trait); background: var(--surface); font-size: 1.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.625rem; }
+.prenom .picto { width: 1.75rem; height: 1.75rem; stroke-width: 3; }
+.prenom.choisi { border: 0.25rem solid var(--accent); background: var(--accent-clair); color: var(--accent-fonce); }
+.prenom:disabled { opacity: 0.4; cursor: default; }
+.champs-prenoms { display: flex; gap: 2rem; align-items: center; }
+.champ { display: flex; flex-direction: column; gap: 0.5rem; font-size: 1.5rem; font-weight: 600; }
+.champ input { width: 20rem; height: 5rem; border-radius: 1.25rem; border: 0.1875rem solid var(--trait); font-size: 2rem; padding: 0 1.25rem; background: var(--surface); }
+.champ input:focus { border-color: var(--accent); outline: none; }
+.grille-equipes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; width: 100%; max-width: 75rem; }
+.equipe-bouton { height: 6.5rem; border-radius: 1.5rem; border: 0.1875rem solid var(--trait); background: var(--surface); font-size: 1.875rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+.equipe-bouton.derniere { border: 0.3125rem solid var(--accent); box-shadow: 0 0.375rem 0 var(--accent); }
+.equipe-bouton .picto { width: 2.5rem; height: 2.5rem; color: var(--accent); }
+
+/* ---------- Ma mission ---------- */
+.frise { display: flex; align-items: center; gap: 1.25rem; }
+.carte-seance {
+  width: 21.25rem; height: 23.75rem; border-radius: 2rem; background: var(--surface); border: 0.1875rem solid var(--trait);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.125rem; padding: 0;
+}
+.carte-seance .numero { font-size: 1.375rem; font-weight: 600; color: var(--encre-douce); }
+.carte-seance .grand { width: 9.375rem; height: 9.375rem; border-radius: 2.25rem; display: flex; align-items: center; justify-content: center; background: var(--gris-clair); color: var(--encre-douce); }
+.carte-seance .grand .picto { width: 6rem; height: 6rem; stroke-width: 1.8; }
+.carte-seance .nom { font-size: 2.125rem; font-weight: 700; }
+.carte-seance.fait { border-color: var(--vert); }
+.carte-seance.fait .grand { background: var(--vert-clair); color: var(--vert); }
+.carte-seance.en_cours, .carte-seance.courante { border: 0.3125rem solid var(--accent); box-shadow: 0 0.5rem 0 var(--accent); width: 23.75rem; height: 26.25rem; }
+.carte-seance.courante .grand { background: var(--accent); color: #fff; width: 10.625rem; height: 10.625rem; }
+.etat { display: inline-flex; align-items: center; gap: 0.625rem; font-size: 1.5rem; font-weight: 700; padding: 0.5rem 1.25rem; border-radius: 2rem; background: var(--gris-clair); color: var(--encre-douce); }
+.etat .picto { width: 1.75rem; height: 1.75rem; stroke-width: 3; }
+.etat.fait { background: var(--vert-clair); color: var(--vert-fonce); }
+.etat.en_cours { background: var(--accent-clair); color: var(--accent-fonce); }
+.lien-frise { width: 4rem; height: 0.375rem; border-radius: 0.1875rem; background: var(--trait); }
+.lien-frise.fait { background: var(--vert); }
+
+/* ---------- Photo ---------- */
+.zone-camera { position: relative; width: 50rem; height: 28.125rem; border-radius: 1.5rem; background: #1E2836; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.zone-camera video, .zone-camera img { width: 100%; height: 100%; object-fit: cover; }
+.zone-camera .vide { color: #fff; font-size: 1.75rem; font-weight: 600; text-align: center; padding: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+.zone-camera .vide .picto { width: 5rem; height: 5rem; }
+.coin { position: absolute; width: 3.5rem; height: 3.5rem; border: 0 solid #fff; pointer-events: none; }
+.coin.hg { top: 1.5rem; left: 1.5rem; border-top-width: 0.375rem; border-left-width: 0.375rem; border-top-left-radius: 1rem; }
+.coin.hd { top: 1.5rem; right: 1.5rem; border-top-width: 0.375rem; border-right-width: 0.375rem; border-top-right-radius: 1rem; }
+.coin.bg { bottom: 1.5rem; left: 1.5rem; border-bottom-width: 0.375rem; border-left-width: 0.375rem; border-bottom-left-radius: 1rem; }
+.coin.bd { bottom: 1.5rem; right: 1.5rem; border-bottom-width: 0.375rem; border-right-width: 0.375rem; border-bottom-right-radius: 1rem; }
+.flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+.flash.on { opacity: 0.6; transition: none; }
+.declencheur {
+  width: 10.5rem; height: 10.5rem; border-radius: 50%; background: var(--accent); border: 0.5rem solid #fff; color: #fff;
+  box-shadow: 0 0 0 0.25rem var(--accent), 0 0.5rem 0 0.25rem var(--accent-fonce); display: flex; align-items: center; justify-content: center; align-self: flex-start;
+}
+.declencheur .picto { width: 5.25rem; height: 5.25rem; stroke-width: 2; }
+.declencheur:disabled { opacity: 0.5; }
+.colonne { display: flex; flex-direction: column; gap: 1.75rem; flex: 1; min-width: 0; }
+.cameras { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+/* ---------- Cases à cocher (rangement, vérification) ---------- */
+.lignes { flex: 1; display: flex; flex-direction: column; gap: 1.125rem; max-width: 62rem; }
+.ligne {
+  width: 100%; min-height: 7rem; border-radius: 1.5rem; background: var(--surface); border: 0.1875rem solid var(--trait);
+  display: flex; align-items: center; gap: 1.5rem; padding: 0.75rem 1.5rem; font-size: 1.875rem; font-weight: 600; text-align: left;
+}
+.ligne .boite-coche { width: 4rem; height: 4rem; border-radius: 1rem; border: 0.25rem solid #8A97AA; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ligne .boite-coche .picto { width: 2.5rem; height: 2.5rem; stroke-width: 3.2; visibility: hidden; }
+.ligne .tuile { width: 4.75rem; height: 4.75rem; border-radius: 1.25rem; background: var(--accent-clair); color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ligne .tuile .picto { width: 3rem; height: 3rem; }
+.ligne[aria-pressed="true"] { border-color: var(--vert); background: #F2FAF5; }
+.ligne[aria-pressed="true"] .boite-coche { background: var(--vert); border-color: var(--vert); color: #fff; }
+.ligne[aria-pressed="true"] .boite-coche .picto { visibility: visible; }
+.compte { font-size: 1.625rem; font-weight: 600; color: var(--encre-douce); }
+
+/* ---------- Bilan ---------- */
+.questions-bilan { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; }
+.question-bilan { background: var(--surface); border-radius: 1.75rem; border: 0.1875rem solid var(--trait); padding: 1.25rem 1.75rem; display: flex; align-items: center; gap: 1.5rem; }
+.question-bilan p { margin: 0; flex: 1; font-size: 2.125rem; font-weight: 700; line-height: 1.25; }
+.question-bilan .btn-voix { width: 4.5rem; height: 4.5rem; }
+.visage { width: 9.375rem; height: 9.375rem; border-radius: 1.5rem; border: 0.1875rem solid var(--trait); background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.375rem; font-size: 1.375rem; font-weight: 600; flex-shrink: 0; }
+.visage .picto { width: 5rem; height: 5rem; }
+.visage[aria-pressed="true"] { border: 0.3125rem solid var(--accent); background: var(--accent-clair); color: var(--accent-fonce); }
+
+/* ---------- Bravo ---------- */
+.collage { position: relative; width: 37.5rem; height: 28.75rem; flex-shrink: 0; }
+.collage .photo { position: absolute; width: 18.75rem; height: 13.125rem; border-radius: 1.125rem; border: 0.25rem solid #fff; box-shadow: 0 0.25rem 0.625rem rgba(23, 32, 51, 0.15); background: #E2E6EB; object-fit: cover; }
+.collage .photo:nth-child(1) { left: 0; top: 1.875rem; transform: rotate(-4deg); }
+.collage .photo:nth-child(2) { left: 18.125rem; top: 0; transform: rotate(3deg); }
+.collage .photo:nth-child(3) { left: 1.875rem; top: 15rem; transform: rotate(2deg); }
+.collage .photo:nth-child(4) { left: 18.75rem; top: 14.375rem; transform: rotate(-3deg); }
+.collage .sans-photo { position: absolute; inset: 3rem; border-radius: 2rem; background: var(--accent-clair); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+.collage .sans-photo .picto { width: 12rem; height: 12rem; stroke-width: 1.6; }
+.fait-liste { display: flex; flex-direction: column; gap: 1.25rem; }
+.fait-ligne { display: flex; align-items: center; gap: 0.875rem; font-size: 1.75rem; font-weight: 600; }
+.fait-ligne .picto { width: 2.5rem; height: 2.5rem; stroke-width: 3; color: var(--vert); }
+.prochaine { margin-top: 0.75rem; display: flex; align-items: center; gap: 1.125rem; background: var(--surface); border: 0.1875rem solid var(--trait); border-radius: 1.5rem; padding: 1rem 1.375rem; align-self: flex-start; }
+.prochaine .tuile { width: 4.5rem; height: 4.5rem; border-radius: 1.125rem; background: var(--accent-clair); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+.prochaine .tuile .picto { width: 3rem; height: 3rem; }
+.prochaine small { display: block; font-size: 1.25rem; font-weight: 600; color: var(--encre-douce); }
+.prochaine strong { font-size: 1.75rem; }
+
+/* ---------- Album ---------- */
+.album { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 1.25rem; padding: 0 3rem; align-self: stretch; justify-content: flex-start; }
+.album-onglets { display: flex; gap: 1rem; }
+.album-onglets .btn[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.album-grille { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.25rem; align-content: start; }
+.album-photo { padding: 0; border: 0.1875rem solid var(--trait); border-radius: 1.25rem; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; text-align: left; }
+.album-photo img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #E2E6EB; display: block; }
+.album-photo span { font-size: 1.25rem; font-weight: 600; padding: 0.5rem 0.875rem; }
+.album-vide { font-size: 1.875rem; font-weight: 600; color: var(--encre-douce); display: flex; align-items: center; gap: 1rem; }
+.album-vide .picto { width: 3.5rem; height: 3.5rem; }
+.pages { display: flex; align-items: center; gap: 1rem; font-size: 1.5rem; font-weight: 600; }
+.loupe { position: fixed; inset: 0; background: rgba(23, 32, 51, 0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; z-index: 10; }
+.loupe img { max-width: 88vw; max-height: 74vh; border-radius: 1rem; }
+.loupe p { margin: 0; color: #fff; font-size: 2rem; font-weight: 600; }
+
+/* ---------- Bandeau du mode enseignant, messages brefs ---------- */
+.bandeau-enseignant { position: fixed; top: 0; left: 50%; transform: translateX(-50%); background: var(--encre); color: #fff; font-size: 1rem; font-weight: 600; padding: 0.25rem 1rem; border-radius: 0 0 0.75rem 0.75rem; z-index: 20; }
+.message-bref { position: fixed; bottom: 10rem; left: 50%; transform: translateX(-50%); background: var(--encre); color: #fff; font-size: 1.5rem; font-weight: 600; padding: 1rem 1.75rem; border-radius: 1.25rem; z-index: 15; max-width: 60rem; text-align: center; }
