@@ -2,7 +2,7 @@
 // la mesure d'une pièce au réglet (séance 2), le tableau à l'envers et les questions (séance 3).
 // Chaque écran se fait en plusieurs temps (une seule chose à faire à la fois) ; le temps en cours est gardé dans
 // O.sous() et le travail dans la sauvegarde (brouillon de l'étape), pour reprendre après une fermeture de la page.
-// Les noms des pièces, les longueurs de référence et les phrases-cartes viennent de donnees/modele.js.
+// Les noms des pièces et les longueurs de référence viennent de donnees/modele.js.
 (function (global) {
   'use strict';
 
@@ -398,8 +398,8 @@
   });
 
   // ---------- Séance 3 : les questions de compréhension ----------
-  // Répondre en choisissant (phrases-cartes ou ses propres photos), en écrivant, ou à l'oral (le professeur valide).
-  // Pas de correction : le professeur lit les réponses.
+  // Réponse toujours écrite (décision de Thomas, 27/10/2026). Pour « quelle pièce… », les photos et les noms des pièces
+  // de la séance 1 restent sous les yeux, pour aider à écrire. Pas de correction : le professeur lit les réponses.
 
   S.ajouterEcran('questions', (etape, O) => {
     const sous = O.sous();
@@ -407,82 +407,47 @@
     const valeur = brouillon(O, etape, { reponses: {} });
     sous.q = sous.q || 0;
     const q = questions[sous.q];
-    const rep = valeur.reponses[q.id] || null;
+    const rep = valeur.reponses[q.id];
+    const texte = (rep && typeof rep.valeur === 'string' && rep.valeur) || '';
     const derniere = sous.q === questions.length - 1;
-    const choisir = (reponse) => {
-      valeur.reponses[q.id] = reponse;
-      garderBrouillon(O, etape, valeur);
-      sous.ecrire = false;
-      O.rafraichir();
+    const pieces = q.aide === 'mes-pieces' ? piecesDemontees(O.D()) : [];
+    const ecrire = (valeurTexte) => {
+      valeur.reponses[q.id] = { mode: 'texte', valeur: valeurTexte };
+      S.noterBrouillon(O.D(), O.seance().id, etape.id, valeur);
+      O.enregistrer(false);
     };
-    const presse = (mode, v) => !!(rep && rep.mode === mode && (v === undefined || rep.valeur === v));
-    const titre = `<div class="consigne-ligne" style="align-items:center"><span class="pastille">Question ${sous.q + 1} sur ${questions.length}</span><p class="consigne-texte" style="font-size:2.5rem">${O.ech(q.texte)}</p>${O.boutonVoix(q.texte)}</div>`;
-
-    if (sous.ecrire)
-      return {
-        milieu: `<div class="colonne" style="gap:1.5rem;max-width:66rem">${titre}<textarea class="champ-libre" rows="3" maxlength="300" aria-label="Ma réponse">${O.ech((rep && rep.mode === 'texte' && rep.valeur) || '')}</textarea></div>`,
-        gauche: O.boutonRetour('retour-ecrire'),
-        principal: O.boutonPrincipal('ecrit', 'C’est écrit', 'coche', !(rep && rep.mode === 'texte' && rep.valeur)),
-        actions: {
-          'retour-ecrire': () => {
-            sous.ecrire = false;
-            O.rafraichir();
-          },
-          ecrit: () => choisir({ mode: 'texte', valeur: O.racine.querySelector('.champ-libre').value.trim() }),
-        },
-        apres: () => {
-          const t = O.racine.querySelector('.champ-libre');
-          t.focus();
-          t.addEventListener('input', () => (O.racine.querySelector('[data-action="ecrit"]').disabled = !t.value.trim()));
-        },
-      };
-
-    let cartes = '';
-    if (q.choix === 'phrases')
-      cartes = (M().phrasesManivelle || [])
-        .map((ph, i) => `<button type="button" class="carte-choix phrase" data-action="phrase" data-i="${i}" aria-pressed="${presse('carte', ph)}">${O.ech(ph)}</button>`)
-        .join('');
-    if (q.choix === 'mes-pieces')
-      cartes = piecesDemontees(O.D())
-        .map(
-          (p, i) => `<button type="button" class="carte-choix piece" data-action="choix-piece" data-i="${i}" aria-pressed="${presse('photo', p.numero)}">${vignette(O, p.photo, nomPiece(p))}<span>${O.ech(nomPiece(p))}</span></button>`
-        )
-        .join('');
-    const ecrite = rep && rep.mode === 'texte';
     return {
-      milieu: `<div class="colonne" style="gap:1.25rem;align-self:stretch;justify-content:center">
-          ${titre}
-          ${cartes ? `<div class="grille-choix${q.choix === 'mes-pieces' ? ' pieces' : ''}">${cartes}</div>` : ''}
-          <div class="autres-reponses">
-            ${q.choix === 'phrases' ? `<button type="button" class="carte-choix mode" data-action="ecrire" aria-pressed="${!!ecrite}">${S.picto('texte')}${ecrite ? O.ech(rep.valeur) : 'J’écris ma réponse'}</button>` : ''}
-            <button type="button" class="carte-choix mode" data-action="oral" aria-pressed="${presse('oral')}">${S.picto('oral')}Je réponds à l’oral</button>
-          </div>
+      milieu: `<div class="colonne" style="gap:1.25rem;align-self:stretch;justify-content:center;max-width:72rem">
+          <div class="consigne-ligne" style="align-items:center"><span class="pastille">Question ${sous.q + 1} sur ${questions.length}</span><p class="consigne-texte" style="font-size:2.5rem">${O.ech(q.texte)}</p>${O.boutonVoix(q.texte + ' J’écris ma réponse.')}</div>
+          ${pieces.length ? `<div class="rappel-pieces" aria-label="Mes pièces">${pieces.map((p) => `<div class="rappel-piece">${vignette(O, p.photo, nomPiece(p))}<span>${O.ech(nomPiece(p))}</span></div>`).join('')}</div>` : ''}
+          <label class="etiquette-reponse">${S.picto('texte')}J’écris ma réponse</label>
+          <textarea class="champ-libre" rows="${pieces.length ? 2 : 3}" maxlength="300" aria-label="Ma réponse">${O.ech(texte)}</textarea>
         </div>`,
       gauche: O.boutonRetour('retour-question'),
-      principal: O.boutonPrincipal('question-suivante', derniere ? 'C’est fini' : 'Suivant', derniere ? 'coche' : 'suivant', !rep),
+      principal: O.boutonPrincipal('question-suivante', derniere ? 'C’est fini' : 'Suivant', derniere ? 'coche' : 'suivant', !texte.trim()),
       actions: {
-        phrase: (b) => choisir({ mode: 'carte', valeur: M().phrasesManivelle[Number(b.dataset.i)] }),
-        'choix-piece': (b) => {
-          const p = piecesDemontees(O.D())[Number(b.dataset.i)];
-          choisir({ mode: 'photo', valeur: p.numero, nom: p.nom || null });
-        },
-        ecrire: () => {
-          sous.ecrire = true;
-          O.rafraichir();
-        },
-        oral: () => choisir({ mode: 'oral', valeur: null }),
         'retour-question': () => {
           if (sous.q === 0) return O.etat.actions.precedent();
           sous.q--;
           O.rafraichir();
         },
         'question-suivante': () => {
+          ecrire(O.racine.querySelector('.champ-libre').value.trim());
           if (derniere) return O.suivant(valeur);
           sous.q++;
           O.rafraichir();
         },
       },
-      apres: () => chargerPhotos(O),
+      apres: () => {
+        const t = O.racine.querySelector('.champ-libre');
+        t.focus();
+        t.setSelectionRange(t.value.length, t.value.length);
+        t.addEventListener('input', () => {
+          O.racine.querySelector('[data-action="question-suivante"]').disabled = !t.value.trim();
+          ecrire(t.value);
+        });
+        chargerPhotos(O);
+      },
     };
   });
 })(window);

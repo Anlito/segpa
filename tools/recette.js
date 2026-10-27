@@ -65,7 +65,7 @@ async function cliquer(page, selecteur) {
 const visible = async (page, selecteur) => (await page.locator(selecteur).count()) > 0;
 
 // Fait l'écran affiché, quel que soit son type. Renvoie false sur l'écran « Bravo ».
-// demo : modèle de démonstration chargé (cartes de noms, plage de mesure, phrases-cartes).
+// demo : modèle de démonstration chargé (cartes de noms, plage de mesure).
 async function faireEcran(page, nom, captures, demo) {
   await page.waitForTimeout(120);
   if (await visible(page, '[data-action="fini"]')) return false;
@@ -108,13 +108,10 @@ async function faireEcran(page, nom, captures, demo) {
       await sansDefilement(page, nom + '-ecart');
       if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '-ecart.png') });
     }
-  } else if (await visible(page, '[data-action="oral"]')) {
-    if (await visible(page, '.carte-choix.phrase')) await cliquer(page, '.carte-choix.phrase');
-    else if (await visible(page, '.carte-choix.piece')) {
-      await cliquer(page, '.carte-choix.piece');
-      if (process.env.TRACE) console.log('  choisi', await page.locator('[aria-pressed="true"]').count(), await page.locator('[data-action="question-suivante"]').isDisabled());
-    }
-    else await cliquer(page, '[data-action="oral"]');
+  } else if (await visible(page, 'textarea.champ-libre')) {
+    // Questions : réponse toujours écrite.
+    assert.ok(await page.locator('[data-action="question-suivante"]').isDisabled(), 'pas de suite sans réponse écrite');
+    await page.locator('textarea.champ-libre').fill('Elle fait tourner la lame.');
     await cliquer(page, '[data-action="question-suivante"]');
   } else {
     const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'remise', 'fait'];
@@ -136,7 +133,7 @@ async function faireSeance(page, prefixe, captures, demo) {
   return n - 1;
 }
 
-// Modèle de démonstration (fictif) : pour essayer les cartes de noms, la vérification de mesure et les phrases-cartes.
+// Modèle de démonstration (fictif) : pour essayer les cartes de noms et la vérification de mesure.
 const MODELE_DEMO = {
   pieces: [{ nom: 'Pièce A' }, { nom: 'Pièce B' }, { nom: 'Pièce C' }, { nom: 'Pièce D' }],
   nombrePieces: 8,
@@ -147,8 +144,7 @@ const MODELE_DEMO = {
   },
   tolerance: 0.5,
   essaisMesure: 2,
-  phrasesManivelle: ['[Phrase-carte 1]', '[Phrase-carte 2]', '[Phrase-carte 3]'],
-};
+  };
 
 async function scenarioEnseignant(navigateur, base, taille, captures, demo) {
   const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
@@ -173,10 +169,16 @@ async function scenarioEnseignant(navigateur, base, taille, captures, demo) {
   for (const s of ['s1', 's2', 's3']) {
     await cliquer(page, '[data-action="continuer"]');
     ecrans.push(await faireSeance(page, s, captures, demo));
-    await cliquer(page, '[data-action="album"]');
-    await sansDefilement(page, s + '-album');
-    if (captures && s === 's3') await page.screenshot({ path: path.join(SORTIE, 'album.png') });
-    await cliquer(page, '[data-action="mission"]');
+    // Fin de séance : « Ma mission » ramène à la mission ; l'album est ouvert une fois en passant.
+    if (s === 's3') {
+      await cliquer(page, '[data-action="album"]');
+      await sansDefilement(page, s + '-album');
+      if (captures) await page.screenshot({ path: path.join(SORTIE, 'album.png') });
+      await cliquer(page, '[data-action="mission"]');
+    } else {
+      await cliquer(page, '[data-action="fini"]');
+      await page.locator('.carte-seance').first().waitFor();
+    }
   }
   assert.equal(await page.locator('.carte-seance.fait').count(), 3);
   if (captures) await page.screenshot({ path: path.join(SORTIE, 'mission-fin.png') });
@@ -231,7 +233,7 @@ async function scenarioDossier(navigateur, base, taille) {
   await faireSeance(page, 'dossier-s1', false);
   await cliquer(page, '[data-action="fini"]');
   await page.waitForTimeout(800);
-  if (!(await page.locator('[data-action="commencer"]').count())) throw new Error('après « J’ai fini » : ' + (await page.locator('.message-bref').textContent().catch(() => '?')) + ' / ' + (await page.evaluate(() => Segpa.app.etat.session && Segpa.app.etat.session.derniereErreur)));
+  if (!(await page.locator('.carte-seance').count())) throw new Error('après « J’ai fini » : ' + (await page.locator('.message-bref').textContent().catch(() => '?')) + ' / ' + (await page.evaluate(() => Segpa.app.etat.session && Segpa.app.etat.session.derniereErreur)));
   const fichiers = await page.evaluate(async () => {
     const racine = await navigator.storage.getDirectory();
     const equipe = await (await racine.getDirectoryHandle('Taille-crayon')).getDirectoryHandle('Ines_Noah');
@@ -300,7 +302,7 @@ async function scenarioDossier(navigateur, base, taille) {
           const quoi = demo ? 'modèle de démonstration' : 'modele.js vide';
           try {
             const ecrans = await scenarioEnseignant(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366 && demo, demo);
-            noter(`- OK ${nomBase} ${t} · mode enseignant, ${quoi} : séances de ${ecrans.join(', ')} écrans faites jusqu’à « Bravo » (présentation, 2 pièces démontées, 2 mesures${demo ? ' dont une hors plage' : ''}, remontage, questions), album, aide, rien ne dépasse, aucune erreur, aucune requête hors du site.`);
+            noter(`- OK ${nomBase} ${t} · mode enseignant, ${quoi} : séances de ${ecrans.join(', ')} écrans faites jusqu’à « Bravo » puis retour à « Ma mission » (présentation, 2 pièces démontées, 2 mesures${demo ? ' dont une hors plage' : ''}, remontage, questions écrites), album, aide, rien ne dépasse, aucune erreur, aucune requête hors du site.`);
           } catch (e) {
             ok = false;
             noter(`- ÉCHEC ${nomBase} ${t} · mode enseignant, ${quoi} : ${e.message.split('\n')[0]}`);

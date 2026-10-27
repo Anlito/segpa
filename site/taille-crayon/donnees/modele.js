@@ -1,8 +1,7 @@
 // Le modèle de taille-crayon de la classe.
 // À RENSEIGNER PAR THOMAS après avoir démonté le modèle acheté (brief §9, question 2) : tant que c'est vide,
 //   - pieces vide : l'élève écrit le nom de la pièce au clavier (ou « Je ne sais pas ») ;
-//   - reference null : la longueur est notée sans vérification ;
-//   - phrasesManivelle vide : l'élève écrit sa réponse ou répond à l'oral.
+//   - reference null : la longueur est notée sans vérification.
 definirModele({
   // Modèle acheté, par exemple « JPC 850011 » (affiché seulement au professeur).
   "reference": "",
@@ -23,8 +22,5 @@ definirModele({
   },
   "tolerance": 0.5,
   // Après ce nombre de mesures hors de la plage : « Montre ta mesure au professeur. »
-  "essaisMesure": 2,
-
-  // Séance 3, « À quoi sert la manivelle ? » : 3 phrases-cartes rédigées par Thomas.
-  "phrasesManivelle": []
+  "essaisMesure": 2
 });

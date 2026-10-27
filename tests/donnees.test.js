@@ -63,7 +63,6 @@ test('modèle du taille-crayon : forme attendue (même vide, en attendant les me
     assert.ok(m && m.titre && m.nom, cle);
     if (m.reference !== null) assert.ok(S.plageDe(m.reference, modele.tolerance), `${cle} : référence lisible`);
   }
-  assert.ok(Array.isArray(modele.phrasesManivelle) && modele.phrasesManivelle.length <= 3);
   const mesures = etapes.seances.find((s) => s.id === 's2').etapes.filter((e) => e.type === 'mesure').map((e) => e.piece);
   assert.deepEqual(mesures, ['corps', 'manivelle'], 'les étapes de mesure correspondent au modèle');
 });
@@ -77,6 +76,7 @@ test('présentation d’ouverture et questions : textes courts, pictogrammes des
     if (p.revele) assert.ok(PICTOS.has(p.revele.picto));
   }
   const questions = etapes.seances[2].etapes.find((e) => e.type === 'questions').questions;
-  assert.deepEqual(questions.map((q) => q.choix), ['phrases', 'mes-pieces', 'mes-pieces']);
+  assert.deepEqual(questions.map((q) => q.aide || null), [null, 'mes-pieces', 'mes-pieces']);
+  assert.ok(questions.every((q) => !q.choix), 'réponse toujours écrite : pas de cartes à choisir');
   for (const q of questions) assert.ok(S.nombreDeMots(q.texte) <= 8, q.texte);
 });

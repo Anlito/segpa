@@ -125,6 +125,11 @@ Tests `node:test` à chaque jalon (CLAUDE.md).
 - Classe : **6A**. Dossier réseau : même structure, nom de dossier projet simplifié → `… › 6A › COMMUN › TECHNOLOGIE › Taille-crayon`
   (de même `Voiture-ballon`, `Stop-motion` plus tard). `donnees/classes.js` : `definirReglagesAtelier({ classes: ['6A'], cheminProjet: ['Taille-crayon'] })`.
 
+**Décisions de Thomas après le jalon 2 (27/10/2026)**
+- Questions de compréhension : réponse **toujours écrite** (plus de phrases-cartes ni de « Je réponds à l'oral ») ;
+  pour « quelle pièce… », les photos de la séance 1 restent affichées pour aider à écrire.
+- Fin de séance : l'écran « Bravo » ramène à **« Ma mission »** (et non plus à l'accueil).
+
 **Relevé dans les documents reçus** (complète le §7 du brief)
 - La préparation enseignant reçue a bien ses 4 objectifs (le 3e est « Suivre une procédure dans l'ordre, puis dans l'ordre
   inverse ») : le constat 1 du brief ne s'applique plus.
@@ -135,7 +140,7 @@ Tests `node:test` à chaque jalon (CLAUDE.md).
   propres pictogrammes, dans le même esprit.
 
 **Bloquant pour J2** (questions du brief §9) : modèle exact du taille-crayon, liste et noms des pièces, longueurs de
-référence du corps et de la manivelle ; les 3 phrases-cartes « À quoi sert la manivelle ? ».
+référence du corps et de la manivelle.
 
 **Bloquant pour J4** : noms et couleurs des 4 ceintures et règle exacte ; validation du rattachement critères → compétences
 (cahier des charges §8.4).

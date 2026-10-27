@@ -749,7 +749,7 @@
             }
           </div>
         </div>
-        ${bas({ gauche: '<button type="button" class="btn btn-second gauche" data-action="album">' + pic('album') + 'Mon album</button>', principal: boutonPrincipal('fini', 'J’ai fini', 'coche') })}
+        ${bas({ gauche: '<button type="button" class="btn btn-second gauche" data-action="album">' + pic('album') + 'Mon album</button>', principal: boutonPrincipal('fini', 'Ma mission', 'maison') })}
       </div>`,
       {
         album: () => ecranAlbum(s.id),
@@ -762,10 +762,8 @@
             F().telecharger(d);
             message('Ton fichier est dans Téléchargements : range-le dans le dossier de ton équipe.', 7000);
           }
-          etat.session = null;
-          etat.seance = null;
-          ecranAccueil();
-          message('À la prochaine fois !');
+          // Fin de séance : retour à « Ma mission » (décision de Thomas, 27/10/2026).
+          ecranMission();
         },
       },
       async () => {

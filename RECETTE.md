@@ -5,8 +5,7 @@ La recette automatique (`npm run recette`, résultat dans `RECETTE-AUTO.md`) a d
 caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifier.
 
 ## Préparer
-0. Remplir `site/taille-crayon/donnees/modele.js` (noms des pièces, longueurs du corps et de la manivelle,
-   3 phrases-cartes) — l'outil marche aussi sans, mais sans aide au nom ni vérification de la mesure.
+0. Remplir `site/taille-crayon/donnees/modele.js` (noms des pièces, longueurs du corps et de la manivelle) — l'outil marche aussi sans, mais sans aide au nom ni vérification de la mesure.
 1. Copier le dossier `site/` du dépôt sur le réseau (ou ouvrir `site/index.html` depuis une clé USB).
 2. Dans `Bureau › Classe › 6A › COMMUN › TECHNOLOGIE`, créer le dossier **`Taille-crayon`**.
 3. Y déposer **`classe.json`** avec les prénoms de la classe (modèle : `docs/exemple-classe.json`) :
@@ -31,13 +30,13 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
       Avec les longueurs de référence dans `modele.js` : une mesure fausse donne « Mesure encore une fois, en partant
       du 0 du réglet », la deuxième fausse « Montre ta mesure au professeur ».
 - [ ] **Séance 3** : les photos de la séance 1 reviennent **de la dernière à la première** ; vérification (3 cases) ;
-      photos du taille-crayon remonté et d'un crayon taillé ; 3 questions (cartes, « J'écris ma réponse »,
-      « Je réponds à l'oral », ou ses propres photos) ; le bilan.
+      photos du taille-crayon remonté et d'un crayon taillé ; 3 questions, **toujours à l'écrit** (« Suivant » reste
+      grisé tant que rien n'est écrit ; pour « quelle pièce… », les photos de la séance 1 restent affichées) ; le bilan.
 - [ ] **Webcam** : l'image s'affiche ; « Autre caméra » apparaît s'il y en a plusieurs ; la photo est prise
       (bouton ou barre d'espace) → « Je garde » → le fichier `photos/s1-boite-01.jpg` est dans le dossier de l'équipe.
 - [ ] Webcam débranchée : message « Je ne vois pas la caméra. Branche-la, puis appuie sur Réessayer. »
 - [ ] **Aide** : le bouton devient « Aide demandée » ; toucher encore → « Merci ! Tu continues. »
-- [ ] **Bravo** → « Enregistré dans votre dossier » → J'ai fini.
+- [ ] **Bravo** → « Enregistré dans votre dossier » → le bouton « Ma mission » ramène à la mission.
 - [ ] Fermer l'onglet, rouvrir → **Je continue** → Ouvrir le dossier → le bouton de l'équipe est entouré (dernière
       équipe de ce poste) → la séance 1 est « Fait », la séance 2 est « En cours ».
 - [ ] Sur un **autre poste**, Je continue → la même équipe se retrouve (le travail suit l'élève, pas le poste).

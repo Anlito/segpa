@@ -4,8 +4,9 @@
 //
 // Types d'écran : regle (bouton « J'ai compris ») · consigne (« C'est fait ») · photo · cases (lignes à cocher) ·
 // bilan (phrases + trois visages). Écrans propres au taille-crayon (js/ecrans.js) : ouverture (la présentation),
-// pieces (tableau des pièces), mesure (une pièce au réglet), remontage (le tableau à l'envers), questions.
-// Les noms des pièces, longueurs de référence et phrases-cartes sont dans donnees/modele.js.
+// pieces (tableau des pièces), mesure (une pièce au réglet), remontage (le tableau à l'envers), questions (réponse
+// toujours écrite ; aide « mes-pieces » : les photos de la séance 1 restent affichées).
+// Les noms des pièces et les longueurs de référence sont dans donnees/modele.js.
 // bravo : ce qui s'affiche sur l'écran « Bravo » quand l'étape est faite.
 // minuteur : minutes du bloc (déroulé minuté de la préparation) ; le cercle se vide pendant le bloc.
 (function () {
@@ -72,9 +73,9 @@
           { "id": "remonte", "type": "photo", "picto": "taille-crayon", "texte": "Prends le taille-crayon remonté en photo.", "legende": "Mon taille-crayon remonté" },
           { "id": "crayon", "type": "photo", "picto": "crayon", "texte": "Prends un crayon taillé en photo.", "legende": "Un crayon taillé" },
           { "id": "questions", "type": "questions", "minuteur": 10, "questions": [
-            { "id": "manivelle", "texte": "À quoi sert la manivelle ?", "choix": "phrases" },
-            { "id": "tourner", "texte": "Quelle pièce fait tourner l’autre pièce ?", "choix": "mes-pieces" },
-            { "id": "difficile", "texte": "Quelle pièce était la plus dure à remonter ?", "choix": "mes-pieces" }
+            { "id": "manivelle", "texte": "À quoi sert la manivelle ?" },
+            { "id": "tourner", "texte": "Quelle pièce fait tourner l’autre pièce ?", "aide": "mes-pieces" },
+            { "id": "difficile", "texte": "Quelle pièce était la plus dure à remonter ?", "aide": "mes-pieces" }
           ] },
           { "id": "bilan", "type": "bilan", "texte": "Mon bilan", "bravo": "Mon bilan est fait",
             "phrases": [
