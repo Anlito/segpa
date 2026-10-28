@@ -1,13 +1,13 @@
 # Plan court — Course de voitures à ballon (6e SEGPA)
 
-Version 1 · 28/10/2026 · **à valider par Thomas avant d'écrire du code**. À lire avec `BRIEF-CLAUDE-CODE-voiture-ballon.md`
+Version 2 · 29/10/2026 · **validé par Thomas** (avec ses retours : 5 séances, photo officielle, poules et finales). À lire avec `BRIEF-CLAUDE-CODE-voiture-ballon.md`
 (proposition d'origine) et `PLAN.md` (organisation du dépôt, socle commun).
 
 ## 1. Décisions de Thomas (28/10/2026)
 
 | Sujet | Décision |
 |---|---|
-| Séances | 4 (S1 je prépare · S2 je construis · S3 je teste et j'améliore · S4 la course) |
+| Séances | **5** (S1 je prépare · S2 je construis · S3 je décore · S4 je teste et j'améliore · S5 la course), une 6ᵉ facultative « J'améliore encore » avant la course ; le nombre de séances est un réglage des données |
 | Châssis | **imprimé en 3D par Thomas**, fourni dans le kit (`Ch_ssis_voiture_ballon.stl` : 150 × 80 mm, trous d'axe Ø 3,5 mm à 6 mm de haut, entraxe 99 mm, tube du ballon Ø 15 mm avec collerette Ø 20 mm, tuyère Ø 4 mm vers l'arrière) |
 | Axes | piques à brochettes **Ø 3 mm**, coupées par le professeur (≈ 11 cm) ; elles tournent librement dans le châssis |
 | Roues | imprimées en 3D par Thomas : **Ø 20, 30, 40 et 50 mm**, trou serré sur la pique |
@@ -19,6 +19,8 @@ Version 1 · 28/10/2026 · **à valider par Thomas avant d'écrire du code**. À
 | Piste | longueur et nombre de couloirs **pas encore connus** : fixés après les essais de la séance 3 (l'outil propose une longueur) |
 | Classement | ordre d'arrivée ; **n'entre pas** dans l'évaluation |
 | Questions | réponses **toujours écrites** (comme le taille-crayon) |
+| Photos | webcam à chaque moment clé, dont une **photo officielle** de la voiture décorée (page de course, podium, diplôme) |
+| Course | **poules** (selon le nombre de couloirs du jour), puis **finales par niveau** : principale, secondaire, tertiaire ; personne n'est éliminé, chaque voiture court au moins deux fois |
 
 ## 2. Dans le dépôt
 
@@ -43,21 +45,24 @@ Dossier réseau : `… › 6A › COMMUN › TECHNOLOGIE › Voiture-ballon` (co
 4. Mon matériel : une carte par pièce du kit (châssis, piques, roues, élastique, ballon) avec « J'ai pris … » au pavé numérique.
 5. Photo des pièces sur la table · rangement (cases + photo).
 
+**S3 — Je décore ma voiture** (customisation libre) : je choisis mes matériaux (carton, feuilles de couleur, scotch) · je décore ·
+📷 **photo officielle** de ma voiture (de côté, en entier) · je vérifie : les roues tournent toujours · rangement.
+
 **S2 — Je construis ma voiture** — fiche de fabrication, une étape par écran, avec photo de Thomas. *Proposition à valider :*
 1. Je passe une pique dans les trous de devant. 2. J'enfonce une roue de chaque côté. 3. Je vérifie : la roue tourne.
 4. Même chose derrière. 5. J'enfile le ballon sur le tube. 6. Je serre l'élastique sous le rebord. 7. 📷 Ma voiture sans décoration.
-8. Je décore ma voiture (carton, feuilles de couleur, scotch). 9. 📷 Ma voiture décorée. Puis rangement + photo de la voiture à sa place.
+Puis rangement + photo de la voiture à sa place (la décoration est la séance 3).
 Écran d'aide **« Ma voiture ne roule pas »** : 3 pictos de causes (une roue frotte · le ballon fuit · la voiture est trop lourde) → renvoi
 à l'étape de fabrication concernée, sans donner la solution.
 
-**S3 — Je teste et j'améliore** — de 3 à 5 essais ; pour chaque essai : je pose la voiture sur la ligne · je gonfle le ballon avec la
+**S4 — Je teste et j'améliore** — de 3 à 5 essais ; pour chaque essai : je pose la voiture sur la ligne · je gonfle le ballon avec la
 pompe · je lâche · 📏 je mesure (pavé, en cm, unité toujours affichée ; un résultat 10 fois plus grand que les autres → « Mesure encore une
 fois ? » en ambre) · ma voiture roule : tout droit / à gauche / à droite · **je change UNE chose** avant l'essai suivant.
 Cartes « je change une chose » (*à valider*) : **les roues** (20 · 30 · 40 · 50 mm) · **le ballon** (plus ou moins gonflé : nombre de coups de
 pompe) · **le poids** (j'enlève ou j'ajoute de la décoration). Deux cartes choisies → « Choisis un seul changement » en ambre.
 Mon graphique : une barre épaisse par essai, la distance écrite en grand, le picto du changement dessous. 📷 avant / après.
 
-**S4 — La course** — « Ma voiture est prête » · règles de la course (*la piste reste libre · je lâche au signal · je ne pousse pas
+**S5 — La course** — « Ma voiture est prête » · règles de la course (*la piste reste libre · je lâche au signal · je ne pousse pas
 la voiture*) · écran d'attente « Regarde la piste ! » · **mon résultat** (lu dans `course.json` du dossier du projet ; message
 encourageant quel que soit le rang ; sinon « Le professeur te donnera ton résultat ») · **Pourquoi ma voiture avance ? (réponse écrite)** ·
 mon bilan (smileys) · 📷 photo finale.
@@ -69,9 +74,14 @@ mon bilan (smileys) · 📷 photo finale.
 - Onglet **Essais** : tableau et graphique des essais, changements faits, directions.
 - **Longueur de piste proposée** d'après les distances mesurées en S3 (par exemple un peu moins que la distance médiane, pour que la
   plupart des voitures arrivent au bout) : le professeur la garde ou la change.
-- **`course.html`** (vidéoprojecteur) : manches de 2 à 4 voitures (nombre de couloirs choisi le jour même), **Top départ**, un gros bouton
-  par couloir quand la voiture passe la ligne (place + temps indicatif) ; mode « distance » en option ; podium, classement général,
-  record de la classe, « Bravo à tous » ; résultats écrits dans `course.json` + CSV ; diplôme de pilote N&B (facultatif).
+- **`course.html`** (vidéoprojecteur) : le professeur choisit le nombre de couloirs du jour (2 à 4).
+  1. **Poules** : l'outil répartit les voitures (ex. 8 voitures, 4 couloirs → 2 poules de 4 ; 3 couloirs → poules de 3, 3 et 2) ; le
+     professeur peut déplacer une voiture. **Top départ**, un gros bouton par couloir quand la voiture passe la ligne (place + temps
+     indicatif) ; une voiture qui n'arrive pas : distance mesurée.
+  2. **Classement des poules** : place dans la poule, puis temps ; les voitures qui n'arrivent pas, à la distance.
+  3. **Finales par niveau** : les meilleures en **finale principale**, les suivantes en **secondaire**, puis **tertiaire** (autant de voitures
+     que de couloirs) ; un podium par finale, record de la classe, « Bravo à tous ».
+  Résultats écrits dans `course.json` + CSV ; diplôme de pilote N&B avec la photo officielle (facultatif).
 
 ## 5. Évaluation (proposition du brief, à valider)
 
@@ -83,18 +93,17 @@ l'unité · explique pourquoi sa voiture avance (**à l'écrit**) · autonomie /
 
 | Jalon | Contenu |
 |---|---|
-| V1 | données + écrans S1 et S2 (nom, couleur, matériel, fabrication, « ma voiture ne roule pas ») |
-| V2 | S3 : essais, mesures, « je change une chose », graphique |
-| V3 | S4 et `course.html` (manches, chrono, podium, `course.json`, résultat côté élève) |
+| V1 ✓ 29/10 | données + écrans S1, S2 et S3 (nom, couleur, matériel, fabrication, « ma voiture ne roule pas », décoration, photo officielle) |
+| V2 | S4 : essais, mesures, « je change une chose », graphique |
+| V3 | S5 et `course.html` (poules, finales, chrono, podiums, `course.json`, résultat côté élève) |
 | V4 | outil professeur : tuiles, onglet Essais, longueur de piste proposée, évaluation et exports |
 | V5 | recette automatique, essai réel (piste, mètre ruban, vraies voitures), publication |
 
-## 7. À valider ou à fournir avant de coder
+## 7. Réglé et restant
 
-1. Les **textes des règles** (S1) et des **règles de la course** (S4) ci-dessus.
-2. La **fiche de fabrication** (S2) : les étapes proposées, et plus tard **une photo par étape** (sinon pictogramme).
-3. Les **cartes « je change une chose »** : roues · gonflage · poids — à garder, retirer ou compléter.
-4. Les **noms de voitures amusants** proposés (je peux en proposer 12) et les **6 couleurs d'équipe**.
-5. Les **7 critères** et leur rattachement au cycle 3 (je proposerai le tableau comme pour le taille-crayon), et la **ceinture** : quel critère
-   (proposition : « Voiture terminée et qui fonctionne ») ?
-6. Le résultat de vos **essais de châssis** (distance, tuyère de 4 mm suffisante ?) — pour régler l'alerte « 10 fois plus grand ».
+**Validé le 29/10/2026** (« OK pour le plan ») : textes des règles du matériel et de la course, étapes de fabrication, cartes
+« je change une chose » (roues · gonflage · poids), tels que proposés ci-dessus ; noms de voitures et couleurs d'équipe proposés par
+Claude dans `donnees/` (modifiables).
+
+**Restant** : photos de Thomas (modèle fini, une par étape de fabrication) ; les 7 critères et la ceinture (au jalon V4) ; le résultat
+des essais de châssis (distance, tuyère de 4 mm) pour régler l'alerte « 10 fois plus grand ».

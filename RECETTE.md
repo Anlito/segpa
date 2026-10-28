@@ -70,3 +70,12 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
 - Voix française : oui / non
 - Webcam : modèle, image nette ? lumière ?
 - Remarques des élèves :
+
+## Voiture à ballon — jalon V1 (séances 1 à 3)
+`site/professeur.html` → « Course de voitures à ballon » → Écrans élèves (démonstration) :
+- [ ] Ma mission : 5 séances lisibles, sans défilement.
+- [ ] Séance 1 : 4 règles, nom de la voiture (cartes ou « J'écris un nom »), couleur d'équipe (aperçu de la voiture), modèle
+      (photo `img/modele.jpg` quand elle existe), « J'ai pris… » avec − et +, photo des pièces, rangement.
+- [ ] Séance 2 : la fabrication pas à pas (photos `img/fabrication/1.jpg`… quand elles existent), « Ma voiture ne roule pas »
+      → la cause ramène à la bonne étape.
+- [ ] Séance 3 : décoration, vérification, **photo officielle**, rangement.

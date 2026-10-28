@@ -38,7 +38,7 @@ async function nouvellePage(navigateur, taille) {
   });
   // Les photos du professeur (img/…) sont facultatives : un fichier absent n'est pas une erreur (le pictogramme s'affiche).
   // Tout autre fichier manquant en est une.
-  const facultatif = (u) => /\/taille-crayon\/img\//.test(u);
+  const facultatif = (u) => /\/(?!commun\/)[a-z-]+\/img\/.+\.(jpe?g|png)$/.test(u);
   page.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && erreurs.push(m.text()));
   page.on('requestfailed', (r) => !facultatif(r.url()) && erreurs.push('fichier introuvable : ' + r.url()));
   page.on('response', (r) => r.status() >= 400 && !facultatif(r.url()) && erreurs.push(`fichier introuvable (${r.status()}) : ${r.url()}`));
@@ -59,7 +59,17 @@ async function sansDefilement(page, nom) {
       .map((el) => ({ el, r: el.getBoundingClientRect() }))
       .filter(({ r }) => r.width && r.height && (r.bottom > h + 1 || r.right > w + 1 || r.top < -1 || r.left < -1))
       .map(({ el, r }) => `${el.tagName.toLowerCase()}.${el.className && el.className.baseVal === undefined ? el.className : ''} (${Math.round(r.bottom)}×${Math.round(r.right)})`);
-    return { defile: document.documentElement.scrollHeight > h + 1 || document.documentElement.scrollWidth > w + 1, depasse: depasse.slice(0, 5) };
+    // Rien du milieu ne passe sous la barre du bas (boutons) ni au-dessus de celle du haut.
+    const bas = document.querySelector('#app .bas');
+    const haut = document.querySelector('#app .haut');
+    const limiteBas = bas ? bas.getBoundingClientRect().top + 1 : h;
+    const limiteHaut = haut ? haut.getBoundingClientRect().bottom - 1 : 0;
+    const chevauche = [...document.querySelectorAll('#app .milieu *')]
+      .filter((el) => el.offsetParent !== null)
+      .map((el) => ({ el, r: el.getBoundingClientRect() }))
+      .filter(({ el, r }) => r.width && r.height && (r.bottom > limiteBas || r.top < limiteHaut) && !el.closest('.msg-flottant'))
+      .map(({ el, r }) => `${el.tagName.toLowerCase()}.${typeof el.className === 'string' ? el.className : ''} chevauche (${Math.round(r.top)}-${Math.round(r.bottom)})`);
+    return { defile: document.documentElement.scrollHeight > h + 1 || document.documentElement.scrollWidth > w + 1, depasse: depasse.concat(chevauche).slice(0, 5) };
   });
   assert.ok(!r.defile && !r.depasse.length, `${nom} : ça dépasse de l'écran ${JSON.stringify(r.depasse)}`);
 }
@@ -93,6 +103,17 @@ async function faireEcran(page, nom, captures, demo) {
     await page.locator('[data-action="garder"]').waitFor();
     await sansDefilement(page, nom + '-apercu');
     await cliquer(page, '[data-action="garder"]');
+  } else if (await visible(page, '[data-action="choisir-nom"]')) {
+    await cliquer(page, '[data-action="choisir-nom"]');
+    await cliquer(page, '[data-action="nom-choisi"]');
+  } else if (await visible(page, '[data-action="choisir-couleur"]')) {
+    await cliquer(page, '[data-action="choisir-couleur"]');
+    await page.locator('.apercu-voiture').waitFor();
+    await sansDefilement(page, nom + '-apercu');
+    await cliquer(page, '[data-action="couleur-choisie"]');
+  } else if (await visible(page, '.ligne-materiel')) {
+    for (const b of await page.locator('[data-action="plus"]').all()) await b.click();
+    await cliquer(page, '[data-action="compte"]');
   } else if (await visible(page, '[data-action="decouvrir"]')) {
     await cliquer(page, '[data-action="decouvrir"]');
   } else if (await visible(page, '[data-action="piece"]')) {
@@ -194,6 +215,46 @@ async function scenarioEnseignant(navigateur, base, taille, captures, demo) {
   }
   assert.equal(await page.locator('.carte-seance.fait').count(), 3);
   if (captures) await page.screenshot({ path: path.join(SORTIE, 'mission-fin.png') });
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+  return ecrans;
+}
+
+// Voiture à ballon (jalon V1) : séances 1 à 3, Ma mission à 5 séances, dépannage « Ma voiture ne roule pas ».
+async function scenarioVoiture(navigateur, base, taille, captures) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
+  await page.goto(base + 'voiture-ballon/index.html?enseignant=1');
+  await sansDefilement(page, 'voiture-accueil');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'voiture-accueil.png') });
+  await cliquer(page, '[data-action="commencer"]');
+  await cliquer(page, '[data-prenom="Léa"]');
+  await cliquer(page, '[data-prenom="Tom"]');
+  await cliquer(page, '[data-action="valider"]');
+  assert.equal(await page.locator('.carte-seance').count(), 5);
+  await sansDefilement(page, 'voiture-mission');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'voiture-mission.png') });
+  const ecrans = [];
+  for (const s of ['s1', 's2', 's3']) {
+    await cliquer(page, '[data-action="continuer"]');
+    ecrans.push(await faireSeance(page, 'voiture-' + s, captures));
+    await cliquer(page, '[data-action="fini"]');
+    await page.locator('.carte-seance').first().waitFor();
+  }
+  assert.equal(await page.locator('.carte-seance.fait').count(), 3);
+  const d = await page.evaluate(() => Segpa.voitureDe(Segpa.app.etat.session.donnees));
+  assert.equal(d.nom, 'Turbo Ballon');
+  assert.equal(d.nomCouleur, 'Bleu');
+  assert.ok(await page.evaluate(() => Segpa.app.etat.session.donnees.photos.some((p) => p.legende === 'Photo officielle')));
+  // Séance 4 : « Ma voiture ne roule pas » → « Une roue frotte » ramène à l'étape de la séance 2.
+  await cliquer(page, '[data-action="continuer"]');
+  await cliquer(page, '[data-action="depannage"]');
+  await page.locator('.cause').first().waitFor();
+  await sansDefilement(page, 'voiture-depannage');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'voiture-depannage.png') });
+  await cliquer(page, '.cause');
+  assert.match(await page.locator('.consigne-texte').first().textContent(), /Je vérifie : les roues tournent/);
+  assert.match(await page.locator('.etiquette-seance').textContent(), /Séance 2/);
   assert.deepEqual(erreurs, []);
   assert.deepEqual(horsSite, []);
   await contexte.close();
@@ -465,6 +526,17 @@ async function scenarioProfesseur(navigateur, base) {
             ok = false;
             noter(`- ÉCHEC ${nomBase} ${t} · mode enseignant, ${quoi} : ${e.message.split('\n')[0]}`);
           }
+        }
+      }
+    for (const [nomBase, base] of bases)
+      for (const taille of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+        const t = `${taille.width}×${taille.height}`;
+        try {
+          const ecrans = await scenarioVoiture(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
+          noter(`- OK ${nomBase} ${t} · voiture à ballon : séances 1 à 3 de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, décoration, photo officielle), Ma mission à 5 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
+        } catch (e) {
+          ok = false;
+          noter(`- ÉCHEC ${nomBase} ${t} · voiture à ballon : ${e.message.split('\n')[0]}`);
         }
       }
     // Le dossier privé du navigateur n'existe pas en file:// : ce scénario passe par le serveur local.

@@ -429,7 +429,7 @@
           <button type="button" class="btn btn-maison btn-petit" data-action="son" aria-pressed="${S.voix.sonActif()}">${pic(S.voix.sonActif() ? 'son' : 'sans-son')}Son</button>
           ${etiquetteEquipe()}
         </div>
-        <div class="milieu"><div class="frise">${cartes}</div></div>
+        <div class="milieu${seances().length > 3 ? ' milieu-large' : ''}"><div class="frise${seances().length > 3 ? ' nombreuses' : ''}">${cartes}</div></div>
         ${bas({ gauche: `<div class="gauche">${etatEnregistrement()}</div>`, principal: boutonPrincipal('continuer', 'Je continue', 'lecture') })}
       </div>`,
       {
@@ -478,10 +478,47 @@
       `<div class="ecran">
         ${hautEtape(etape)}
         <div class="milieu">${vue.milieu}</div>
-        ${bas({ gauche: vue.gauche || boutonRetour('precedent'), principal: vue.principal })}
+        ${bas({ gauche: (vue.gauche || boutonRetour('precedent')) + boutonDepannage(), principal: vue.principal })}
       </div>`,
-      Object.assign({ precedent }, vue.actions),
+      Object.assign({ precedent, depannage: ecranDepannage }, vue.actions),
       vue.apres
+    );
+  }
+
+  // Dépannage d'une séance (données : seance.depannage = { texte, picto, causes: [{ picto, texte, etape }] }) :
+  // l'élève touche la cause qu'il voit, l'outil le ramène à l'étape concernée, sans donner la solution.
+  const boutonDepannage = () => {
+    const d = etat.seance && etat.seance.depannage;
+    return d ? `<button type="button" class="btn btn-second btn-depannage" data-action="depannage">${pic(d.picto || 'question')}${ech(d.texte)}</button>` : '';
+  };
+
+  function ecranDepannage() {
+    const d = etat.seance.depannage;
+    afficher(
+      `<div class="ecran">
+        <div class="haut">${boutonMaison()}<h1 class="titre-ecran">${ech(d.texte)}</h1>${boutonVoix(d.texte + '. Qu’est-ce que tu vois ? ' + d.causes.map((c) => c.texte).join('. ') + '.')}<div class="espace"></div>${etiquetteEquipe()}</div>
+        <div class="milieu" style="flex-direction:column;gap:2rem">
+          <p class="consigne-texte" style="font-size:2.5rem">Qu’est-ce que tu vois ?</p>
+          <div class="causes">${d.causes
+            .map((c, i) => `<button type="button" class="cause" data-action="cause" data-i="${i}"><span class="tuile">${pic(c.picto)}</span>${ech(c.texte)}</button>`)
+            .join('')}</div>
+        </div>
+        ${bas({ gauche: boutonRetour('retour-etape') })}
+      </div>`,
+      {
+        'retour-etape': () => ecranEtape(),
+        cause: (b) => {
+          // etape : « verifier » (même séance) ou « s2/verifier » (étape d'une autre séance).
+          const c = d.causes[Number(b.dataset.i)];
+          const [idSeance, idEtape] = c.etape.includes('/') ? c.etape.split('/') : [etat.seance.id, c.etape];
+          const autre = seances().find((x) => x.id === idSeance);
+          if (autre && autre !== etat.seance) etat.seance = autre;
+          const i = etapes().findIndex((e) => e.id === idEtape);
+          if (i >= 0) etat.index = i;
+          ecranEtape();
+          message('Regarde bien cette étape, puis réessaie.', 4000);
+        },
+      }
     );
   }
 
@@ -503,8 +540,9 @@
   }
 
   function blocConsigne(etape, pastille) {
-    const pictos = etape.picto2 ? S.pictoDouble(etape.picto, etape.picto2, 120) : pic(etape.picto);
-    return `<div class="picto-grand${etape.picto2 ? '' : ' seul'}">${pictos}</div>
+    // image : photo de Thomas (modèle, étape de fabrication) ; tant qu'elle manque, le pictogramme s'affiche.
+    const pictos = etape.image ? S.photoOuPicto(etape.image, etape.picto) : etape.picto2 ? S.pictoDouble(etape.picto, etape.picto2, 120) : pic(etape.picto);
+    return `<div class="picto-grand${etape.picto2 && !etape.image ? '' : ' seul'}${etape.image ? ' avec-photo' : ''}">${pictos}</div>
       <div class="consigne">
         ${pastille ? `<span class="pastille">${ech(pastille)}</span>` : ''}
         <div class="consigne-ligne"><p class="consigne-texte">${ech(etape.texte)}</p>${boutonVoix(lisible(etape.texte, etape.detail))}</div>
