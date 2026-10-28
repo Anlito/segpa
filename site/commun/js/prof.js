@@ -291,6 +291,7 @@
             : ''
         }
         <div class="pc-resume"><span><b>${etat.equipes.length}</b> équipe${etat.equipes.length > 1 ? 's' : ''}</span>${S.etapes.seances.map((s, i) => `<span>Séance ${i + 1} finie : <b>${finies(s.id)}</b></span>`).join('')}<span>Aides en cours : <b>${aides.length}</b></span></div>
+        ${S.criteres ? `<div class="pc-exports"><span>Évaluation :</span><button type="button" class="pb-btn" data-action="excel">Excel</button><button type="button" class="pb-btn" data-action="csv">CSV</button><button type="button" class="pb-btn" data-action="carnet" title="Niveaux 1 à 4 par critère, à importer dans le Carnet de classe">Carnet de classe</button><button type="button" class="pb-btn" data-action="ceintures">Feuilles ceinture</button>${etat.dossier ? '' : '<span class="pc-attention">Fichiers importés : l’évaluation n’est pas enregistrée, pensez à exporter.</span>'}</div>` : ''}
         <div class="pc-tuiles">${liste.map(tuile).join('') || '<p class="pc-vide">Aucune équipe pour l’instant.</p>'}</div>
         ${etat.invalides.length ? `<details class="pc-invalides"><summary>${etat.invalides.length} fichier(s) non lu(s)</summary><ul>${etat.invalides.map((x) => `<li>${ech(x.nom)} : ${ech(x.raison)}</li>`).join('')}</ul></details>` : ''}
       </section>`,
@@ -300,6 +301,14 @@
           etat.onglet = 'bilan';
           ecranEquipe();
         },
+        excel: () => telecharger(S.classeurEvaluation(lignesEval(), S.criteres), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', nomExport('evaluation.xlsx')),
+        csv: () => telecharger(S.csvClasse(lignesEval(), S.criteres), 'text/csv;charset=utf-8', nomExport('evaluation.csv')),
+        carnet: () => {
+          const r = S.resultatsCarnet(lignesEval(), S.criteres, { id: S.projet.id, titre: S.projet.titre });
+          telecharger(JSON.stringify(r, null, 2) + '\n', 'application/json', nomExport('labo-resultats.json'));
+          alert('Fichier pour le Carnet de classe enregistré dans Téléchargements.\n\nDans le projet du Carnet, créez d’abord les 7 critères avec les mêmes libellés.\nLe Carnet recalcule sa propre note (moyenne des niveaux × 5) : elle peut différer de la note de l’Excel, qui reste la note de référence.');
+        },
+        ceintures: () => ecranCeintures(),
         vu: async (b) => {
           const eq = etat.equipes.find((x) => x.cle === b.dataset.cle);
           etat.professeur.aidesVues[eq.nom] = eq.resume.aide.date;
@@ -366,7 +375,7 @@
         return `<section class="pp-bloc"><h3>Séance ${i + 1} · ${ech(s.titre)} (${photos.length})</h3>${photos.length ? `<div class="pp-album">${cartes.join('')}</div>` : '<p class="pp-vide">Pas de photo.</p>'}</section>`;
       })
     );
-    return parSeance.join('');
+    return `<div><button type="button" class="pb-btn" data-action="imprimer-album">Imprimer l’album (A4, 6 photos par page)</button></div>` + parSeance.join('');
   }
 
   function ongletHistorique(eq) {
@@ -392,10 +401,11 @@
     const i = liste.findIndex((x) => x.cle === etat.courante);
     if (i < 0) return ecranClasse();
     const eq = liste[i];
-    const onglets = [{ id: 'bilan', titre: 'Bilan' }, { id: 'album', titre: 'Album' }, ...P().onglets, { id: 'historique', titre: 'Historique' }, { id: 'differenciation', titre: 'Différenciation' }];
+    const onglets = [{ id: 'bilan', titre: 'Bilan' }, ...(S.criteres ? [{ id: 'evaluation', titre: 'Évaluation' }] : []), { id: 'album', titre: 'Album' }, ...P().onglets, { id: 'historique', titre: 'Historique' }, { id: 'differenciation', titre: 'Différenciation' }];
     const o = onglets.find((x) => x.id === etat.onglet) || onglets[0];
     let contenu;
     if (o.id === 'bilan') contenu = ongletBilan(eq);
+    else if (o.id === 'evaluation') contenu = ongletEvaluation(eq);
     else if (o.id === 'album') contenu = await ongletAlbum(eq);
     else if (o.id === 'historique') contenu = ongletHistorique(eq);
     else if (o.id === 'differenciation') contenu = ongletDifferenciation(eq);
@@ -423,6 +433,25 @@
           etat.onglet = b.dataset.id;
           ecranEquipe();
         },
+        niveau: async (b) => {
+          const eleves = eq.donnees.equipe.eleves;
+          const actuel = S.evaluationEquipe(etat.professeur, eq.nom, eleves).eleves[b.dataset.eleve].niveaux[b.dataset.critere];
+          const n = Number(b.dataset.n);
+          S.poserNiveau(etat.professeur, eq.nom, eleves, b.dataset.eleve, b.dataset.critere, actuel === n ? null : n);
+          await ecrireProfesseur();
+          ecranEquipe();
+        },
+        lie: async (c) => {
+          S.evaluationEquipe(etat.professeur, eq.nom, eq.donnees.equipe.eleves).lie = c.checked;
+          await ecrireProfesseur();
+          ecranEquipe();
+        },
+        commentaire: async (t) => {
+          const e = S.evaluationEquipe(etat.professeur, eq.nom, eq.donnees.equipe.eleves);
+          for (const p of e.lie ? eq.donnees.equipe.eleves : [t.dataset.eleve]) e.eleves[p].commentaire = t.value.trim();
+          await ecrireProfesseur();
+        },
+        'imprimer-album': () => ecranAlbumImprime(eq),
         drapeau: async (c) => {
           const set = new Set(etat.professeur.drapeaux[eq.nom] || []);
           if (c.checked) set.add(c.value);
@@ -434,7 +463,133 @@
     );
   }
 
+  // ---------- Évaluation ----------
+
+  const lignesEval = () => S.lignesEleves(etat.professeur, S.trier(etat.equipes), S.criteres);
+  const caseNiveau = (v) => (Number.isInteger(v) ? `<span class="niv niv-${v}">${S.NIVEAUX[v].symbole} ${S.NIVEAUX[v].lettre}</span>` : '<span class="niv niv-vide">—</span>');
+
+  function ongletEvaluation(eq) {
+    const def = S.criteres;
+    const eleves = eq.donnees.equipe.eleves;
+    const e = S.evaluationEquipe(etat.professeur, eq.nom, eleves);
+    const repere = P().repere || (() => '');
+    const lignes = def.criteres
+      .map(
+        (c) => `<tr><th scope="row"><span class="ev-seance">${ech(c.seance || '—')}</span> ${ech(c.libelle)}<small>${ech(c.competence)}</small></th>
+          ${eleves
+            .map(
+              (p) => `<td><div class="ev-niveaux" role="group" aria-label="${ech(c.libelle)} — ${ech(p)}">${S.NIVEAUX.map(
+                (n) => `<button type="button" class="niv-btn niv-${n.valeur}" data-action="niveau" data-eleve="${ech(p)}" data-critere="${ech(c.id)}" data-n="${n.valeur}" aria-pressed="${e.eleves[p].niveaux[c.id] === n.valeur}" title="${ech(n.nom)}">${n.symbole} ${n.lettre}</button>`
+              ).join('')}</div></td>`
+            )
+            .join('')}
+          <td class="ev-repere">${ech(repere(c.repere, eq.donnees))}</td></tr>`
+      )
+      .join('');
+    const bilans = eleves
+      .map((p) => {
+        const r = S.noter(e.eleves[p].niveaux, def.criteres);
+        const ce = S.ceinture(e.eleves[p].niveaux, def);
+        return `<div class="ev-bilan"><strong>${ech(p)}</strong>
+          <span>Score : <b>${r.score === null ? '—' : r.score}</b> / ${r.max}</span>
+          <span>Note : <b>${r.note === null ? '—' : String(r.note).replace('.', ',')}</b> / 20${r.note !== null && !r.complet ? ` <small>(${r.evalues} critères sur ${def.criteres.length})</small>` : ''}</span>
+          <span>${ech(r.appreciation || '—')}</span>
+          <span>${ce ? `${ceintureSvg(ce.niveau, 22)} ${ech(ce.nom)}` : 'Ceinture : —'}</span>
+          <label>Commentaire${e.lie && eleves.length > 1 ? ' (binôme)' : ''}<textarea data-change="commentaire" data-eleve="${ech(p)}" rows="2">${ech(e.eleves[p].commentaire || '')}</textarea></label></div>`;
+      })
+      .join('');
+    return `<section class="pp-bloc">
+        <div class="ev-tete">${eleves.length > 1 ? `<label class="ev-lie"><input type="checkbox" data-change="lie"${e.lie ? ' checked' : ''}> Même niveau pour tout le binôme</label>` : ''}
+          <span class="ev-legende">${S.NIVEAUX.map((n) => `${caseNiveau(n.valeur)} ${ech(n.nom)}`).join(' ')}</span></div>
+        <table class="pp-table ev-table"><thead><tr><th>Critère · compétence</th>${eleves.map((p) => `<th>${ech(p)}</th>`).join('')}<th>Repères (observations, pas une note)</th></tr></thead><tbody>${lignes}</tbody></table>
+      </section>
+      <section class="pp-bloc ev-bilans">${bilans}</section>
+      <p class="pp-vide">La note /20 n’est visible que dans l’outil professeur et les exports. Les élèves ne voient que leur ceinture (feuilles ceinture).${etat.dossier ? '' : ' Fichiers importés : rien n’est enregistré, pensez à exporter.'}</p>`;
+  }
+
+  // Ceinture en noir et blanc : motif + lettre (jamais la couleur seule). blanche · jaune (points) · verte (hachures) · vert foncé (plein).
+  function ceintureSvg(niveau, taille) {
+    const motifs = ['none', 'url(#c-points)', 'url(#c-hachures)', '#222'];
+    const lettres = ['B', 'J', 'V', 'VF'];
+    const h = taille || 40;
+    return `<svg class="ceinture" viewBox="0 0 120 40" width="${h * 3}" height="${h}" role="img" aria-label="${ech(S.criteres.ceintures[niveau])}">
+      <defs><pattern id="c-points" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.3" fill="#222"/></pattern>
+        <pattern id="c-hachures" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#222" stroke-width="2.2"/></pattern></defs>
+      <rect x="2" y="12" width="116" height="16" rx="3" fill="${motifs[niveau] === 'none' ? '#fff' : motifs[niveau]}" stroke="#222" stroke-width="2"/>
+      <rect x="48" y="6" width="24" height="28" rx="3" fill="#fff" stroke="#222" stroke-width="2"/>
+      <text x="60" y="25.5" text-anchor="middle" font-size="13" font-weight="700" font-family="Lexend, sans-serif">${lettres[niveau]}</text></svg>`;
+  }
+
+  function telecharger(contenu, type, nom) {
+    const url = URL.createObjectURL(new Blob([contenu], { type }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nom;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  }
+
+  function nomExport(fin) {
+    const classe = etat.equipes.map((x) => x.donnees.equipe.classe).find(Boolean) || 'classe';
+    return `${S.projet.id}-${classe}-${new Date().toISOString().slice(0, 10)}-${fin}`;
+  }
+
+  // Feuilles « ceinture » à imprimer (noir et blanc), une carte par élève : ceinture, auto-évaluation (smileys).
+  // La note n'y figure que si le professeur coche « Afficher la note chiffrée ».
+  function ecranCeintures(avecNote) {
+    etat.vue = 'impression';
+    const lignes = lignesEval();
+    const bilan = (eqNom) => {
+      const eq = etat.equipes.find((x) => x.nom === eqNom);
+      const etape = S.etapes.seances.flatMap((s) => s.etapes.map((e) => Object.assign({ seance: s.id }, e))).find((e) => e.type === 'bilan');
+      const v = etape && eq ? S.valeurEtape(eq.donnees, etape.seance, etape.id) : null;
+      return etape ? etape.phrases.map((ph, i) => `<li>${ech(ph)} <b>${Array.isArray(v) && Number.isInteger(v[i]) ? ['😀 Oui', '😐 Un peu', '😕 Pas encore'][v[i]] : '—'}</b></li>`).join('') : '';
+    };
+    afficher(
+      `<section class="impression">
+        <div class="impression-outils"><button type="button" class="pb-btn" data-action="classe">${pic('retour')}Classe</button>
+          <label><input type="checkbox" data-change="avec-note"${avecNote ? ' checked' : ''}> Afficher la note chiffrée</label>
+          <button type="button" class="pb-btn" data-action="imprimer">Imprimer</button></div>
+        <div class="feuilles">${lignes
+          .map(
+            (l) => `<article class="feuille-ceinture"><header><strong>${ech(l.eleve)}</strong><span>${ech(S.projet.titre)}${l.binome ? ` · avec ${ech(l.binome)}` : ''}</span></header>
+              <div class="fc-ceinture">${l.ceinture ? `${ceintureSvg(l.ceinture.niveau, 48)}<b>${ech(l.ceinture.nom)}</b>` : '<b>Ceinture : pas encore</b>'}</div>
+              <ul class="fc-bilan">${bilan(l.equipe)}</ul>
+              ${avecNote && l.note !== null ? `<p class="fc-note">Note : ${String(l.note).replace('.', ',')} / 20 · ${ech(l.appreciation)}</p>` : ''}
+              ${l.commentaire ? `<p class="fc-commentaire">${ech(l.commentaire)}</p>` : ''}</article>`
+          )
+          .join('')}</div></section>`,
+      {
+        classe: () => ecranClasse(),
+        imprimer: () => print(),
+        'avec-note': (c) => ecranCeintures(c.checked),
+      }
+    );
+  }
+
+  // Album imprimable d'une équipe : A4, 6 photos par page.
+  async function ecranAlbumImprime(eq) {
+    etat.vue = 'impression';
+    const photos = eq.donnees.photos || [];
+    const cartes = await Promise.all(photos.map(async (p) => {
+      const u = await urlPhoto(eq, p.fichier);
+      return `<figure>${u ? `<img src="${u}" alt="">` : '<span class="pp-sans">fichier absent</span>'}<figcaption>${ech(p.legende)}</figcaption></figure>`;
+    }));
+    const pages = [];
+    for (let i = 0; i < cartes.length; i += 6) pages.push(cartes.slice(i, i + 6).join(''));
+    afficher(
+      `<section class="impression">
+        <div class="impression-outils"><button type="button" class="pb-btn" data-action="retour">${pic('retour')}${ech(eq.resume.noms)}</button><button type="button" class="pb-btn" data-action="imprimer">Imprimer</button></div>
+        ${pages.map((pg) => `<div class="page-album"><h2>${ech(eq.resume.noms)} · ${ech(S.projet.titre)}</h2><div class="album-a4">${pg}</div></div>`).join('') || '<p class="pp-vide">Pas de photo.</p>'}
+      </section>`,
+      { retour: () => ecranEquipe(), imprimer: () => print() }
+    );
+  }
+
   document.addEventListener('keydown', (e) => {
+    if (etat.vue === 'impression' && e.key === 'Escape') return ecranClasse();
     if (etat.vue !== 'equipe') return;
     if (e.key === 'Escape') ecranClasse();
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {

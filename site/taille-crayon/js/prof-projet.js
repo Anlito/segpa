@@ -98,3 +98,47 @@
     ],
   };
 })(window);
+
+// Repères automatiques à côté de chaque critère d'évaluation (cahier des charges §7.3) : des observations,
+// jamais un niveau. Le professeur décide.
+(function (global) {
+  'use strict';
+
+  const S = global.Segpa;
+  const fait = (d, s, e) => S.etapeFaite(d, s, e);
+  const coche = (b) => (b ? '✓' : '○');
+
+  function repere(id, d) {
+    const pieces = ((S.valeurEtape(d, 's1', 'pieces') || {}).pieces || []);
+    const mesures = ['mesure-corps', 'mesure-manivelle'].map((e) => ({ e, v: S.valeurEtape(d, 's2', e) }));
+    const aides = (s) => d.aides.filter((a) => !s || a.seance === s).length;
+    switch (id) {
+      case 'procedure':
+        return `${pieces.length} pièce${pieces.length > 1 ? 's' : ''} démontée${pieces.length > 1 ? 's' : ''} une à une, ${pieces.filter((p) => p.photo).length} photographiée${pieces.filter((p) => p.photo).length > 1 ? 's' : ''} · rangement séance 1 ${coche(fait(d, 's1', 'rangement'))}`;
+      case 'securite':
+        return `Règles comprises : ${['s1', 's2', 's3'].map((s, i) => `S${i + 1} ${coche(['regle-force', 'regle-vis', 'regle-lames'].every((r) => fait(d, s, r)))}`).join(' ')} · demandes d’aide : ${aides()}${mesures.some((m) => m.v && m.v.tropDehors) ? ' · a sorti plus de 2 pièces en séance 2' : ''}`;
+      case 'mesure':
+        return mesures
+          .map(({ e, v }) => `${e === 'mesure-corps' ? 'corps' : 'manivelle'} : ${v && v.longueur !== null && v.longueur !== undefined ? `${S.ecrireNombre(v.longueur)} cm (${v.essais.length} essai${v.essais.length > 1 ? 's' : ''}${v.verdict === 'dedans' ? ', dans la plage' : v.verdict === 'dehors' ? ', hors de la plage' : ''})` : '—'}`)
+          .join(' · ');
+      case 'dessin': {
+        const n = mesures.filter((m) => m.v && m.v.photo).length;
+        return `Photos du dessin : ${n} sur 2 (onglet Album)`;
+      }
+      case 'remontage': {
+        const v = S.valeurEtape(d, 's3', 'verification') || [];
+        return `Manivelle tourne ${coche(v[0])} · boîte vide ${coche(v[1])} · fonctionne ${coche(v[2])} · photo du taille-crayon remonté ${coche(fait(d, 's3', 'remonte'))}`;
+      }
+      case 'questions': {
+        const r = (S.valeurEtape(d, 's3', 'questions') || {}).reponses || {};
+        return `Réponses écrites : ${Object.values(r).filter((x) => x && x.valeur).length} sur 3 (onglet Pièces et réponses)`;
+      }
+      case 'autonomie':
+        return `Demandes d’aide : ${aides()} (S1 ${aides('s1')} · S2 ${aides('s2')} · S3 ${aides('s3')})`;
+      default:
+        return '';
+    }
+  }
+
+  S.profProjet.repere = repere;
+})(window);

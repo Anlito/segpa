@@ -11,7 +11,9 @@ function moteur() {
   require(path.join(SITE, 'commun/js/moteur/sauvegarde.js'));
   require(path.join(SITE, 'commun/js/moteur/mesure.js'));
   require(path.join(SITE, 'commun/js/moteur/etapes.js'));
-  return require(path.join(SITE, 'commun/js/moteur/classe.js'));
+  require(path.join(SITE, 'commun/js/moteur/classe.js'));
+  require(path.join(SITE, 'commun/js/moteur/evaluation.js'));
+  return require(path.join(SITE, 'commun/js/moteur/xlsx.js'));
 }
 
 // Données d'un projet lues dans un bac à sable (les fichiers appellent definirXxx({...})).
@@ -23,9 +25,10 @@ function donnees(projet) {
     definirReglagesAtelier: (r) => (lu.reglages = r),
     definirCollege: (c) => (lu.college = c),
     definirModele: (m) => (lu.modele = m),
+    definirCriteres: (c) => (lu.criteres = c),
   };
   vm.createContext(bac);
-  for (const f of ['projet.js', 'classes.js', 'modele.js', 'etapes.js']) vm.runInContext(fs.readFileSync(path.join(SITE, projet, 'donnees', f), 'utf8'), bac, { filename: f });
+  for (const f of ['projet.js', 'classes.js', 'modele.js', 'etapes.js', 'criteres.js']) vm.runInContext(fs.readFileSync(path.join(SITE, projet, 'donnees', f), 'utf8'), bac, { filename: f });
   vm.runInContext(fs.readFileSync(path.join(SITE, 'commun/donnees/college.js'), 'utf8'), bac);
   return JSON.parse(JSON.stringify(lu));
 }

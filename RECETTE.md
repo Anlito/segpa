@@ -1,4 +1,4 @@
-# Recette manuelle — jalons 1 à 3 (écrans élèves et outil professeur du taille-crayon)
+# Recette manuelle — jalons 1 à 4 (écrans élèves, outil professeur, évaluation du taille-crayon)
 
 À faire par Thomas sur **un poste élève du collège** (Chrome ou Edge), avant la première séance.
 La recette automatique (`npm run recette`, résultat dans `RECETTE-AUTO.md`) a déjà vérifié le parcours complet avec une
@@ -54,6 +54,16 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
 - [ ] Différenciation : cocher une case → elle apparaît sur la tuile ; `professeur.json` est dans le dossier du projet.
 - [ ] Fermer, rouvrir `prof.html` → « Reprendre : Taille-crayon » rouvre le même dossier.
 - [ ] Essai sans élèves : dossier `exemples-equipes-fictives/Taille-crayon` du zip.
+
+## Évaluation
+- [ ] Onglet Évaluation : poser les 7 niveaux d'un binôme → même note pour les deux ; décocher « Même niveau pour tout
+      le binôme » → les niveaux d'un seul élève changent.
+- [ ] Note : tout jaune → 6,7 ; l'exemple Jaune, Jaune, Vert clair ×4, Vert foncé → 12,4 « Satisfaisant ».
+- [ ] **Excel** : s'ouvre dans Excel (et LibreOffice) sans message de réparation ; couleurs, menus déroulants, notes et
+      synthèse calculées ; la ligne d'exemple est dans la Légende ; onglet Pronote rempli.
+- [ ] **Carnet de classe** : importer le fichier dans le Carnet (projet avec les 7 critères aux mêmes libellés).
+- [ ] **Feuilles ceinture** : impression en noir et blanc lisible ; pas de note sauf si la case est cochée.
+- [ ] Album → « Imprimer l'album » : 6 photos par page A4.
 
 ## Noter ici
 - Poste : fixe / portable · Navigateur et version :

@@ -32,7 +32,8 @@ async function nouvellePage(navigateur, taille) {
     if (process.env.TRACE) console.log('ERREUR PAGE', e.message);
   });
   page.on('dialog', (d) => {
-    erreurs.push('fenêtre inattendue : ' + d.type());
+    // Seule fenêtre attendue : le message d'information après l'export Carnet de classe.
+    if (!(d.type() === 'alert' && /Carnet de classe/.test(d.message()))) erreurs.push('fenêtre inattendue : ' + d.type());
     d.accept();
   });
   // Les photos du professeur (img/…) sont facultatives : un fichier absent n'est pas une erreur (le pictogramme s'affiche).
@@ -381,6 +382,49 @@ async function scenarioProfesseur(navigateur, base) {
   await page.keyboard.press('Escape');
   await page.locator('.pt').first().waitFor();
   assert.match(await tuile('Léa · Tom'), /Rôles observateur \/ manipulateur/);
+  // Évaluation de Léa et Tom (binôme lié) : 7 niveaux, note et ceinture, enregistrés dans professeur.json.
+  await page.locator('.pt', { hasText: 'Léa · Tom' }).click();
+  await cliquer(page, '[data-action="onglet"][data-id="evaluation"]');
+  assert.match(await page.locator('.ev-table').textContent(), /6 pièces démontées/, 'repères automatiques');
+  const niveaux = { procedure: 1, securite: 1, mesure: 2, dessin: 2, remontage: 2, questions: 2, autonomie: 3 };
+  for (const [c, n] of Object.entries(niveaux)) {
+    const bouton = `.niv-btn[data-eleve="Léa"][data-critere="${c}"][data-n="${n}"]`;
+    await cliquer(page, bouton);
+    await page.locator(`${bouton}[aria-pressed="true"]`).waitFor();
+  }
+  await page.waitForFunction(() => /12,4/.test(document.querySelector('.ev-bilans').textContent));
+  assert.equal((await page.locator('.ev-bilans').textContent()).match(/12,4/g).length, 2, 'même note pour les deux élèves du binôme');
+  assert.match(await page.locator('.ev-bilans').textContent(), /Ceinture verte/);
+  await page.locator('textarea[data-eleve="Tom"]').fill('Bon travail d’équipe.');
+  await page.locator('textarea[data-eleve="Tom"]').blur();
+  await page.waitForFunction(() => ((window.__lireJson('professeur.json').evaluations || {})['Léa_Tom'] || { eleves: {} }).eleves.Léa?.commentaire === 'Bon travail d’équipe.');
+  const ev = await page.evaluate(() => window.__lireJson('professeur.json').evaluations['Léa_Tom']);
+  assert.deepEqual(ev.eleves.Tom.niveaux, niveaux);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-evaluation.png'), fullPage: true });
+  // Exports.
+  await page.keyboard.press('Escape');
+  const telecharge = async (action) => {
+    const [d] = await Promise.all([page.waitForEvent('download'), cliquer(page, `[data-action="${action}"]`)]);
+    const f = path.join(SORTIE, d.suggestedFilename());
+    await d.saveAs(f);
+    return f;
+  };
+  const xlsx = await telecharge('excel');
+  assert.match(path.basename(xlsx), /^taille-crayon-6A-\d{4}-\d{2}-\d{2}-evaluation\.xlsx$/);
+  assert.equal(fs.readFileSync(xlsx).slice(0, 2).toString(), 'PK');
+  const csv = fs.readFileSync(await telecharge('csv'), 'utf8');
+  assert.match(csv, /;Léa;Tom;Jaune;Jaune;Vert clair;Vert clair;Vert clair;Vert clair;Vert foncé;13;12,4;Satisfaisant;Ceinture verte;Bon travail d’équipe\./);
+  const carnet = JSON.parse(fs.readFileSync(await telecharge('carnet'), 'utf8'));
+  assert.equal(carnet.format, 'labo-blocs/resultats');
+  assert.deepEqual(carnet.equipes.find((e) => e.eleves.includes('Léa')).eleves, ['Léa', 'Tom']);
+  // Feuilles ceinture : une par élève, sans note sauf si on la demande.
+  await cliquer(page, '[data-action="ceintures"]');
+  assert.equal(await page.locator('.feuille-ceinture').count(), 10);
+  assert.ok(!(await page.locator('.feuilles').textContent()).includes('/ 20'), 'pas de note par défaut');
+  await page.locator('[data-change="avec-note"]').check();
+  assert.match(await page.locator('.feuilles').textContent(), /12,4 \/ 20/);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-ceintures.png'), fullPage: true });
+  await cliquer(page, '[data-action="classe"]');
   // Équipe qui a fini : réponses écrites visibles.
   await page.locator('.pt', { hasText: 'Chloé · Sami' }).click();
   await cliquer(page, '[data-action="onglet"][data-id="pieces"]');
@@ -437,7 +481,7 @@ async function scenarioProfesseur(navigateur, base) {
     for (const [nomBase, base] of bases) {
       try {
         await scenarioProfesseur(navigateur, base);
-        noter(`- OK ${nomBase} 1366×768 · professeur : 5 équipes fictives, aide en premier avec son étape, alertes (inactivité, pièces dehors, mesure), dernière photo, « J’y vais » écrit dans professeur.json, onglets Bilan, Album, Pièces et réponses, Séance 2, Historique, Différenciation.`);
+        noter(`- OK ${nomBase} 1366×768 · professeur : 5 équipes fictives, aide en premier avec son étape, alertes (inactivité, pièces dehors, mesure), dernière photo, « J’y vais » écrit dans professeur.json, onglets Bilan, Évaluation (niveaux, note, ceinture), Album, Pièces et réponses, Séance 2, Historique, Différenciation ; exports Excel, CSV, Carnet de classe ; feuilles ceinture.`);
       } catch (e) {
         ok = false;
         noter(`- ÉCHEC ${nomBase} 1366×768 · professeur : ${e.message.split('\n')[0]}`);

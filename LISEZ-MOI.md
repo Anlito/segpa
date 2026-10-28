@@ -35,6 +35,22 @@ en favori. Elle mène au suivi de la classe et aux écrans élèves en démonstr
    Bilan, Album (photos à télécharger), Pièces et réponses, Séance 2 (longueurs saisies et essais), Historique,
    Différenciation (vos notes, visibles sur la tuile, jamais par les élèves).
 Vos notes vont dans `professeur.json`, dans le dossier du projet ; l'outil n'écrit jamais dans le fichier d'une équipe.
+
+## Évaluer
+Fiche d'une équipe → onglet **Évaluation** : les 7 critères de votre Excel, une colonne par élève, 4 boutons par case
+(✗ R Rouge · ~ J Jaune · ✓ V Vert clair · ★ VV Vert foncé ; toucher encore le même bouton efface). « Même niveau pour
+tout le binôme » (coché par défaut) évalue les deux élèves d'un geste ; décochez pour les distinguer. À droite, les
+**repères** observés par l'outil (pièces démontées, mesures, cases cochées, demandes d'aide) : jamais un niveau.
+Sous le tableau : score /21, note /20 (formule de l'Excel : score ÷ 21 × 20), appréciation, ceinture, commentaire.
+- **Ceinture** = niveau du critère « Remontage fonctionnel » : Rouge → blanche · Jaune → jaune · Vert clair → verte ·
+  Vert foncé → vert foncé. Les élèves ne voient jamais la note.
+- Vue Classe → **Excel** (votre classeur : Évaluation, Synthèse classe, Légende avec la ligne d'exemple, Référentiel
+  compétences, Pronote ; formules recalculées à l'ouverture ; une ligne vide n'est plus comptée) · **CSV** ·
+  **Carnet de classe** (niveaux 1 à 4 ; créer d'abord les 7 critères avec les mêmes libellés dans le projet du Carnet ;
+  sa note peut différer de celle de l'Excel, qui reste la note de référence) · **Feuilles ceinture** (une carte par
+  élève, noir et blanc, motif et lettre ; note seulement si vous cochez « Afficher la note chiffrée »).
+- Onglet Album → « Imprimer l'album » (A4, 6 photos par page).
+- Les critères et leurs compétences sont dans `site/taille-crayon/donnees/criteres.js`.
 Pour essayer sans élèves : le dossier `exemples-equipes-fictives/Taille-crayon` du zip (ou `npm run exemples`).
 
 ## Voir tous les écrans (démonstration)

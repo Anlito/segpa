@@ -90,3 +90,53 @@ body.page-prof { height: auto; min-height: 100vh; overflow: auto; font-size: 1re
 .pp-table { width: 100%; border-collapse: collapse; font-size: 1rem; }
 .pp-table th, .pp-table td { text-align: left; padding: 0.5rem 0.625rem; border-bottom: 0.0625rem solid var(--trait-doux); vertical-align: top; }
 .pp-table thead th { color: var(--encre-douce); font-size: 0.9375rem; }
+
+/* Évaluation : 4 niveaux, couleur + symbole + lettre (jamais la couleur seule) */
+.pc-exports { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.pc-exports > span { font-weight: 700; }
+.pc-attention { color: var(--ambre-fonce); background: var(--ambre-clair); border-radius: 0.5rem; padding: 0.25rem 0.625rem; font-weight: 600; }
+.niv-0, .niv-btn.niv-0[aria-pressed="true"] { background: #FFC7CE; color: #9C0006; }
+.niv-1, .niv-btn.niv-1[aria-pressed="true"] { background: #FFEB9C; color: #9C6500; }
+.niv-2, .niv-btn.niv-2[aria-pressed="true"] { background: #C6EFCE; color: #006100; }
+.niv-3, .niv-btn.niv-3[aria-pressed="true"] { background: #1E7B34; color: #fff; }
+.niv { display: inline-block; border-radius: 0.375rem; padding: 0.125rem 0.5rem; font-weight: 700; font-size: 0.875rem; }
+.niv-vide { background: var(--gris-clair); color: var(--encre-douce); }
+.ev-tete { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center; margin-bottom: 0.75rem; }
+.ev-lie { font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+.ev-lie input { width: 1.25rem; height: 1.25rem; }
+.ev-legende { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; color: var(--encre-douce); }
+.ev-table th small { display: block; font-weight: 400; color: var(--encre-douce); font-size: 0.875rem; }
+.ev-seance { display: inline-block; min-width: 2rem; font-size: 0.8125rem; font-weight: 700; color: var(--accent-fonce); background: var(--accent-clair); border-radius: 0.375rem; padding: 0 0.375rem; text-align: center; }
+.ev-niveaux { display: flex; gap: 0.25rem; }
+.niv-btn { min-width: 3rem; min-height: 2.5rem; border-radius: 0.5rem; border: 0.125rem solid var(--trait); background: var(--surface); font-weight: 700; font-size: 0.875rem; color: var(--encre-douce); }
+.niv-btn[aria-pressed="true"] { border-color: var(--encre); box-shadow: inset 0 0 0 0.125rem var(--encre); }
+.ev-repere { color: var(--encre-douce); font-size: 0.9375rem; max-width: 22rem; }
+.ev-bilans { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1rem; }
+.ev-bilan { display: flex; flex-direction: column; gap: 0.375rem; font-size: 1rem; }
+.ev-bilan strong { font-size: 1.25rem; }
+.ev-bilan textarea { width: 100%; font: inherit; border: 0.125rem solid var(--trait); border-radius: 0.5rem; padding: 0.375rem; margin-top: 0.25rem; }
+.ceinture { vertical-align: middle; }
+
+/* Impression : feuilles ceinture (noir et blanc) et album A4 */
+.impression-outils { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+.feuilles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.feuille-ceinture { background: #fff; color: #000; border: 0.125rem solid #000; border-radius: 0.75rem; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; break-inside: avoid; }
+.feuille-ceinture header { display: flex; flex-direction: column; }
+.feuille-ceinture header strong { font-size: 1.75rem; }
+.fc-ceinture { display: flex; align-items: center; gap: 1rem; font-size: 1.5rem; }
+.fc-bilan { margin: 0; padding-left: 1.25rem; line-height: 1.6; }
+.fc-note, .fc-commentaire { margin: 0; }
+.page-album { break-after: page; margin-bottom: 1.5rem; }
+.page-album h2 { margin: 0 0 0.75rem; font-size: 1.25rem; }
+.album-a4 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.album-a4 figure { margin: 0; break-inside: avoid; }
+.album-a4 img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border: 0.0625rem solid #999; }
+.album-a4 figcaption { font-size: 0.875rem; font-weight: 600; }
+@media print {
+  .pb, .impression-outils { display: none !important; }
+  body.page-prof { background: #fff; }
+  #prof { padding: 0; }
+  .feuilles { gap: 0.5cm; }
+  .feuille-ceinture { border-radius: 0; }
+  @page { size: A4; margin: 1cm; }
+}

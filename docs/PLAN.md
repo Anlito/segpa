@@ -109,7 +109,7 @@ fichier des élèves, qui l'écrivent au même moment) + copie dans le navigateu
 | **J1 — Socle élève** ✓ 27/10 | portail, accueil (boutons-prénoms), ma mission, écran d'étape, 🔊, 🙋, minuteur, photo, album, rangement, bilan, bravo, sauvegarde ; données de la **séance 1** | essai sur un poste du collège : **webcam, voix française, droits d'écriture du dossier réseau** |
 | **J2 — Taille-crayon complet** ✓ 27/10 (données du modèle à remplir) | ouverture S1, tableau des pièces, S2 (pièces dehors, pavé, vérification douce), S3 (tableau à l'envers, questions, bilan) | parcours complet d'une équipe fictive |
 | **J3 — Outil professeur** ✓ 28/10 | classe (tuiles, alertes 🙋 et « plus de 2 pièces dehors »), équipe (bilan, album, historique), onglet Séance 2, drapeaux de différenciation | suivi en direct avec 2 postes |
-| **J4 — Évaluation et exports** | grille 7 critères, observations, note /20, ceinture, Excel (4 onglets + Pronote), Carnet de classe, CSV, feuille ceinture N&B, album A4 | Excel ouvert dans Excel/LibreOffice, fichier relu par le Carnet |
+| **J4 — Évaluation et exports** ✓ 28/10 | grille 7 critères, observations, note /20, ceinture, Excel (4 onglets + Pronote), Carnet de classe, CSV, feuille ceinture N&B, album A4 | Excel ouvert dans Excel/LibreOffice, fichier relu par le Carnet |
 | **J5 — Recette et publication** | `npm run recette` (caméra simulée, 1366×768 et 1920×1080, file:// et serveur), zip, GitHub Pages, fiche sur anlito.github.io | essai réel avec un vrai taille-crayon |
 
 Puis voiture à ballon, puis stop motion, chacun avec son propre plan court.
@@ -146,7 +146,8 @@ Tests `node:test` à chaque jalon (CLAUDE.md).
 **Bloquant pour J2** (questions du brief §9) : modèle exact du taille-crayon, liste et noms des pièces, longueurs de
 référence du corps et de la manivelle.
 
-**Bloquant pour J4** : noms et couleurs des 4 ceintures et règle exacte ; validation du rattachement critères → compétences
-(cahier des charges §8.4).
+**Réglé pour J4 (28/10/2026)** : ceintures = les 4 niveaux de la grille, niveau du critère « Remontage fonctionnel »
+(Rouge → blanche, Jaune → jaune, Vert clair → verte, Vert foncé → vert foncé) ; rattachement critères → compétences du
+cycle 3 validé (`site/taille-crayon/donnees/criteres.js`). Évaluation par élève, binôme lié par défaut.
 
 **Non bloquant** : postes fixes ou portables, fiches papier gardées ou non.
