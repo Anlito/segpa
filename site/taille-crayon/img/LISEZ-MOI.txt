@@ -1,0 +1,9 @@
+Photos du taille-crayon (à prendre par Thomas, avec un vrai exemplaire)
+
+taille-crayon.jpg    le taille-crayon entier, posé sur une table, fond clair, bien éclairé.
+                     Il s'affiche sur l'accueil et sur la page « L'objet du jour » de la présentation.
+                     Tant que ce fichier n'est pas là, le pictogramme dessiné s'affiche.
+
+pieces/              une photo par pièce démontée (voir pieces/LISEZ-MOI.txt).
+
+Conseils : format paysage, JPEG, environ 1280 × 720, l'objet au centre, pas de visage ni de main au premier plan.

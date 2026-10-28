@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Professeur : la classe</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.ecran{width:1366px;height:768px;box-sizing:border-box;background:#F3F5F9;color:#172033;font-family:'Lexend',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+.outil{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:12px;border:2px solid #C9D2DF;background:#fff;font-family:inherit;font-size:17px;font-weight:600;color:#172033;cursor:pointer}
+.tuile{background:#fff;border:3px solid #C9D2DF;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+.tuile.aide{border-color:#5B2F9E;box-shadow:0 0 0 3px #E9E1F7}
+.etiquette{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;border-radius:10px;padding:4px 10px}
+.frise{display:flex;gap:6px;font-size:15px;font-weight:600}
+.frise span{border-radius:8px;padding:3px 8px;background:#EEF1F5}
+</style>
+</helmet>
+<div class="ecran">
+  <div style="height:72px;display:flex;align-items:center;gap:14px;padding:0 24px;background:#fff;border-bottom:2px solid #DDE3EC">
+    <strong style="font-size:22px">Taille-crayon · 6A</strong>
+    <span class="etiquette" style="background:#E3F2E9;color:#14532D">● En direct · lu à 10:42</span>
+    <div style="flex:1"></div>
+    <button class="outil">Excel</button>
+    <button class="outil">CSV</button>
+    <button class="outil">Carnet de classe</button>
+    <button class="outil">Imprimer</button>
+    <button class="outil">Autre classe</button>
+  </div>
+  <div style="margin:14px 24px 0;height:56px;border-radius:14px;background:#5B2F9E;color:#fff;display:flex;align-items:center;gap:14px;padding:0 18px;font-size:20px;font-weight:600">
+    <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M8 13V6a1.5 1.5 0 013 0v5"></path><path d="M11 11V4a1.5 1.5 0 013 0v7"></path><path d="M14 11V5.5a1.5 1.5 0 013 0V12"></path><path d="M17 10a1.5 1.5 0 013 0v5a7 7 0 01-7 7h-1a7 7 0 01-5.6-2.8L3 15.5a1.6 1.6 0 012.4-2L8 16"></path></svg>
+    Inès et Noah demandent de l'aide · pièce 5 · depuis 2 min
+    <div style="flex:1"></div>
+    <button class="outil" style="height:38px">J'y vais</button>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:14px;padding:14px 24px 20px">
+    <sc-for list="{{equipes}}" as="e" hint-placeholder-count="8">
+      <div class="tuile {{e.classe}}">
+        <div style="display:flex;align-items:center;gap:8px">
+          <strong style="font-size:20px;flex:1">{{e.noms}}</strong>
+          <sc-if value="{{e.aide}}" hint-placeholder-val="{{false}}"><span class="etiquette" style="background:#5B2F9E;color:#fff">Aide</span></sc-if>
+        </div>
+        <div style="display:flex;gap:12px">
+          <div style="width:118px;height:84px;border-radius:10px;background:#E2E6EB;display:flex;align-items:center;justify-content:center;flex-shrink:0"><div style="width:52px;height:22px;border-radius:11px;background:#9AA5B4"></div></div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:16px">
+            <span style="font-size:24px;font-weight:700">{{e.pieces}}<span style="font-size:15px;font-weight:600;color:#3D4A5C"> pièces</span></span>
+            <span style="color:#3D4A5C">{{e.activite}}</span>
+          </div>
+        </div>
+        <div class="frise"><span style="background:#E3F2E9;color:#14532D">✓ Règles</span><span style="background:#E6EEF9;color:#123F7A">● Démontage</span><span>○ Rangement</span></div>
+        <sc-if value="{{e.ecart}}" hint-placeholder-val="{{false}}"><span class="etiquette" style="background:#FEF3C7;color:#78350F;align-self:flex-start">{{e.ecart}}</span></sc-if>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1366,"height":768}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const donnees = [
+      ['Inès · Noah', '4 / 8', 'il y a 2 min', true, ''],
+      ['Léa · Tom', '6 / 8', 'à l’instant', false, ''],
+      ['Jade · Adam', '5 / 8', 'il y a 1 min', false, ''],
+      ['Lina · Sami', '2 / 8', 'il y a 6 min', false, 'Rien depuis 6 min'],
+      ['Manon · Yanis', '7 / 8', 'il y a 1 min', false, ''],
+      ['Chloé · Rayan', '5 / 8', 'à l’instant', false, ''],
+      ['Emma · Nolan', '3 / 8', 'il y a 3 min', false, ''],
+      ['Zoé · Ilyes', '6 / 8', 'à l’instant', false, ''],
+    ];
+    return {
+      equipes: donnees.map(([noms, pieces, activite, aide, ecart]) => ({ noms, pieces, activite, aide, ecart, classe: aide ? 'aide' : '' })),
+    };
+  }
+}
+</script>
+</body>
+</html>

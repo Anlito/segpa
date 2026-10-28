@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Accueil</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.ecran{width:1366px;height:768px;box-sizing:border-box;background:#F3F5F9;color:#172033;font-family:'Lexend',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+.barre{box-sizing:border-box;padding:16px 28px;display:flex;align-items:center;gap:24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:14px;border-radius:20px;font-family:inherit;font-weight:600;font-size:26px;border:3px solid transparent;cursor:pointer;min-height:72px;padding:0 28px;box-sizing:border-box;text-decoration:none}
+.btn svg,.picto svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.btn svg{width:36px;height:36px}
+.btn-aide{background:#fff;color:#5B2F9E;border-color:#5B2F9E;width:112px;height:112px;border-radius:56px;flex-direction:column;gap:2px;font-size:20px;padding:0}
+.btn-voix{background:#E6EEF9;color:#1D5FB4;width:80px;height:80px;border-radius:40px;padding:0}
+.choix{background:#fff;border:3px solid #C9D2DF;border-radius:32px;width:440px;height:330px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;color:#172033;text-decoration:none;box-shadow:0 6px 0 #C9D2DF}
+.choix:hover{border-color:#1D5FB4;box-shadow:0 6px 0 #1D5FB4}
+.rond{width:150px;height:150px;border-radius:75px;display:flex;align-items:center;justify-content:center}
+.rond svg{width:84px;height:84px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+</style>
+</helmet>
+<div class="ecran">
+  <div class="barre" style="height:200px;justify-content:center;gap:28px;padding-top:40px">
+    <div style="width:120px;height:120px;border-radius:28px;background:#1D5FB4;color:#fff;display:flex;align-items:center;justify-content:center">
+      <svg viewBox="0 0 24 24" width="80" height="80" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="8" width="12" height="11" rx="2"></rect><circle cx="9" cy="13.5" r="2"></circle><path d="M15 12h3l2-4"></path><circle cx="20.5" cy="7" r="1.5"></circle><path d="M6 8V6h6v2"></path></svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div style="font-size:22px;font-weight:600;color:#3D4A5C">Technologie · 6e SEGPA</div>
+      <h1 style="margin:0;font-size:52px;font-weight:700;line-height:1.1">Je démonte un objet technique</h1>
+    </div>
+    <button class="btn btn-voix" aria-label="Lire à voix haute"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"></path><path d="M16.5 9a4 4 0 010 6"></path><path d="M19.5 6a8 8 0 010 12"></path></svg></button>
+  </div>
+  <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:64px">
+    <a class="choix" href="Prenoms.dc.html">
+      <div class="rond" style="background:#1D5FB4;color:#fff"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"></path></svg></div>
+      <div style="font-size:40px;font-weight:700">Je commence</div>
+    </a>
+    <a class="choix" href="Prenoms.dc.html">
+      <div class="rond" style="background:#E6EEF9;color:#1D5FB4"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"></path><path d="M10 13h7"></path><path d="M14 10l3 3-3 3"></path></svg></div>
+      <div style="font-size:40px;font-weight:700">Je continue</div>
+    </a>
+  </div>
+  <div class="barre" style="height:144px;justify-content:flex-end">
+    <button class="btn btn-aide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 13V6a1.5 1.5 0 013 0v5"></path><path d="M11 11V4a1.5 1.5 0 013 0v7"></path><path d="M14 11V5.5a1.5 1.5 0 013 0V12"></path><path d="M17 10a1.5 1.5 0 013 0v5a7 7 0 01-7 7h-1a7 7 0 01-5.6-2.8L3 15.5a1.6 1.6 0 012.4-2L8 16"></path></svg>Aide</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1366,"height":768}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

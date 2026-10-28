@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Ma mission</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.ecran{width:1366px;height:768px;box-sizing:border-box;background:#F3F5F9;color:#172033;font-family:'Lexend',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+.barre{box-sizing:border-box;padding:16px 28px;display:flex;align-items:center;gap:24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:14px;border-radius:20px;font-family:inherit;font-weight:600;font-size:26px;border:3px solid transparent;cursor:pointer;min-height:72px;padding:0 28px;box-sizing:border-box;text-decoration:none}
+.btn svg,.carte svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.btn svg{width:36px;height:36px}
+.btn-second{background:#fff;color:#1D5FB4;border-color:#1D5FB4}
+.btn-principal{background:#1D5FB4;color:#fff;min-height:96px;font-size:32px;padding:0 44px;border-radius:24px;box-shadow:0 6px 0 #123F7A}
+.btn-aide{background:#fff;color:#5B2F9E;border-color:#5B2F9E;width:112px;height:112px;border-radius:56px;flex-direction:column;gap:2px;font-size:20px;padding:0}
+.btn-voix{background:#E6EEF9;color:#1D5FB4;width:80px;height:80px;border-radius:40px;padding:0}
+.equipe{font-size:24px;font-weight:600;background:#fff;border:2px solid #C9D2DF;border-radius:40px;padding:10px 24px}
+.carte{width:340px;height:380px;border-radius:32px;background:#fff;border:3px solid #C9D2DF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;box-sizing:border-box;position:relative}
+.etat{display:inline-flex;align-items:center;gap:10px;font-size:24px;font-weight:700;padding:8px 20px;border-radius:30px}
+.etat svg{width:28px;height:28px;stroke-width:3}
+.lien{width:64px;height:6px;border-radius:3px;background:#C9D2DF}
+</style>
+</helmet>
+<div class="ecran">
+  <div class="barre" style="height:112px">
+    <h1 style="margin:0;font-size:44px;font-weight:700">Ma mission</h1>
+    <button class="btn btn-voix" aria-label="Lire à voix haute"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"></path><path d="M16.5 9a4 4 0 010 6"></path><path d="M19.5 6a8 8 0 010 12"></path></svg></button>
+    <div style="flex:1"></div>
+    <a class="btn btn-second" href="Bravo.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-9 8"></path></svg>Mon album</a>
+    <div class="equipe">Léa · Tom</div>
+  </div>
+  <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:20px">
+    <div class="carte" style="border-color:#1E7A46">
+      <div style="font-size:22px;font-weight:600;color:#3D4A5C">Séance 1</div>
+      <div style="width:150px;height:150px;border-radius:36px;background:#E3F2E9;color:#1E7A46;display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" width="96" height="96" aria-hidden="true"><path d="M20 4l-6 6"></path><path d="M13 9l2 2-7.5 7.5a2.1 2.1 0 01-3-3z"></path></svg>
+      </div>
+      <div style="font-size:34px;font-weight:700">Je démonte</div>
+      <div class="etat" style="background:#E3F2E9;color:#14532D"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>Fait</div>
+    </div>
+    <div class="lien" style="background:#1E7A46"></div>
+    <div class="carte" style="border-color:#1D5FB4;border-width:5px;width:380px;height:420px;box-shadow:0 8px 0 #1D5FB4">
+      <div style="font-size:22px;font-weight:600;color:#3D4A5C">Séance 2</div>
+      <div style="width:170px;height:170px;border-radius:40px;background:#1D5FB4;color:#fff;display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" width="108" height="108" aria-hidden="true"><rect x="2" y="8" width="20" height="8" rx="1.5"></rect><path d="M6 8v3M10 8v4M14 8v3M18 8v4"></path></svg>
+      </div>
+      <div style="font-size:38px;font-weight:700">Je mesure</div>
+      <div class="etat" style="background:#E6EEF9;color:#123F7A"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5" style="fill:currentColor"></circle></svg>En cours</div>
+    </div>
+    <div class="lien"></div>
+    <div class="carte" style="opacity:0.85">
+      <div style="font-size:22px;font-weight:600;color:#3D4A5C">Séance 3</div>
+      <div style="width:150px;height:150px;border-radius:36px;background:#EEF1F5;color:#3D4A5C;display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" width="96" height="96" aria-hidden="true"><path d="M4 12a8 8 0 0114-5.3"></path><path d="M18 3v4h-4"></path><path d="M20 12a8 8 0 01-14 5.3"></path><path d="M6 21v-4h4"></path></svg>
+      </div>
+      <div style="font-size:34px;font-weight:700">Je remonte</div>
+      <div class="etat" style="background:#EEF1F5;color:#3D4A5C"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"></circle></svg>À faire</div>
+    </div>
+  </div>
+  <div class="barre" style="height:144px;justify-content:flex-end">
+    <a class="btn btn-principal" href="Etape.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"></path></svg>Je continue</a>
+    <div style="width:40px"></div>
+    <button class="btn btn-aide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 13V6a1.5 1.5 0 013 0v5"></path><path d="M11 11V4a1.5 1.5 0 013 0v7"></path><path d="M14 11V5.5a1.5 1.5 0 013 0V12"></path><path d="M17 10a1.5 1.5 0 013 0v5a7 7 0 01-7 7h-1a7 7 0 01-5.6-2.8L3 15.5a1.6 1.6 0 012.4-2L8 16"></path></svg>Aide</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1366,"height":768}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

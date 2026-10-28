@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Professeur · 6e SEGPA</title>
+<link rel="stylesheet" href="commun/css/socle.css">
+<style>
+  /* Page du professeur : aucun lien vers elle depuis le portail des élèves (index.html). */
+  body { overflow: auto; height: auto; min-height: 100vh; }
+  .portail { max-width: 80rem; margin: 0 auto; padding: 3rem 2rem; display: flex; flex-direction: column; gap: 2rem; }
+  .projets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
+  .projet { background: var(--surface); border: 0.1875rem solid var(--trait); border-radius: 2rem; padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem; }
+  .projet strong { font-size: 1.75rem; line-height: 1.15; }
+  .projet small { font-size: 1.25rem; color: var(--encre-douce); font-weight: 600; }
+  .projet a { font-size: 1.25rem; }
+  .projet.bientot { opacity: 0.7; }
+  .note { font-size: 1.125rem; color: var(--encre-douce); line-height: 1.5; margin: 0; }
+  @media (max-width: 52rem) { .projets { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="portail">
+  <div><div class="sur-titre">Technologie · 6e SEGPA</div><h1 class="grand-titre">Professeur</h1></div>
+  <div class="projets">
+    <div class="projet">
+      <strong>Je démonte un objet technique</strong><small>Le taille-crayon</small>
+      <a class="btn btn-principal" href="taille-crayon/prof.html">Suivre la classe</a>
+      <a class="btn btn-second" href="taille-crayon/index.html?enseignant=1">Écrans élèves (démonstration)</a>
+    </div>
+    <div class="projet bientot"><strong>Course de voitures à ballon</strong><small>Bientôt</small></div>
+    <div class="projet bientot"><strong>Film en stop motion</strong><small>Bientôt</small></div>
+  </div>
+  <p class="note">Cette page n’est pas liée depuis le portail des élèves : gardez son adresse en favori.
+    « Suivre la classe » lit les dossiers des équipes sur le réseau, dans votre navigateur ; rien n’est envoyé ailleurs.
+    « Écrans élèves (démonstration) » ouvre tous les écrans avec une équipe fictive : rien n’y est enregistré.</p>
+</div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # Plan court — dépôt SEGPA, premier projet : le taille-crayon
 
-Version 1 · 27/10/2026 · **à valider par Thomas avant d'écrire du code** (brief taille-crayon §10, étape 1).
+Version 2 · 27/10/2026 · **validé par Thomas le 27/10/2026** (plan, organisation du dépôt). Maquette : `docs/MAQUETTE.md`.
 
 ## 0. Ce qui change par rapport au cahier des charges
 
@@ -72,12 +72,12 @@ Non repris : `exercices.js`, `mise-a-jour.js`, `notation.js`, `carnet*.js`, `cat
 
 ## 3. Formats
 
-**Sauvegarde** `Prénom_Prénom.json` (dossier `… › COMMUN › TECHNOLOGIE › DEMONTAGE TAILLE-CRAYON › Prénom_Prénom`, photos dans `photos/`) :
+**Sauvegarde** `Prénom_Prénom.json` (dossier `Bureau › Classe › 6A › COMMUN › TECHNOLOGIE › Taille-crayon › Prénom_Prénom`, photos dans `photos/`) :
 
 ```js
 {
   application: 'segpa', projet: 'taille-crayon', formatVersion: 1,
-  equipe: { eleves: ['Léa', 'Tom'], classe: '6S' }, creeLe, modifieLe,
+  equipe: { eleves: ['Léa', 'Tom'], classe: '6A' }, creeLe, modifieLe,
   seances: {
     s1: { etapes: { 'regle-1': { fait: '2026-11-03T10:12' } , … },
           pieces: [{ numero: 1, photo: 'photos/s1-piece-01.jpg', nom: 'Manivelle', autreNom: null, rangee: true }],
@@ -106,31 +106,48 @@ fichier des élèves, qui l'écrivent au même moment) + copie dans le navigateu
 
 | Jalon | Contenu | Recette |
 |---|---|---|
-| **J1 — Socle élève** | portail, accueil (boutons-prénoms), ma mission, écran d'étape, 🔊, 🙋, minuteur, photo, album, rangement, bilan, bravo, sauvegarde ; données de la **séance 1** | essai sur un poste du collège : **webcam, voix française, droits d'écriture du dossier réseau** |
-| **J2 — Taille-crayon complet** | ouverture S1, tableau des pièces, S2 (pièces dehors, pavé, vérification douce), S3 (tableau à l'envers, questions, bilan) | parcours complet d'une équipe fictive |
-| **J3 — Outil professeur** | classe (tuiles, alertes 🙋 et « plus de 2 pièces dehors »), équipe (bilan, album, historique), onglet Séance 2, drapeaux de différenciation | suivi en direct avec 2 postes |
-| **J4 — Évaluation et exports** | grille 7 critères, observations, note /20, ceinture, Excel (4 onglets + Pronote), Carnet de classe, CSV, feuille ceinture N&B, album A4 | Excel ouvert dans Excel/LibreOffice, fichier relu par le Carnet |
+| **J1 — Socle élève** ✓ 27/10 | portail, accueil (boutons-prénoms), ma mission, écran d'étape, 🔊, 🙋, minuteur, photo, album, rangement, bilan, bravo, sauvegarde ; données de la **séance 1** | essai sur un poste du collège : **webcam, voix française, droits d'écriture du dossier réseau** |
+| **J2 — Taille-crayon complet** ✓ 27/10 (données du modèle à remplir) | ouverture S1, tableau des pièces, S2 (pièces dehors, pavé, vérification douce), S3 (tableau à l'envers, questions, bilan) | parcours complet d'une équipe fictive |
+| **J3 — Outil professeur** ✓ 28/10 | classe (tuiles, alertes 🙋 et « plus de 2 pièces dehors »), équipe (bilan, album, historique), onglet Séance 2, drapeaux de différenciation | suivi en direct avec 2 postes |
+| **J4 — Évaluation et exports** ✓ 28/10 | grille 7 critères, observations, note /20, ceinture, Excel (4 onglets + Pronote), Carnet de classe, CSV, feuille ceinture N&B, album A4 | Excel ouvert dans Excel/LibreOffice, fichier relu par le Carnet |
 | **J5 — Recette et publication** | `npm run recette` (caméra simulée, 1366×768 et 1920×1080, file:// et serveur), zip, GitHub Pages, fiche sur anlito.github.io | essai réel avec un vrai taille-crayon |
 
 Puis voiture à ballon, puis stop motion, chacun avec son propre plan court.
 
 Tests `node:test` à chaque jalon (CLAUDE.md).
 
-## 5. Ce qu'il me faut avant de coder
+## 5. Décisions et ce qu'il reste à obtenir
 
-**Bloquant pour J1**
-1. Créer le dépôt vide **`Anlito/segpa`** sur GitHub (public) et l'ajouter à la session : je n'ai pas le droit de le créer.
-2. Les **documents sources** du taille-crayon (dans `docs/sources/`) : `Fiche_eleve_demontage_taille-crayon.docx`,
-   `Introduction_projet_demontage.pptx`, `Preparation_enseignant_demontage.docx`, `Evaluation_projet_demontage.xlsx`.
-3. La **maquette Claude Design** des écrans SEGPA (`BRIEF-CLAUDE-DESIGN-6e-segpa.md`) : existe-t-elle ? Sinon je pose le
-   squelette avec une charte neutre et la couleur d'accent s'ajoute ensuite.
-4. Les **classes** concernées (nom : `6S` ? `6SEGPA` ?) et le niveau à mettre dans `classes.js` ; le chemin réseau exact
-   (`… › COMMUN › TECHNOLOGIE › DEMONTAGE TAILLE-CRAYON`).
+**Réglé le 27/10/2026**
+- Dépôt `Anlito/segpa` créé ; plan validé.
+- Documents sources reçus, rangés dans `docs/sources/` (fiche élève, introduction, préparation, grille d'évaluation).
+- Pas de maquette Claude Design : Claude propose la maquette (`docs/MAQUETTE.md`), à valider par Thomas.
+- Classe : **6A**. Dossier réseau : même structure, nom de dossier projet simplifié → `… › 6A › COMMUN › TECHNOLOGIE › Taille-crayon`
+  (de même `Voiture-ballon`, `Stop-motion` plus tard). `donnees/classes.js` : `definirReglagesAtelier({ classes: ['6A'], cheminProjet: ['Taille-crayon'] })`.
+
+**Décisions de Thomas après le jalon 2 (27/10/2026)**
+- Questions de compréhension : réponse **toujours écrite** (plus de phrases-cartes ni de « Je réponds à l'oral ») ;
+  pour « quelle pièce… », les photos de la séance 1 restent affichées pour aider à écrire.
+- Fin de séance : l'écran « Bravo » ramène à **« Ma mission »** (et non plus à l'accueil).
+- Dessin de la séance 2 : bords droits **à la règle** (arrondis à main levée), flèche de dimension **à la règle, d'une
+  autre couleur** ; deux écrans, chacun avec un exemple sur quadrillage (pièce inventée, jamais celle du taille-crayon).
+- Liens professeur : retirés du portail des élèves, regroupés dans `site/professeur.html` (non liée, en favori).
+- Bouton Aide : retiré avant le choix de l'équipe, gardé ensuite (demandes lues par l'outil professeur).
+
+**Relevé dans les documents reçus** (complète le §7 du brief)
+- La préparation enseignant reçue a bien ses 4 objectifs (le 3e est « Suivre une procédure dans l'ordre, puis dans l'ordre
+  inverse ») : le constat 1 du brief ne s'applique plus.
+- Grille Excel : la ligne 3 (élève n° 1) contient des couleurs et entre dans la synthèse ; la « ligne Ex. » annoncée par la
+  légende n'existe pas. L'export de l'outil ajoute une vraie ligne d'exemple grise hors synthèse (cahier des charges §8.5).
+- Synthèse : les pourcentages divisent par 16 en dur (`=B8/16`) ; l'export divisera par le nombre d'élèves évalués.
+- Les pictogrammes du PowerPoint ressemblent à ceux de Font Awesome (licence libre avec attribution) : l'outil dessine ses
+  propres pictogrammes, dans le même esprit.
 
 **Bloquant pour J2** (questions du brief §9) : modèle exact du taille-crayon, liste et noms des pièces, longueurs de
-référence du corps et de la manivelle ; les 3 phrases-cartes « À quoi sert la manivelle ? ».
+référence du corps et de la manivelle.
 
-**Bloquant pour J4** : noms et couleurs des 4 ceintures et règle exacte ; validation du rattachement critères → compétences
-(cahier des charges §8.4).
+**Réglé pour J4 (28/10/2026)** : ceintures = les 4 niveaux de la grille, niveau du critère « Remontage fonctionnel »
+(Rouge → blanche, Jaune → jaune, Vert clair → verte, Vert foncé → vert foncé) ; rattachement critères → compétences du
+cycle 3 validé (`site/taille-crayon/donnees/criteres.js`). Évaluation par élève, binôme lié par défaut.
 
-**Non bloquant** : postes fixes ou portables, fiches papier gardées ou non, origine des images du PowerPoint.
+**Non bloquant** : postes fixes ou portables, fiches papier gardées ou non.
