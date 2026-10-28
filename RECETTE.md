@@ -78,4 +78,19 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
       (photo `img/modele.jpg` quand elle existe), « J'ai pris… » avec − et +, photo des pièces, rangement.
 - [ ] Séance 2 : la fabrication pas à pas (photos `img/fabrication/1.jpg`… quand elles existent), « Ma voiture ne roule pas »
       → la cause ramène à la bonne étape.
-- [ ] Séance 3 : décoration, vérification, **photo officielle**, rangement.
+- [ ] Séance 3 (carrosserie) : gabarit, tracé, découpe, pli, languettes dans les fentes, roues qui tournent, décoration,
+      vérification, **photo officielle**, rangement.
+
+## Voiture à ballon — jalon V2 (séance 4 et univers Grand prix)
+- [ ] L'univers : bitume, damier en haut, cartes bordées orange et blanc, stands numérotés dans Ma mission ; tout se lit bien
+      au vidéoprojecteur et sur les postes élèves.
+- [ ] Séance 4 : roues du départ (20 à 50 mm), puis pour chaque essai : je pose · je gonfle (coups de pompe, − et +) · je lâche ·
+      je mesure (pavé, en cm) · ma voiture roule comment ?
+- [ ] Une mesure 10 fois plus grande (ou plus petite) que les autres → message ambre « Mesure encore une fois ? » avec « Je
+      mesure encore » et « C'est juste ».
+- [ ] Je change une seule chose : deux cartes touchées → « Choisis un seul changement » (ambre) ; roues, ballon (plus ou moins
+      gonflé), poids (j'enlève, j'ajoute).
+- [ ] Après 3 essais : « Encore un essai ? » ou « Mon graphique » ; au 5e essai, le graphique directement ; « Retour » défait
+      le dernier geste sans rien perdre.
+- [ ] Mon graphique : une barre par essai, la distance écrite, le changement dessous, « Le plus loin » sous le meilleur.
+- [ ] Gabarits (page professeur) : imprimer à 100 %, le trait mesure 50 mm ; les languettes entrent dans les fentes.

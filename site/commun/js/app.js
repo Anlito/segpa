@@ -164,7 +164,7 @@
   function ecranAccueil() {
     const p = S.projet;
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="accueil">
         <div class="accueil-titre">
           <div class="logo-projet${p.photo ? ' avec-photo' : ''}">${S.photoOuPicto(p.photo, p.picto)}</div>
           <div><div class="sur-titre">${ech(p.niveau)}</div><h1 class="grand-titre">${ech(p.titre)}</h1></div>
@@ -197,7 +197,7 @@
     const chemin = cheminProjet();
     const cible = chemin[chemin.length - 1];
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="dossier">
         <div class="haut">
           <button type="button" class="btn btn-second" data-action="accueil">${pic('retour')}Retour</button>
           <h1 class="titre-ecran">Ouvre le dossier ${ech(cible)}</h1>
@@ -259,7 +259,7 @@
         </div></div>`;
     }
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="prenoms">
         <div class="haut">
           <button type="button" class="btn btn-second" data-action="retour">${pic('retour')}Retour</button>
           <h1 class="titre-ecran">${avecBoutons ? 'Touche vos deux prénoms' : 'Écris vos deux prénoms'}</h1>
@@ -332,7 +332,7 @@
     const visibles = liste.slice(p * parPage, (p + 1) * parPage);
     const pages = Math.ceil(liste.length / parPage);
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="equipes">
         <div class="haut">
           <button type="button" class="btn btn-second" data-action="retour">${pic('retour')}Retour</button>
           <h1 class="titre-ecran">Touche votre équipe</h1>
@@ -420,7 +420,7 @@
       })
       .join('');
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="mission">
         <div class="haut">
           <h1 class="titre-ecran">Ma mission</h1>
           ${boutonVoix('Ma mission. ' + seances().map((s, i) => `Séance ${i + 1} : ${s.titre} ${s.sousTitre || ''}.`).join(' '))}
@@ -475,7 +475,7 @@
     if (!etat.sous || etat.sous.cle !== cle) etat.sous = { cle };
     const vue = TYPES[etape.type](etape);
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="etape">
         ${hautEtape(etape)}
         <div class="milieu">${vue.milieu}</div>
         ${bas({ gauche: (vue.gauche || boutonRetour('precedent')) + boutonDepannage(), principal: vue.principal })}
@@ -495,7 +495,7 @@
   function ecranDepannage() {
     const d = etat.seance.depannage;
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="depannage">
         <div class="haut">${boutonMaison()}<h1 class="titre-ecran">${ech(d.texte)}</h1>${boutonVoix(d.texte + '. Qu’est-ce que tu vois ? ' + d.causes.map((c) => c.texte).join('. ') + '.')}<div class="espace"></div>${etiquetteEquipe()}</div>
         <div class="milieu" style="flex-direction:column;gap:2rem">
           <p class="consigne-texte" style="font-size:2.5rem">Qu’est-ce que tu vois ?</p>
@@ -776,7 +776,7 @@
     if (!lignes.length) lignes.push('Séance terminée');
     const noms = d.equipe.eleves.length > 1 ? d.equipe.eleves.slice(0, -1).join(', ') + ' et ' + d.equipe.eleves.slice(-1) : d.equipe.eleves[0];
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="bravo">
         <div class="haut">${boutonMaison()}<div class="espace"></div>${etatEnregistrement()}</div>
         <div class="milieu" style="gap:3.5rem">
           <div class="collage">${photos.length ? photos.map(() => '<img class="photo" alt="">').join('') : `<div class="sans-photo">${pic(s.picto)}</div>`}</div>
@@ -830,7 +830,7 @@
     const visibles = toutes.slice(p * parPage, (p + 1) * parPage);
     const pages = Math.max(1, Math.ceil(toutes.length / parPage));
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="album">
         <div class="haut">
           ${boutonMaison()}
           <h1 class="titre-ecran">Mon album</h1>

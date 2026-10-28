@@ -125,6 +125,28 @@ async function faireEcran(page, nom, captures, demo) {
   } else if (await visible(page, 'input.champ-libre')) {
     await page.locator('input.champ-libre').fill('Ressort');
     await cliquer(page, '[data-action="nomme"]');
+  } else if (await visible(page, '[data-action="choisir-roues"]')) {
+    // Essais de la voiture (séance 4) : un écran par geste.
+    await cliquer(page, '[data-action="choisir-roues"]');
+    await cliquer(page, '[data-action="roues-choisies"]');
+  } else if (await visible(page, '[data-action="pompe-plus"]')) {
+    for (let i = 0; i < 3; i++) await cliquer(page, '[data-action="pompe-plus"]');
+    await cliquer(page, '[data-action="essai-pompe"]');
+  } else if (await visible(page, '[data-action="choisir-direction"]')) {
+    await cliquer(page, '[data-action="choisir-direction"]');
+    await cliquer(page, '[data-action="direction-choisie"]');
+  } else if (await visible(page, '[data-action="voir-graphique"]')) {
+    await cliquer(page, '[data-action="voir-graphique"]');
+  } else if (await visible(page, '[data-action="choisir-changement"]')) {
+    // Deux cartes : message ambre « Choisis un seul changement », puis le détail du premier.
+    const cartes = page.locator('[data-action="choisir-changement"]');
+    await cartes.nth(0).click();
+    await cartes.nth(1).click();
+    await page.locator('.msg-ambre').waitFor();
+    await sansDefilement(page, nom + '-deux');
+    if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '-deux.png') });
+    await cliquer(page, '[data-action="choisir-detail"]');
+    await cliquer(page, '[data-action="change-fait"]');
   } else if (await visible(page, '.pave')) {
     // Démonstration : une première mesure hors de la plage (message ambre), puis la bonne.
     const premiere = demo && !(await visible(page, '.msg-ambre'));
@@ -141,7 +163,7 @@ async function faireEcran(page, nom, captures, demo) {
     await page.locator('textarea.champ-libre').fill('Elle fait tourner la lame.');
     await cliquer(page, '[data-action="question-suivante"]');
   } else {
-    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'fleche-faite', 'remise', 'fait'];
+    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'fleche-faite', 'remise', 'fait', 'essai-place', 'essai-parti', 'essais-finis'];
     for (const a of suite)
       if (await visible(page, `[data-action="${a}"]`)) {
         await cliquer(page, `[data-action="${a}"]`);
@@ -221,7 +243,8 @@ async function scenarioEnseignant(navigateur, base, taille, captures, demo) {
   return ecrans;
 }
 
-// Voiture à ballon (jalon V1) : séances 1 à 3, Ma mission à 5 séances, dépannage « Ma voiture ne roule pas ».
+// Voiture à ballon (jalons V1 et V2) : séances 1 à 4, Ma mission à 5 séances, dépannage « Ma voiture ne roule pas »,
+// essais (un changement à la fois, message ambre si deux cartes, graphique).
 async function scenarioVoiture(navigateur, base, taille, captures) {
   const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
   await page.goto(base + 'voiture-ballon/index.html?enseignant=1');
@@ -255,6 +278,17 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   await cliquer(page, '.cause');
   assert.match(await page.locator('.consigne-texte').first().textContent(), /Je vérifie : les roues tournent/);
   assert.match(await page.locator('.etiquette-seance').textContent(), /Séance 2/);
+  // Séance 4 : les essais (3 essais, un changement à la fois, graphique).
+  await cliquer(page, '[data-action="mission"]');
+  await page.locator('.carte-seance').first().waitFor();
+  await cliquer(page, '[data-action="continuer"]');
+  ecrans.push(await faireSeance(page, 'voiture-s4', captures));
+  await cliquer(page, '[data-action="fini"]');
+  await page.locator('.carte-seance').first().waitFor();
+  assert.equal(await page.locator('.carte-seance.fait').count(), 4);
+  const r = await page.evaluate(() => Segpa.resumeEssais(Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's4', 'essais')));
+  assert.equal(r.nombre, 3);
+  assert.equal(r.changements.length, 2);
   assert.deepEqual(erreurs, []);
   assert.deepEqual(horsSite, []);
   await contexte.close();
@@ -533,7 +567,7 @@ async function scenarioProfesseur(navigateur, base) {
         const t = `${taille.width}×${taille.height}`;
         try {
           const ecrans = await scenarioVoiture(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
-          noter(`- OK ${nomBase} ${t} · voiture à ballon : séances 1 à 3 de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, décoration, photo officielle), Ma mission à 5 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
+          noter(`- OK ${nomBase} ${t} · voiture à ballon : séances 1 à 4 de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, carrosserie, photo officielle, 3 essais avec un changement à la fois et graphique), Ma mission à 5 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
         } catch (e) {
           ok = false;
           noter(`- ÉCHEC ${nomBase} ${t} · voiture à ballon : ${e.message.split('\n')[0]}`);

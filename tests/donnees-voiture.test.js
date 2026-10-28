@@ -52,3 +52,17 @@ test('kit, noms et couleurs d’équipe', () => {
   assert.ok(donneesProjet.couleurs.length >= 4);
   for (const c of donneesProjet.couleurs) assert.match(c.hex, /^#[0-9A-F]{6}$/i, c.nom);
 });
+
+test('essais : réglages, cartes « je change une chose » et directions', () => {
+  const { essais, roues, changements, directions } = donneesProjet;
+  assert.ok(essais.min >= 1 && essais.max >= essais.min && essais.ecart > 1 && essais.unite);
+  assert.ok(roues.length >= 2);
+  for (const c of changements) {
+    assert.ok(c.id && c.nom && PICTOS.has(c.picto), c.id);
+    assert.ok(c.choix === 'roues' || (Array.isArray(c.choix) && c.choix.length >= 2), c.id);
+    for (const x of Array.isArray(c.choix) ? c.choix : []) assert.ok(S.nombreDeMots(x.nom) <= 4, x.nom);
+  }
+  for (const d of directions) assert.ok(d.id && d.nom && PICTOS.has(d.picto), d.id);
+  const s4 = etapes.seances.find((s) => s.id === 's4');
+  assert.ok(s4.etapes.some((e) => e.type === 'essais'));
+});

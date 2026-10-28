@@ -21,6 +21,8 @@ Version 2 · 29/10/2026 · **validé par Thomas** (avec ses retours : 5 séances
 | Questions | réponses **toujours écrites** (comme le taille-crayon) |
 | Photos | webcam à chaque moment clé, dont une **photo officielle** de la voiture décorée (page de course, podium, diplôme) |
 | Course | **poules** (selon le nombre de couloirs du jour), puis **finales par niveau** : principale, secondaire, tertiaire ; personne n'est éliminé, chaque voiture court au moins deux fois |
+| Univers graphique (29/10) | **A · Grand prix** (maquette https://claude.ai/artifact/A4HWMn9pWPbUaaCAnS7igQ) : bitume, damier, bordures orange et blanches, stands numérotés ; `css/univers.css`, le socle n'est pas touché |
+| Carrosserie (29/10) | séance 3 : **carrosserie en carton** fixée dans les **fentes** du châssis v5 (7 fentes 20 × 2 mm, carton 1,6 mm), plus basse que le tube du ballon (40 mm) ; à partir d'un **gabarit imprimé** : 4 pièces ou patron à plier (`documents/`, sources `tools/gabarits/`), version choisie après les essais de Thomas |
 
 ## 2. Dans le dépôt
 
@@ -45,8 +47,10 @@ Dossier réseau : `… › 6A › COMMUN › TECHNOLOGIE › Voiture-ballon` (co
 4. Mon matériel : une carte par pièce du kit (châssis, piques, roues, élastique, ballon) avec « J'ai pris … » au pavé numérique.
 5. Photo des pièces sur la table · rangement (cases + photo).
 
-**S3 — Je décore ma voiture** (customisation libre) : je choisis mes matériaux (carton, feuilles de couleur, scotch) · je décore ·
-📷 **photo officielle** de ma voiture (de côté, en entier) · je vérifie : les roues tournent toujours · rangement.
+**S3 — Je fabrique ma carrosserie** (29/10) : règles (colle, ciseaux) · je pose le gabarit sur le carton · je trace autour au crayon ·
+je découpe · je plie · j'enfonce les languettes dans les fentes · je vérifie : les roues tournent · je décore (20 min, léger) ·
+vérification (roues, carrosserie qui tient, ballon et sortie d'air libres) · 📷 **photo officielle** · rangement. Photos de Thomas :
+`img/carrosserie/1.jpg` à `5.jpg`.
 
 **S2 — Je construis ma voiture** — fiche de fabrication, une étape par écran, avec photo de Thomas. *Proposition à valider :*
 1. Je passe une pique dans les trous de devant. 2. J'enfonce une roue de chaque côté. 3. Je vérifie : la roue tourne.
@@ -55,7 +59,8 @@ Puis rangement + photo de la voiture à sa place (la décoration est la séance 
 Écran d'aide **« Ma voiture ne roule pas »** : 3 pictos de causes (une roue frotte · le ballon fuit · la voiture est trop lourde) → renvoi
 à l'étape de fabrication concernée, sans donner la solution.
 
-**S4 — Je teste et j'améliore** — de 3 à 5 essais ; pour chaque essai : je pose la voiture sur la ligne · je gonfle le ballon avec la
+**S4 — Je teste et j'améliore** (fait le 29/10, `js/essais.js` + `js/ecran-essais.js`) — règles (pompe, piste libre, une chose à la
+fois) · « Quelles roues sont sur ma voiture ? » (une fois) · de 3 à 5 essais ; pour chaque essai : je pose la voiture sur la ligne · je gonfle le ballon avec la
 pompe · je lâche · 📏 je mesure (pavé, en cm, unité toujours affichée ; un résultat 10 fois plus grand que les autres → « Mesure encore une
 fois ? » en ambre) · ma voiture roule : tout droit / à gauche / à droite · **je change UNE chose** avant l'essai suivant.
 Cartes « je change une chose » (*à valider*) : **les roues** (20 · 30 · 40 · 50 mm) · **le ballon** (plus ou moins gonflé : nombre de coups de
@@ -94,7 +99,7 @@ l'unité · explique pourquoi sa voiture avance (**à l'écrit**) · autonomie /
 | Jalon | Contenu |
 |---|---|
 | V1 ✓ 29/10 | données + écrans S1, S2 et S3 (nom, couleur, matériel, fabrication, « ma voiture ne roule pas », décoration, photo officielle) |
-| V2 | S4 : essais, mesures, « je change une chose », graphique |
+| V2 ✓ 29/10 | S4 : essais, mesures, « je change une chose », graphique ; univers Grand prix ; S3 carrosserie |
 | V3 | S5 et `course.html` (poules, finales, chrono, podiums, `course.json`, résultat côté élève) |
 | V4 | outil professeur : tuiles, onglet Essais, longueur de piste proposée, évaluation et exports |
 | V5 | recette automatique, essai réel (piste, mètre ruban, vraies voitures), publication |
@@ -105,5 +110,6 @@ l'unité · explique pourquoi sa voiture avance (**à l'écrit**) · autonomie /
 « je change une chose » (roues · gonflage · poids), tels que proposés ci-dessus ; noms de voitures et couleurs d'équipe proposés par
 Claude dans `donnees/` (modifiables).
 
-**Restant** : photos de Thomas (modèle fini, une par étape de fabrication) ; les 7 critères et la ceinture (au jalon V4) ; le résultat
+**Restant** : photos de Thomas (modèle fini, une par étape de fabrication et de carrosserie) ; choix du gabarit (4 pièces ou
+patron à plier) après essai ; façon de mesurer à confirmer (proposé : de la ligne de départ à l'avant de la voiture, en cm) ; les 7 critères et la ceinture (au jalon V4) ; le résultat
 des essais de châssis (distance, tuyère de 4 mm) pour régler l'alerte « 10 fois plus grand ».

@@ -1,7 +1,9 @@
 // Les séances de la voiture à ballon et leurs écrans (plan validé le 29/10/2026 : docs/PLAN-voiture-ballon.md).
 // Types d'écran du socle : regle · consigne (image : photo de Thomas, pictogramme en attendant) · photo · cases · bilan.
-// Écrans propres (js/ecrans.js) : nom-voiture · couleur · materiel ; essais (jalon V2) et course (jalon V3) viendront ensuite
-// (tant qu'ils n'existent pas, le site les saute).
+// Écrans propres : nom-voiture · couleur · materiel (js/ecrans.js) ; essais (js/ecran-essais.js) ; course (jalon V3 :
+// tant qu'il n'existe pas, le site le saute).
+// Séance 3 : carrosserie en carton fixée dans les fentes du châssis, à partir d'un gabarit imprimé (documents/ ; la
+// version gardée, 4 pièces ou patron à plier, sera choisie après les essais de Thomas). Photos : img/carrosserie/.
 // depannage : bouton « Ma voiture ne roule pas » sur les écrans de la séance ; chaque cause ramène à une étape
 // (« verifier » dans la même séance, « s2/verifier » dans une autre).
 // Photos de fabrication à déposer dans img/fabrication/ (voir img/LISEZ-MOI.txt).
@@ -61,24 +63,30 @@
         ]
       },
       {
-        "id": "s3", "titre": "Je décore", "sousTitre": "ma voiture", "picto": "palette",
+        "id": "s3", "titre": "Je fabrique", "sousTitre": "ma carrosserie", "picto": "gabarit",
         "depannage": {
           "texte": "Ma voiture ne roule pas", "picto": "question",
           "causes": [
-            { "picto": "roue", "texte": "Une roue frotte", "etape": "verification" },
-            { "picto": "ballon", "texte": "Le ballon est caché", "etape": "verification" },
-            { "picto": "boite", "texte": "Elle est trop lourde", "etape": "decorer" }
+            { "picto": "roue", "texte": "Une roue frotte", "etape": "essai-carrosserie" },
+            { "picto": "gabarit", "texte": "La carrosserie ne tient pas", "etape": "monter" },
+            { "picto": "poids", "texte": "Elle est trop lourde", "etape": "decorer" }
           ]
         },
         "etapes": [
           COLLE,
-          { "id": "idees", "type": "consigne", "picto": "palette", "texte": "Je choisis comment décorer ma voiture.", "detail": "Carton, feuilles de couleur, scotch." },
-          { "id": "decorer", "type": "consigne", "picto": "palette", "texte": "Je décore ma voiture.", "detail": "Léger, et les roues doivent tourner.", "minuteur": 35 },
-          { "id": "verification", "type": "cases", "picto": "voiture", "texte": "Je vérifie ma voiture.", "bravo": "La voiture est décorée",
+          { "id": "regle-ciseaux", "type": "regle", "picto": "ciseaux", "texte": "Je coupe doucement avec les ciseaux.", "detail": "Les doigts loin de la lame." },
+          { "id": "gabarit", "type": "consigne", "picto": "gabarit", "image": "img/carrosserie/1.jpg", "texte": "Je pose le gabarit sur le carton.", "detail": "Je le tiens bien à plat." },
+          { "id": "tracer", "type": "consigne", "picto": "crayon", "image": "img/carrosserie/2.jpg", "texte": "Je trace autour au crayon.", "detail": "Tout le tour, même les languettes." },
+          { "id": "decouper", "type": "consigne", "picto": "ciseaux", "image": "img/carrosserie/3.jpg", "texte": "Je découpe sur le trait.", "detail": "Doucement, en tournant le carton." },
+          { "id": "plier", "type": "consigne", "picto": "pli", "image": "img/carrosserie/4.jpg", "texte": "Je plie sur les pointillés.", "detail": "Je marque le pli avec la règle." },
+          { "id": "monter", "type": "consigne", "picto": "chassis", "image": "img/carrosserie/5.jpg", "texte": "J'enfonce les languettes dans les fentes.", "detail": "Le tube du ballon reste libre." },
+          { "id": "essai-carrosserie", "type": "consigne", "picto": "roue", "texte": "Je vérifie : les roues tournent.", "detail": "Elles ne touchent pas le carton.", "bouton": "Elles tournent" },
+          { "id": "decorer", "type": "consigne", "picto": "palette", "texte": "Je décore ma carrosserie.", "detail": "Feuilles de couleur, feutres, scotch. Léger !", "minuteur": 20 },
+          { "id": "verification", "type": "cases", "picto": "voiture", "texte": "Je vérifie ma voiture.", "bravo": "La carrosserie est finie",
             "lignes": [
               { "picto": "roue", "texte": "Les roues tournent toujours." },
-              { "picto": "ballon", "texte": "Le ballon n'est pas caché." },
-              { "picto": "fleche", "texte": "La sortie d'air est libre." }
+              { "picto": "gabarit", "texte": "La carrosserie tient bien." },
+              { "picto": "ballon", "texte": "Le ballon et la sortie d'air sont libres." }
             ] },
           { "id": "officielle", "type": "photo", "picto": "voiture", "officielle": true, "texte": "Photo officielle de ma voiture !", "detail": "De côté, toute la voiture.", "legende": "Photo officielle" },
           { "id": "rangement", "type": "cases", "picto": "balai", "texte": "Je range.", "minuteur": 5,
@@ -90,18 +98,27 @@
         ]
       },
       {
-        "id": "s4", "titre": "Je teste", "sousTitre": "et j'améliore", "picto": "regle",
+        "id": "s4", "titre": "Je teste", "sousTitre": "et j'améliore", "picto": "metre",
         "depannage": {
           "texte": "Ma voiture ne roule pas", "picto": "question",
           "causes": [
             { "picto": "roue", "texte": "Une roue frotte", "etape": "s2/verifier" },
             { "picto": "ballon", "texte": "Le ballon fuit", "etape": "s2/elastique" },
-            { "picto": "boite", "texte": "Elle est trop lourde", "etape": "s3/decorer" }
+            { "picto": "poids", "texte": "Elle est trop lourde", "etape": "s3/decorer" }
           ]
         },
         "etapes": [
           { "id": "regle-pompe", "type": "regle", "picto": "pompe", "texte": "Je gonfle le ballon avec la pompe.", "detail": "Personne ne souffle dans le ballon." },
-          { "id": "essais", "type": "essais", "titre": "Mes essais" }
+          { "id": "regle-piste", "type": "regle", "picto": "drapeau", "texte": "La piste reste libre.", "detail": "Une seule voiture à la fois." },
+          { "id": "regle-changer", "type": "regle", "picto": "remonter", "texte": "Entre deux essais, je change une chose.", "detail": "Une seule : je verrai ce qui marche." },
+          { "id": "essais", "type": "essais", "titre": "Mes essais" },
+          { "id": "photo-apres", "type": "photo", "picto": "voiture", "texte": "Je photographie ma voiture améliorée.", "legende": "Ma voiture améliorée" },
+          { "id": "rangement", "type": "cases", "picto": "balai", "texte": "Je range.", "minuteur": 5, "bravo": "Mes essais sont finis",
+            "lignes": [
+              { "picto": "pompe", "texte": "La pompe est rendue." },
+              { "picto": "metre", "texte": "Le mètre ruban est rangé." },
+              { "picto": "voiture", "texte": "Ma voiture est à sa place." }
+            ] }
         ]
       },
       {
