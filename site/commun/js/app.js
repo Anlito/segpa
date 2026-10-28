@@ -78,8 +78,11 @@
 
   const boutonMaison = () => `<button type="button" class="btn btn-maison" data-action="mission">${pic('maison')}Ma mission</button>`;
 
+  // Avant le choix de l'équipe, pas de bouton Aide : il ne ferait que dire « lève la main ».
+  // Ensuite, il écrit la demande dans le fichier de l'équipe pour l'outil du professeur.
   function boutonAide() {
-    const demandee = etat.session && S.aideEnCours(D());
+    if (!etat.session) return '';
+    const demandee = S.aideEnCours(D());
     return demandee
       ? `<button type="button" class="btn btn-aide demandee" data-action="aide" aria-pressed="true">${pic('aide')}Aide demandée</button>`
       : `<button type="button" class="btn btn-aide" data-action="aide" aria-pressed="false">${pic('aide')}Aide</button>`;
@@ -140,7 +143,7 @@
   const ACTIONS_COMMUNES = {
     mission: () => ecranMission(),
     aide: () => {
-      if (!etat.session) return message('Lève la main : le professeur arrive.');
+      if (!etat.session) return;
       const d = D();
       if (S.aideEnCours(d)) {
         S.finirAide(d);
@@ -202,10 +205,10 @@
         </div>
         <div class="milieu" style="flex-direction:column;gap:2.5rem">
           <div class="chemin">${chemin.map((d, i) => `<span class="${i === chemin.length - 1 ? 'cible' : ''}">${ech(d)}</span>`).join('<span class="sep">›</span>')}</div>
-          <div class="picto-grand seul" style="width:15rem;height:15rem">${pic('dossier')}</div>
+          <button type="button" class="choix" data-action="ouvrir"><span class="rond plein">${pic('dossier')}</span>Ouvrir le dossier</button>
           ${avertissement ? `<div class="msg msg-ambre" role="alert">${pic('remonter')}${ech(avertissement)}</div>` : ''}
         </div>
-        ${bas({ principal: boutonPrincipal('ouvrir', 'Ouvrir le dossier', 'dossier') })}
+        ${bas({})}
       </div>`,
       {
         accueil: () => ecranAccueil(),
@@ -219,7 +222,7 @@
     try {
       dossier = await F().choisirDossier();
     } catch {
-      return ecranDossier(mode, 'Le dossier ne s’ouvre pas. Touche Aide.');
+      return ecranDossier(mode, 'Le dossier ne s’ouvre pas. Lève la main.');
     }
     if (!dossier) return;
     const sorte = await F().analyserDossier(dossier);
@@ -265,7 +268,7 @@
         ${avecBoutons ? `<div class="binome">${Array.from({ length: cases }, (_, i) => `<div class="case-prenom${pris[i] ? ' rempli' : ''}">${ech(pris[i] || '?')}</div>`).join('<div class="plus-binome">+</div>')}</div>` : ''}
         ${milieu}
         ${bas({
-          gauche: avecBoutons ? '<span class="compte gauche">Ton prénom n’est pas là ? Touche Aide.</span>' : '',
+          gauche: avecBoutons ? '<span class="compte gauche">Ton prénom n’est pas là ? Lève la main.</span>' : '',
           principal: boutonPrincipal('valider', 'C’est nous !', 'coche', avecBoutons && !pris.length),
         })}
       </div>`,
@@ -316,7 +319,7 @@
       if (!deja) await session.enregistrer(true);
       demarrer(session);
     } catch {
-      ecranDossier('commencer', 'Le dossier de l’équipe ne se crée pas. Touche Aide.');
+      ecranDossier('commencer', 'Le dossier de l’équipe ne se crée pas. Lève la main.');
     }
   }
 
@@ -360,7 +363,7 @@
     try {
       if (!(await F().autorise(dossier, true))) return ecranDossier('continuer', 'Touche « Autoriser » quand le navigateur le demande.');
       const s = await F().sauvegardeDans(dossier, dossier.name + '.json');
-      if (!s) return ecranDossier('continuer', 'Ce dossier n’a pas de sauvegarde. Touche Aide.');
+      if (!s) return ecranDossier('continuer', 'Ce dossier n’a pas de sauvegarde. Lève la main.');
       let donnees = s.lecture.donnees;
       // Copie de secours plus récente (page fermée avant l'enregistrement) : on la garde.
       const secours = F().lireSecours();
@@ -370,7 +373,7 @@
       if (donnees === secours) session.aEnregistrer(true);
       demarrer(session);
     } catch {
-      ecranDossier('continuer', 'Le dossier ne s’ouvre pas. Touche Aide.');
+      ecranDossier('continuer', 'Le dossier ne s’ouvre pas. Lève la main.');
     }
   }
 
