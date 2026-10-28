@@ -166,7 +166,7 @@
     afficher(
       `<div class="ecran">
         <div class="accueil-titre">
-          <div class="logo-projet">${pic(p.picto)}</div>
+          <div class="logo-projet${p.photo ? ' avec-photo' : ''}">${S.photoOuPicto(p.photo, p.picto)}</div>
           <div><div class="sur-titre">${ech(p.niveau)}</div><h1 class="grand-titre">${ech(p.titre)}</h1></div>
           ${boutonVoix(p.titre)}
         </div>

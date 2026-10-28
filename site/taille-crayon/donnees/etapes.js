@@ -26,7 +26,7 @@
               "images": [{ "picto": "velo", "mot": "Le vélo" }, { "picto": "stylo", "mot": "Le stylo" }, { "picto": "jouet", "mot": "Le jouet" }, { "picto": "taille-crayon", "mot": "Le taille-crayon" }] },
             { "titre": "Notre mission", "detail": "Toujours en binôme, une pièce à la fois.", "numeros": true,
               "images": [{ "picto": "tournevis", "mot": "Démonter" }, { "picto": "oeil", "mot": "Observer et dessiner" }, { "picto": "regle", "mot": "Mesurer" }, { "picto": "remonter", "mot": "Remonter" }] },
-            { "titre": "L’objet du jour", "revele": { "picto": "taille-crayon", "mot": "Le taille-crayon à manivelle" } },
+            { "titre": "L’objet du jour", "revele": { "picto": "taille-crayon", "image": "img/taille-crayon.jpg", "mot": "Le taille-crayon à manivelle" } },
             { "titre": "Le programme", "detail": "3 séances de 55 minutes.", "programme": true }
           ] },
           ...REGLES,

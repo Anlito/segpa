@@ -62,7 +62,26 @@
     return picto(a, taille) + picto('fleche', Math.round(taille / 2.2), 'picto-fleche') + picto(b, taille);
   }
 
+  // Photo du professeur si elle existe, sinon le pictogramme : <img data-repli="nom du picto">. Si le fichier manque
+  // (photo pas encore prise), l'image est remplacée par le pictogramme (voir l'écouteur plus bas).
+  function photoOuPicto(src, nom, taille) {
+    return src ? `<img class="photo-objet" src="${src}" alt="" data-repli="${nom}" data-taille="${taille || ''}">` : picto(nom, taille);
+  }
+  if (typeof document !== 'undefined') {
+    document.addEventListener(
+      'error',
+      (e) => {
+        const img = e.target;
+        if (!(img instanceof HTMLImageElement)) return;
+        if (img.dataset.repli) img.outerHTML = picto(img.dataset.repli, Number(img.dataset.taille) || undefined);
+        else if (img.closest('.carte-nom')) img.remove();
+      },
+      true
+    );
+  }
+
   S.picto = picto;
+  S.photoOuPicto = photoOuPicto;
   S.pictoDouble = pictoDouble;
   S.PICTOS = Object.keys(TRACES);
 })(window);

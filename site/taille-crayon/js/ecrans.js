@@ -55,7 +55,7 @@
       aLire = O.lisible(page.titre, page.images.map((im) => im.mot).join(', ') + '.', page.detail);
     } else if (page.revele) {
       contenu = sous.vu
-        ? `<div class="revele">${S.picto(page.revele.picto)}<strong>${O.ech(page.revele.mot)}</strong></div>`
+        ? `<div class="revele">${S.photoOuPicto(page.revele.image, page.revele.picto)}<strong>${O.ech(page.revele.mot)}</strong></div>`
         : `<button type="button" class="btn btn-principal" data-action="decouvrir">${S.picto('oeil')}Je découvre</button>`;
       if (sous.vu) aLire = O.lisible(page.titre, page.revele.mot + '.');
     } else if (page.programme) {

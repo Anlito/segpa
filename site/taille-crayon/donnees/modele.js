@@ -7,7 +7,8 @@ definirModele({
   "reference": "",
 
   // Noms proposés à l'élève pour chaque pièce démontée, dans l'ordre où on les retire.
-  // Exemple : { "nom": "Manivelle", "image": "img/pieces/manivelle.jpg" } (image facultative, dans site/taille-crayon/img/pieces/).
+  // Exemple : { "nom": "Manivelle", "image": "img/pieces/piece-01.jpg" } — photo facultative, à déposer dans
+  // site/taille-crayon/img/pieces/ (voir le LISEZ-MOI de ce dossier). Sans photo, la carte montre seulement le nom.
   "pieces": [],
 
   // Lignes du tableau de la séance 1 (comme la fiche) ; « Pièce suivante » est possible jusqu'à maxPieces.

@@ -35,7 +35,12 @@ async function nouvellePage(navigateur, taille) {
     erreurs.push('fenêtre inattendue : ' + d.type());
     d.accept();
   });
-  page.on('console', (m) => m.type() === 'error' && erreurs.push(m.text()));
+  // Les photos du professeur (img/…) sont facultatives : un fichier absent n'est pas une erreur (le pictogramme s'affiche).
+  // Tout autre fichier manquant en est une.
+  const facultatif = (u) => /\/taille-crayon\/img\//.test(u);
+  page.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && erreurs.push(m.text()));
+  page.on('requestfailed', (r) => !facultatif(r.url()) && erreurs.push('fichier introuvable : ' + r.url()));
+  page.on('response', (r) => r.status() >= 400 && !facultatif(r.url()) && erreurs.push(`fichier introuvable (${r.status()}) : ${r.url()}`));
   page.on('request', (r) => {
     const u = r.url();
     if (!u.startsWith('file://') && !u.startsWith(`http://localhost:${PORT}/`) && !u.startsWith('blob:') && !u.startsWith('data:')) horsSite.push(u);
