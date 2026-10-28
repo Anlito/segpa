@@ -1,6 +1,11 @@
 # Mode d'emploi du professeur — outils 6e SEGPA
 
-## Installer sur le réseau du collège
+## En ligne (GitHub Pages)
+Élèves : `https://anlito.github.io/segpa/` · professeur : `https://anlito.github.io/segpa/professeur.html` (en favori).
+Le site en ligne enregistre toujours dans les dossiers du réseau du collège (Chrome ou Edge) : rien n'est envoyé ailleurs.
+Chaque envoi sur la branche `main` relance les tests puis republie le site (`.github/workflows/pages.yml`).
+
+## Installer sur le réseau du collège (sans Internet)
 1. Copier le dossier **`site/`** à un endroit que les élèves peuvent ouvrir (par exemple dans le dossier commun de la
    technologie). Les élèves ouvrent `site/index.html` dans **Chrome ou Edge** (Firefox ne sait pas écrire dans les dossiers).
 2. Pour chaque classe, créer le dossier du projet : `Bureau › Classe › 6A › COMMUN › TECHNOLOGIE › Taille-crayon`.
