@@ -19,9 +19,24 @@ Rien n'est envoyé ailleurs, aucun compte. Une sauvegarde existante n'est jamais
 - `site/taille-crayon/donnees/projet.js` : titre et couleur du projet.
 Après une modification : `npm test` vérifie que les données restent lisibles.
 
+## Suivre la classe (outil professeur)
+`site/taille-crayon/prof.html` (lien sur le portail), dans Chrome ou Edge :
+1. « Ouvrir le dossier de la classe » → choisir `… › 6A › COMMUN › TECHNOLOGIE › Taille-crayon` → Autoriser.
+2. Une tuile par équipe : séances ✓ ● ○, dernière photo, pièces démontées, mesures, dernière activité. Le dossier est
+   relu toutes les 20 secondes (« lu à 10:42 ») : il y a un léger décalage avec l'écran des élèves.
+3. Une équipe touche « Aide » : bandeau violet en haut, petit son, avec la séance et l'écran où elle est.
+   « J'y vais » enlève l'alerte. Repères en ambre : « Rien depuis 12 min », « Plus de 2 pièces dehors », mesure
+   hors de la plage, photo laissée pour plus tard.
+4. Toucher une tuile : la fiche de l'équipe (‹ › pour passer à la suivante, Échap pour revenir) avec les onglets
+   Bilan, Album (photos à télécharger), Pièces et réponses, Séance 2 (longueurs saisies et essais), Historique,
+   Différenciation (vos notes, visibles sur la tuile, jamais par les élèves).
+Vos notes vont dans `professeur.json`, dans le dossier du projet ; l'outil n'écrit jamais dans le fichier d'une équipe.
+Pour essayer sans élèves : le dossier `exemples-equipes-fictives/Taille-crayon` du zip (ou `npm run exemples`).
+
 ## Voir tous les écrans (démonstration)
 `site/taille-crayon/index.html?enseignant=1` (lien en bas du portail) : équipe fictive, rien n'est enregistré.
 
 ## Pour les développeurs
-`npm test` (moteur et données) · `npm start` (serveur local, http://localhost:8080) · `npm run recette`
+`npm test` (moteur et données) · `npm start` (serveur local, http://localhost:8080) · `npm run exemples` (équipes
+fictives dans `exemples/`) · `npm run recette`
 (parcours complet dans le navigateur, caméra simulée ; après `npm install`).

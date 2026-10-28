@@ -282,6 +282,109 @@ async function scenarioDossier(navigateur, base, taille) {
   await contexte.close();
 }
 
+// ---------- Outil professeur ----------
+// Le dossier d'une classe (équipes fictives de « npm run exemples ») est donné au navigateur tel quel, par un petit
+// dossier simulé en mémoire (même interface que le vrai dossier) : noms accentués compris.
+function arbre(chemin) {
+  const nom = path.basename(chemin);
+  if (fs.statSync(chemin).isDirectory()) return { kind: 'directory', name: nom, children: fs.readdirSync(chemin).map((n) => arbre(path.join(chemin, n))) };
+  return { kind: 'file', name: nom, data: fs.readFileSync(chemin).toString('base64') };
+}
+
+async function scenarioProfesseur(navigateur, base) {
+  require('./exemples-equipes.js');
+  const tree = arbre(path.join(RACINE, 'exemples', 'Taille-crayon'));
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  await page.addInitScript((tree) => {
+    const octets = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const fichier = (n) => ({
+      kind: 'file',
+      name: n.name,
+      getFile: async () => new File([octets(n.data)], n.name),
+      createWritable: async () => {
+        const parts = [];
+        return { write: async (x) => parts.push(x), close: async () => (n.data = btoa(String.fromCharCode(...new Uint8Array(await new Blob(parts).arrayBuffer())))) };
+      },
+      queryPermission: async () => 'granted',
+      requestPermission: async () => 'granted',
+    });
+    const dossier = (n) => ({
+      kind: 'directory',
+      name: n.name,
+      async *values() {
+        for (const c of n.children) yield c.kind === 'directory' ? dossier(c) : fichier(c);
+      },
+      async getDirectoryHandle(nom, o) {
+        let c = n.children.find((x) => x.name === nom && x.kind === 'directory');
+        if (!c && o && o.create) n.children.push((c = { kind: 'directory', name: nom, children: [] }));
+        if (!c) throw new DOMException('absent', 'NotFoundError');
+        return dossier(c);
+      },
+      async getFileHandle(nom, o) {
+        let c = n.children.find((x) => x.name === nom && x.kind === 'file');
+        if (!c && o && o.create) n.children.push((c = { kind: 'file', name: nom, data: '' }));
+        if (!c) throw new DOMException('absent', 'NotFoundError');
+        return fichier(c);
+      },
+      queryPermission: async () => 'granted',
+      requestPermission: async () => 'granted',
+    });
+    window.__arbre = tree;
+    window.__lireJson = (nom) => {
+      const c = tree.children.find((x) => x.name === nom);
+      return c && c.data ? JSON.parse(new TextDecoder().decode(octets(c.data))) : null;
+    };
+    window.showDirectoryPicker = async () => dossier(tree);
+  }, tree);
+  await page.goto(base + 'taille-crayon/prof.html');
+  await cliquer(page, '[data-action="ouvrir"]');
+  await page.locator('.pt').first().waitFor();
+  assert.equal(await page.locator('.pt').count(), 5, 'une tuile par équipe');
+  assert.match(await page.locator('.pt').first().textContent(), /Léa · Tom/, 'l’équipe qui demande de l’aide est en premier');
+  assert.equal(await page.locator('.pt-aide').count(), 1);
+  assert.match(await page.locator('.pc-aides').textContent(), /Léa · Tom.*Je mesure/);
+  const tuile = (noms) => page.locator('.pt', { hasText: noms }).textContent();
+  assert.match(await tuile('Inès · Noah'), /Rien depuis 15 min/);
+  assert.match(await tuile('Adam · Jade'), /Plus de 2 pièces dehors/);
+  assert.match(await tuile('Adam · Jade'), /Mesure hors de la plage/);
+  assert.match(await tuile('Léa · Tom'), /Pièces démontées : 6 sur 8/);
+  await page.waitForFunction(() => [...document.querySelectorAll('.pt-photo img')].some((i) => i.src.startsWith('blob:')));
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'pas de défilement horizontal');
+  await page.screenshot({ path: path.join(SORTIE, 'prof-classe.png'), fullPage: true });
+  // « J'y vais » : l'aide est notée vue dans professeur.json, l'alerte disparaît.
+  await cliquer(page, '.pc-aide [data-action="vu"]');
+  await page.waitForFunction(() => !document.querySelector('.pc-aides'));
+  const prof = await page.evaluate(() => window.__lireJson('professeur.json'));
+  assert.ok(prof.aidesVues['Léa_Tom'], 'aide vue enregistrée');
+  // Fiche d'une équipe : onglets.
+  await page.locator('.pt', { hasText: 'Léa · Tom' }).click();
+  await page.locator('.pe-onglets').waitFor();
+  assert.match(await page.locator('.pe-contenu').textContent(), /Séance 1 · Je démonte/);
+  await cliquer(page, '[data-action="onglet"][data-id="album"]');
+  await page.waitForFunction(() => document.querySelectorAll('.pp-photo img').length >= 7);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-album.png'), fullPage: true });
+  await cliquer(page, '[data-action="onglet"][data-id="pieces"]');
+  await page.waitForFunction(() => document.querySelectorAll('.pp-piece').length === 6);
+  await cliquer(page, '[data-action="onglet"][data-id="seance2"]');
+  assert.match(await page.locator('.pp-table').textContent(), /7,5 cm/);
+  await cliquer(page, '[data-action="onglet"][data-id="historique"]');
+  assert.ok((await page.locator('.pp-table tbody tr').count()) > 10);
+  await cliquer(page, '[data-action="onglet"][data-id="differenciation"]');
+  await page.locator('input[value="roles"]').check();
+  await page.waitForFunction(() => (window.__lireJson('professeur.json') || { drapeaux: {} }).drapeaux['Léa_Tom']);
+  await page.keyboard.press('Escape');
+  await page.locator('.pt').first().waitFor();
+  assert.match(await tuile('Léa · Tom'), /Rôles observateur \/ manipulateur/);
+  // Équipe qui a fini : réponses écrites visibles.
+  await page.locator('.pt', { hasText: 'Chloé · Sami' }).click();
+  await cliquer(page, '[data-action="onglet"][data-id="pieces"]');
+  assert.match(await page.locator('.pe-contenu').textContent(), /Elle fait tourner les lames\./);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-reponses.png'), fullPage: true });
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
 (async () => {
   const serveur = spawn(process.execPath, [path.join(__dirname, 'serve.js')], { env: { ...process.env, PORT: String(PORT) }, stdio: 'ignore' });
   await new Promise((ok) => setTimeout(ok, 600));
@@ -323,6 +426,15 @@ async function scenarioDossier(navigateur, base, taille) {
         ok = false;
         noter(`- ÉCHEC ${nomBase} 1366×768 · dossier : ${e.message.split('\n')[0]}`);
         console.error(e.stack);
+      }
+    }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioProfesseur(navigateur, base);
+        noter(`- OK ${nomBase} 1366×768 · professeur : 5 équipes fictives, aide en premier avec son étape, alertes (inactivité, pièces dehors, mesure), dernière photo, « J’y vais » écrit dans professeur.json, onglets Bilan, Album, Pièces et réponses, Séance 2, Historique, Différenciation.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · professeur : ${e.message.split('\n')[0]}`);
       }
     }
   } finally {

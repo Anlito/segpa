@@ -10,7 +10,8 @@ function moteur() {
   require(path.join(SITE, 'commun/js/outils.js'));
   require(path.join(SITE, 'commun/js/moteur/sauvegarde.js'));
   require(path.join(SITE, 'commun/js/moteur/mesure.js'));
-  return require(path.join(SITE, 'commun/js/moteur/etapes.js'));
+  require(path.join(SITE, 'commun/js/moteur/etapes.js'));
+  return require(path.join(SITE, 'commun/js/moteur/classe.js'));
 }
 
 // Données d'un projet lues dans un bac à sable (les fichiers appellent definirXxx({...})).

@@ -7,6 +7,7 @@
 // pieces (tableau des pièces), mesure (une pièce au réglet), remontage (le tableau à l'envers), questions (réponse
 // toujours écrite ; aide « mes-pieces » : les photos de la séance 1 restent affichées).
 // Les noms des pièces et les longueurs de référence sont dans donnees/modele.js.
+// titre : nom de l'écran pour le professeur (écrans sans consigne : présentation, tableau des pièces…).
 // bravo : ce qui s'affiche sur l'écran « Bravo » quand l'étape est faite.
 // minuteur : minutes du bloc (déroulé minuté de la préparation) ; le cercle se vide pendant le bloc.
 (function () {
@@ -21,7 +22,7 @@
       {
         "id": "s1", "titre": "Je démonte", "sousTitre": "et j’observe", "picto": "tournevis",
         "etapes": [
-          { "id": "ouverture", "type": "ouverture", "pages": [
+          { "id": "ouverture", "type": "ouverture", "titre": "Présentation", "pages": [
             { "titre": "C’est quoi, un objet technique ?", "detail": "Un objet fabriqué par l’Homme, qui répond à un besoin.",
               "images": [{ "picto": "velo", "mot": "Le vélo" }, { "picto": "stylo", "mot": "Le stylo" }, { "picto": "jouet", "mot": "Le jouet" }, { "picto": "taille-crayon", "mot": "Le taille-crayon" }] },
             { "titre": "Notre mission", "detail": "Toujours en binôme, une pièce à la fois.", "numeros": true,
@@ -32,7 +33,7 @@
           ...REGLES,
           { "id": "materiel", "type": "consigne", "picto": "tournevis", "texte": "Je prépare mon matériel.", "detail": "1 taille-crayon, 1 tournevis, 1 boîte." },
           { "id": "une-case", "type": "consigne", "picto": "boite", "texte": "Une pièce = une case dans la boîte.", "detail": "Pas de mélange avec le binôme voisin." },
-          { "id": "pieces", "type": "pieces", "minuteur": 25 },
+          { "id": "pieces", "type": "pieces", "titre": "Tableau des pièces", "minuteur": 25 },
           { "id": "rangement", "type": "cases", "picto": "balai", "texte": "Je range.", "minuteur": 5, "bravo": "La boîte est rangée",
             "lignes": [
               { "picto": "boite", "texte": "Mes pièces sont dans la boîte, dans l’ordre." },
@@ -47,8 +48,8 @@
         "etapes": [
           ...REGLES,
           { "id": "carreau", "type": "consigne", "picto": "regle", "texte": "1 carreau du quadrillage = 1 cm.", "detail": "Je mesure, puis je dessine dans la bonne taille." },
-          { "id": "mesure-corps", "type": "mesure", "piece": "corps", "minuteur": 18 },
-          { "id": "mesure-manivelle", "type": "mesure", "piece": "manivelle", "minuteur": 17 },
+          { "id": "mesure-corps", "type": "mesure", "titre": "Mesure du corps", "piece": "corps", "minuteur": 18 },
+          { "id": "mesure-manivelle", "type": "mesure", "titre": "Mesure de la manivelle", "piece": "manivelle", "minuteur": 17 },
           { "id": "rangement", "type": "cases", "picto": "balai", "texte": "Je range.", "minuteur": 5, "bravo": "La boîte est rangée",
             "lignes": [
               { "picto": "boite", "texte": "Les 2 pièces sont dans la boîte." },
@@ -63,7 +64,7 @@
         "etapes": [
           ...REGLES,
           { "id": "a-l-envers", "type": "consigne", "picto": "remonter", "texte": "Je reprends mon tableau à l’envers.", "detail": "Je repars de la dernière pièce. Je revisse dans l’ordre inverse." },
-          { "id": "remontage", "type": "remontage", "minuteur": 30 },
+          { "id": "remontage", "type": "remontage", "titre": "Tableau à l’envers", "minuteur": 30 },
           { "id": "verification", "type": "cases", "picto": "taille-crayon", "texte": "Je vérifie.", "minuteur": 5, "bravo": "Le taille-crayon est remonté",
             "lignes": [
               { "picto": "remonter", "texte": "La manivelle tourne bien." },
@@ -72,7 +73,7 @@
             ] },
           { "id": "remonte", "type": "photo", "picto": "taille-crayon", "texte": "Prends le taille-crayon remonté en photo.", "legende": "Mon taille-crayon remonté" },
           { "id": "crayon", "type": "photo", "picto": "crayon", "texte": "Prends un crayon taillé en photo.", "legende": "Un crayon taillé" },
-          { "id": "questions", "type": "questions", "minuteur": 10, "questions": [
+          { "id": "questions", "type": "questions", "titre": "Questions", "minuteur": 10, "questions": [
             { "id": "manivelle", "texte": "À quoi sert la manivelle ?" },
             { "id": "tourner", "texte": "Quelle pièce fait tourner l’autre pièce ?", "aide": "mes-pieces" },
             { "id": "difficile", "texte": "Quelle pièce était la plus dure à remonter ?", "aide": "mes-pieces" }
