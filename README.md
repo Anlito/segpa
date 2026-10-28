@@ -15,7 +15,8 @@ Documents : `docs/CAHIER-DES-CHARGES-outils-6e-segpa.md` (socle commun), un brie
 ## Organisation
 
 ```
-site/index.html            portail (une tuile par projet)
+site/index.html            portail des élèves (une tuile par projet, aucun lien professeur)
+site/professeur.html       page du professeur (non liée depuis le portail) : suivi de la classe, démonstration
 site/commun/               le socle, écrit une fois : écrans élèves, sauvegarde, dossiers, caméra, voix, style, police Lexend
 site/taille-crayon/        index.html (élèves), prof.html (professeur), js/ (écrans et tuiles propres), donnees/
                            (projet, classes, modèle, étapes), img/ (photos de Thomas)

@@ -19,8 +19,12 @@ Rien n'est envoyé ailleurs, aucun compte. Une sauvegarde existante n'est jamais
 - `site/taille-crayon/donnees/projet.js` : titre et couleur du projet.
 Après une modification : `npm test` vérifie que les données restent lisibles.
 
+## Page du professeur
+`site/professeur.html` (en ligne : `…/segpa/professeur.html`) : **pas de lien depuis le portail des élèves**, à garder
+en favori. Elle mène au suivi de la classe et aux écrans élèves en démonstration, pour chaque projet.
+
 ## Suivre la classe (outil professeur)
-`site/taille-crayon/prof.html` (lien sur le portail), dans Chrome ou Edge :
+`site/taille-crayon/prof.html` (depuis `professeur.html`), dans Chrome ou Edge :
 1. « Ouvrir le dossier de la classe » → choisir `… › 6A › COMMUN › TECHNOLOGIE › Taille-crayon` → Autoriser.
 2. Une tuile par équipe : séances ✓ ● ○, dernière photo, pièces démontées, mesures, dernière activité. Le dossier est
    relu toutes les 20 secondes (« lu à 10:42 ») : il y a un léger décalage avec l'écran des élèves.
@@ -34,7 +38,7 @@ Vos notes vont dans `professeur.json`, dans le dossier du projet ; l'outil n'éc
 Pour essayer sans élèves : le dossier `exemples-equipes-fictives/Taille-crayon` du zip (ou `npm run exemples`).
 
 ## Voir tous les écrans (démonstration)
-`site/taille-crayon/index.html?enseignant=1` (lien en bas du portail) : équipe fictive, rien n'est enregistré.
+`site/taille-crayon/index.html?enseignant=1` (depuis `professeur.html`) : équipe fictive, rien n'est enregistré.
 
 ## Pour les développeurs
 `npm test` (moteur et données) · `npm start` (serveur local, http://localhost:8080) · `npm run exemples` (équipes

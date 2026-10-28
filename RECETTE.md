@@ -42,10 +42,11 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
       équipe de ce poste) → la séance 1 est « Fait », la séance 2 est « En cours ».
 - [ ] Sur un **autre poste**, Je continue → la même équipe se retrouve (le travail suit l'élève, pas le poste).
 - [ ] « Je commence » avec les mêmes prénoms : « Votre dossier existe déjà : vous reprenez votre travail » (rien n'est écrasé).
-- [ ] Mode enseignant : `site/index.html` → lien « Professeur : voir tous les écrans » → bandeau noir, rien n'est enregistré.
+- [ ] Le portail `site/index.html` ne montre **aucun lien professeur**.
+- [ ] `site/professeur.html` → « Écrans élèves (démonstration) » → bandeau noir, rien n'est enregistré.
 
 ## Outil professeur (sur le poste du professeur, pendant que 2 postes élèves travaillent)
-- [ ] `site/taille-crayon/prof.html` → « Ouvrir le dossier de la classe » → `Taille-crayon` de la 6A → les tuiles des équipes.
+- [ ] `site/professeur.html` → « Suivre la classe » → « Ouvrir le dossier de la classe » → `Taille-crayon` de la 6A → les tuiles des équipes.
 - [ ] Un élève touche **Aide** : en 20 secondes au plus, bandeau violet + son sur le poste du professeur, avec l'écran
       où il est. « J'y vais » enlève l'alerte.
 - [ ] La tuile montre la dernière photo, les pièces démontées, « il y a … min ».

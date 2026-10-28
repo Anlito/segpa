@@ -153,6 +153,12 @@ const MODELE_DEMO = {
 
 async function scenarioEnseignant(navigateur, base, taille, captures, demo) {
   const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
+  // Portail des élèves : aucun lien professeur ; page du professeur : ses liens mènent aux bonnes pages.
+  await page.goto(base + 'index.html');
+  assert.equal(await page.locator('a[href*="prof"], a[href*="enseignant"]').count(), 0, 'aucun lien professeur sur le portail');
+  await page.goto(base + 'professeur.html');
+  assert.equal(await page.locator('a[href="taille-crayon/prof.html"]').count(), 1);
+  assert.equal(await page.locator('a[href="taille-crayon/index.html?enseignant=1"]').count(), 1);
   if (demo) await page.addInitScript((m) => document.addEventListener('DOMContentLoaded', () => (window.Segpa.modele = m)), MODELE_DEMO);
   await page.goto(base + 'taille-crayon/index.html?enseignant=1');
   await sansDefilement(page, 'accueil');
