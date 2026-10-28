@@ -26,7 +26,8 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
       nom apparaissent dans la case 1. Faire 3 ou 4 pièces, puis « J'ai fini de démonter ».
 - [ ] Le rangement (les 3 lignes se cochent en touchant la ligne), la photo de la boîte.
 - [ ] **Séance 2** (Ma mission → toucher « Je mesure ») : je sors une seule pièce (« J'en ai sorti plus » → message
-      ambre), je mesure au pavé (« 7,5 »), je dessine sur papier, photo du dessin, je remets la pièce. Deux fois.
+      ambre), je mesure au pavé (« 7,5 »), je trace les bords à la règle (exemple affiché), je trace la flèche de
+      dimension à la règle d'une autre couleur (exemple affiché), photo du dessin, je remets la pièce. Deux fois.
       Avec les longueurs de référence dans `modele.js` : une mesure fausse donne « Mesure encore une fois, en partant
       du 0 du réglet », la deuxième fausse « Montre ta mesure au professeur ».
 - [ ] **Séance 3** : les photos de la séance 1 reviennent **de la dernière à la première** ; vérification (3 cases) ;

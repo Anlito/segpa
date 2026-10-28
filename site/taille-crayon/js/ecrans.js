@@ -241,8 +241,53 @@
     };
   });
 
+  // Exemple de dessin à la taille réelle sur quadrillage (1 carreau = 1 cm), pour montrer la méthode :
+  //   temps 'bords'  : bords droits à la règle (trait épais), arrondis à main levée (marqués) ;
+  //   temps 'fleche' : flèche de dimension à la règle, d'une autre couleur, avec la longueur écrite.
+  // La pièce de l'exemple est inventée (6 cm × 3 cm) : ce n'est jamais une pièce du taille-crayon.
+  function exempleDessin(temps) {
+    const c = 10; // taille d'un carreau dans le dessin
+    const grille = [];
+    for (let x = 0; x <= 12; x++) grille.push(`<line x1="${x * c}" y1="0" x2="${x * c}" y2="${8 * c}"/>`);
+    for (let y = 0; y <= 8; y++) grille.push(`<line x1="0" y1="${y * c}" x2="${12 * c}" y2="${y * c}"/>`);
+    // Pièce : de x = 3 à 9 (6 cm), de y = 1,5 à 4,5 (3 cm), deux coins arrondis à droite (rayon 1 cm).
+    const droits = `M${8 * c} ${1.5 * c} H${3 * c} V${4.5 * c} H${8 * c} M${9 * c} ${2.5 * c} V${3.5 * c}`;
+    const arrondis = `M${8 * c} ${1.5 * c} A${c} ${c} 0 0 1 ${9 * c} ${2.5 * c} M${9 * c} ${3.5 * c} A${c} ${c} 0 0 1 ${8 * c} ${4.5 * c}`;
+    const bords = temps === 'bords';
+    const fleche = `<g class="ex-fleche">
+        <line x1="${3 * c}" y1="${4.9 * c}" x2="${3 * c}" y2="${6.6 * c}"/><line x1="${9 * c}" y1="${4.9 * c}" x2="${9 * c}" y2="${6.6 * c}"/>
+        <line x1="${3 * c + 1}" y1="${6.1 * c}" x2="${9 * c - 1}" y2="${6.1 * c}"/>
+        <path d="M${3 * c} ${6.1 * c} l4 -2.5 v5 z M${9 * c} ${6.1 * c} l-4 -2.5 v5 z" class="ex-pointe"/>
+        <text x="${6 * c}" y="${5.75 * c}">6 cm</text>
+      </g>`;
+    return `<figure class="exemple-dessin">
+        <figcaption><span class="pastille">Exemple</span> ce n’est pas ta pièce</figcaption>
+        <svg viewBox="-2 -2 ${12 * c + 4} ${8 * c + 4}" role="img" aria-label="${bords ? 'Exemple : les bords droits tracés à la règle, les arrondis à main levée.' : 'Exemple : la flèche de dimension tracée à la règle, d’une autre couleur, avec 6 cm écrit à côté.'}">
+          <g class="ex-grille">${grille.join('')}</g>
+          <path d="${droits}" class="ex-trait${bords ? ' fort' : ''}"/>
+          <path d="${arrondis}" class="ex-trait${bords ? ' fort' : ''}"/>
+          ${bords ? `<path d="${arrondis}" class="ex-arrondi"/>` : fleche}
+        </svg>
+        <div class="ex-legende">${
+          bords
+            ? `<span><i class="ex-cle regle"></i>à la règle</span><span><i class="ex-cle main"></i>à main levée</span>`
+            : `<span><i class="ex-cle couleur"></i>flèche à la règle, autre couleur</span>`
+        }</div>
+      </figure>`;
+  }
+
+  function blocDessin(O, temps, texte, detail, pastille) {
+    return `${exempleDessin(temps)}
+      <div class="consigne">
+        <span class="pastille">${O.ech(pastille)}</span>
+        <div class="consigne-ligne"><p class="consigne-texte" style="font-size:2.875rem">${O.ech(texte)}</p>${O.boutonVoix(O.lisible(texte, detail))}</div>
+        <p class="consigne-detail">${O.ech(detail)}</p>
+      </div>`;
+  }
+
   // ---------- Séance 2 : mesurer et dessiner une pièce ----------
-  // Je sors une pièce → je mesure (vérification douce) → je dessine sur papier → photo du dessin → je la remets.
+  // Je sors une pièce → je mesure (vérification douce) → je trace les bords à la règle → je trace la flèche de
+  // dimension à la règle, d'une autre couleur → photo du dessin → je la remets.
 
   S.ajouterEcran('mesure', (etape, O) => {
     const sous = O.sous();
@@ -321,12 +366,21 @@
       };
     }
 
+    // Le dessin sur papier, en deux temps, avec un exemple sur quadrillage (une pièce inventée : pas la réponse).
     if (sous.temps === 'dessiner')
       return {
-        milieu: O.blocConsigne({ picto: 'crayon', texte: 'Je dessine la pièce sur ma feuille.', detail: '1 carreau = 1 cm. J’écris la longueur avec une flèche.' }, pastille),
+        milieu: blocDessin(O, 'bords', 'Je trace les bords droits à la règle.', 'Les arrondis, à main levée. 1 carreau = 1 cm.', pastille),
         gauche: O.boutonRetour('retour-dessin'),
-        principal: O.boutonPrincipal('dessinee', 'C’est dessiné'),
-        actions: { 'retour-dessin': vers('mesurer'), dessinee: vers('photo') },
+        principal: O.boutonPrincipal('dessinee', 'C’est tracé'),
+        actions: { 'retour-dessin': vers('mesurer'), dessinee: vers('fleche') },
+      };
+
+    if (sous.temps === 'fleche')
+      return {
+        milieu: blocDessin(O, 'fleche', 'Je trace la flèche à la règle.', 'D’une autre couleur. J’écris la longueur à côté.', pastille),
+        gauche: O.boutonRetour('retour-fleche'),
+        principal: O.boutonPrincipal('fleche-faite', 'C’est fait'),
+        actions: { 'retour-fleche': vers('dessiner'), 'fleche-faite': vers('photo') },
       };
 
     if (sous.temps === 'photo') {
@@ -343,7 +397,7 @@
         },
         plusTard: vers('remettre'),
       });
-      vue.actions['retour-photo'] = vers('dessiner');
+      vue.actions['retour-photo'] = vers('fleche');
       return vue;
     }
 

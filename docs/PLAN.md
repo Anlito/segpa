@@ -129,6 +129,9 @@ Tests `node:test` à chaque jalon (CLAUDE.md).
 - Questions de compréhension : réponse **toujours écrite** (plus de phrases-cartes ni de « Je réponds à l'oral ») ;
   pour « quelle pièce… », les photos de la séance 1 restent affichées pour aider à écrire.
 - Fin de séance : l'écran « Bravo » ramène à **« Ma mission »** (et non plus à l'accueil).
+- Dessin de la séance 2 : bords droits **à la règle** (arrondis à main levée), flèche de dimension **à la règle, d'une
+  autre couleur** ; deux écrans, chacun avec un exemple sur quadrillage (pièce inventée, jamais celle du taille-crayon).
+- Bouton Aide : retiré avant le choix de l'équipe, gardé ensuite (demandes lues par l'outil professeur).
 
 **Relevé dans les documents reçus** (complète le §7 du brief)
 - La préparation enseignant reçue a bien ses 4 objectifs (le 3e est « Suivre une procédure dans l'ordre, puis dans l'ordre

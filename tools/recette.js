@@ -114,7 +114,7 @@ async function faireEcran(page, nom, captures, demo) {
     await page.locator('textarea.champ-libre').fill('Elle fait tourner la lame.');
     await cliquer(page, '[data-action="question-suivante"]');
   } else {
-    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'remise', 'fait'];
+    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'fleche-faite', 'remise', 'fait'];
     for (const a of suite)
       if (await visible(page, `[data-action="${a}"]`)) {
         await cliquer(page, `[data-action="${a}"]`);
