@@ -5,6 +5,8 @@ const path = require('node:path');
 
 const S = require(path.join(__dirname, '..', 'site', 'voiture-ballon', 'js', 'essais.js'));
 
+const roues = (avant, arriere) => S.noterEssai(S.noterEssai(S.essaisVides(), 'roues-avant', avant), 'roues-arriere', arriere);
+
 // Un essai entier : je pose, je gonfle, je lâche, je mesure, la direction.
 function essai(v, pompe, distance, direction) {
   for (const [quoi, donnee] of [['ligne'], ['gonfle', pompe], ['lache'], ['mesure', distance], ['direction', direction]]) v = S.noterEssai(v, quoi, donnee);
@@ -13,8 +15,10 @@ function essai(v, pompe, distance, direction) {
 
 test('les écrans d’un essai s’enchaînent dans l’ordre', () => {
   let v = S.essaisVides();
-  assert.equal(S.ecranEssai(v), 'roues');
-  v = S.noterEssai(v, 'roues', 30);
+  assert.equal(S.ecranEssai(v), 'roues-avant');
+  v = S.noterEssai(v, 'roues-avant', 30);
+  assert.equal(S.ecranEssai(v), 'roues-arriere');
+  v = S.noterEssai(v, 'roues-arriere', 40);
   const vus = [];
   for (const [quoi, donnee] of [['ligne'], ['gonfle', 12], ['lache'], ['mesure', 240], ['direction', 'droit']]) {
     vus.push(S.ecranEssai(v));
@@ -25,19 +29,20 @@ test('les écrans d’un essai s’enchaînent dans l’ordre', () => {
 });
 
 test('on change UNE chose, puis après 3 essais on choisit : encore un essai ou le graphique ; 5 essais au plus', () => {
-  let v = S.noterEssai(S.essaisVides(), 'roues', 30);
+  let v = roues(30, 30);
   v = essai(v, 10, 200, 'droit');
-  v = S.noterEssai(v, 'changer', { type: 'roues', choix: 40 });
+  v = S.noterEssai(v, 'changer', { type: 'roues', cote: 'arriere', choix: 40 });
   assert.equal(S.ecranEssai(v), 'ligne');
-  assert.equal(S.rouesDe(v), '40');
-  assert.equal(S.rouesDe(v, 0), '30');
+  assert.deepEqual(S.rouesDe(v), { avant: '30', arriere: '40' }, 'seules les roues arrière changent');
+  assert.deepEqual(S.rouesDe(v, 0), { avant: '30', arriere: '30' });
+  assert.equal(v.essais[1].changement.cote, 'arriere');
   v = essai(v, 10, 260, 'gauche');
   v = S.noterEssai(v, 'changer', { type: 'ballon', choix: 'plus' });
   v = essai(v, 14, 310, 'droit');
   assert.equal(S.ecranEssai(v), 'suite');
   v = S.noterEssai(v, 'changer', { type: 'poids', choix: 'enleve' });
   v = essai(v, 14, 330, 'droit');
-  v = S.noterEssai(v, 'changer', { type: 'roues', choix: 50 });
+  v = S.noterEssai(v, 'changer', { type: 'roues', cote: 'avant', choix: 50 });
   v = essai(v, 14, 300, 'droite');
   assert.equal(S.ecranEssai(v), 'graphique', 'au 5e essai, le graphique');
   assert.equal(S.meilleurEssai(v), 3);
@@ -49,7 +54,7 @@ test('on change UNE chose, puis après 3 essais on choisit : encore un essai ou 
 });
 
 test('« Mon graphique » après 3 essais', () => {
-  let v = S.noterEssai(S.essaisVides(), 'roues', 20);
+  let v = roues(20, 20);
   for (let i = 0; i < 3; i++) {
     if (i) v = S.noterEssai(v, 'changer', { type: 'ballon', choix: 'moins' });
     v = essai(v, 8, 100 + i, 'droit');
@@ -60,21 +65,23 @@ test('« Mon graphique » après 3 essais', () => {
 });
 
 test('Retour défait la dernière chose notée, sans rien perdre d’autre', () => {
-  let v = S.noterEssai(S.essaisVides(), 'roues', 30);
+  let v = roues(30, 30);
   v = essai(v, 10, 200, 'droit');
   v = S.reculerEssai(v);
   assert.equal(S.ecranEssai(v), 'direction');
   assert.equal(v.essais[0].distance, 200);
   v = S.noterEssai(S.noterEssai(v, 'direction', 'droit'), 'changer', { type: 'poids', choix: 'ajoute' });
   assert.equal(S.ecranEssai(S.reculerEssai(v)), 'changer', 'on revient au choix du changement');
-  let w = S.noterEssai(S.essaisVides(), 'roues', 30);
+  let w = roues(30, 40);
   w = S.reculerEssai(w);
-  assert.equal(S.ecranEssai(w), 'roues');
+  assert.equal(S.ecranEssai(w), 'roues-arriere');
+  w = S.reculerEssai(w);
+  assert.equal(S.ecranEssai(w), 'roues-avant');
   assert.equal(S.reculerEssai(w), null, 'plus rien à défaire : étape précédente');
 });
 
 test('la valeur reçue n’est jamais modifiée', () => {
-  const v = S.noterEssai(S.essaisVides(), 'roues', 30);
+  const v = roues(30, 30);
   const avant = JSON.stringify(v);
   S.noterEssai(v, 'ligne');
   S.reculerEssai(v);
@@ -82,7 +89,7 @@ test('la valeur reçue n’est jamais modifiée', () => {
 });
 
 test('mesure 10 fois plus grande ou plus petite que les autres : « Mesure encore une fois ? »', () => {
-  let v = S.noterEssai(S.essaisVides(), 'roues', 30);
+  let v = roues(30, 30);
   assert.equal(S.mesureSuspecte(v, 2500), null, 'premier essai : rien à comparer');
   v = essai(v, 10, 250, 'droit');
   assert.equal(S.mesureSuspecte(v, 2500), 'plus');
@@ -96,4 +103,10 @@ test('médiane', () => {
   assert.equal(S.mediane([3, 1, 2]), 2);
   assert.equal(S.mediane([4, 1, 2, 3]), 2.5);
   assert.equal(S.mediane([]), null);
+});
+
+test('ancienne sauvegarde (une seule taille de roues) : mêmes roues devant et derrière', () => {
+  const v = { roues: '30', essais: [], graphique: false };
+  assert.deepEqual(S.rouesDe(v), { avant: '30', arriere: '30' });
+  assert.equal(S.ecranEssai(v), 'ligne');
 });

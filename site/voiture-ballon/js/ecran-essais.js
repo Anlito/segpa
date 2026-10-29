@@ -1,5 +1,5 @@
 // Écran « Mes essais » de la séance 4 (plan : docs/PLAN-voiture-ballon.md §3). Un écran par geste :
-//   roues (une fois) · je pose · je gonfle (coups de pompe) · je lâche · je mesure (pavé, en cm) · ma voiture roule
+//   roues avant puis roues arrière (une fois) · je pose · je gonfle (coups de pompe) · je lâche · je mesure (pavé, en cm) · ma voiture roule
 //   comment ? · je change UNE chose (ou, après 3 essais : encore un essai / mon graphique) · mon graphique.
 // La suite logique est dans js/essais.js (testée) ; ici, seulement l'affichage. Tout est gardé au fur et à mesure dans
 // la rubrique de l'étape : l'équipe reprend là où elle en était.
@@ -16,7 +16,7 @@
     if (!c) return 'Départ';
     const def = (P().changements || []).find((x) => x.id === c.type);
     if (!def) return c.type;
-    if (def.choix === 'roues') return `Roues ${c.choix} mm`;
+    if (def.choix === 'roues') return `${c.cote === 'arriere' ? 'Arrière' : 'Avant'} ${c.choix} mm`;
     const choix = (def.choix || []).find((x) => x.id === c.choix);
     return choix ? choix.nom : def.nom;
   }
@@ -31,7 +31,7 @@
     if (ecran === 'suite' && sous.changer) ecran = 'changer';
 
     const garder = (nv) => {
-      for (const k of ['roues', 'pompe', 'saisie', 'verifier', 'direction', 'type', 'choix', 'deux', 'changer']) delete sous[k];
+      for (const k of ['roues', 'pompe', 'saisie', 'verifier', 'direction', 'type', 'cote', 'choix', 'deux', 'changer']) delete sous[k];
       S.noterBrouillon(O.D(), sid, etape.id, nv);
       O.enregistrer(true);
       O.rafraichir();
@@ -54,13 +54,15 @@
     };
     const vue = (o) => ({ gauche, ...o, actions: Object.assign({}, communes, o.actions) });
 
-    // ---------- Les roues du départ ----------
-    if (ecran === 'roues') {
+    // ---------- Les roues du départ : avant, puis arrière (elles peuvent être différentes) ----------
+    if (ecran === 'roues-avant' || ecran === 'roues-arriere') {
       const roues = P().roues || ['20', '30', '40', '50'];
       const plus = Math.max(...roues.map(Number));
+      const avant = ecran === 'roues-avant';
       return vue({
-        milieu: `<div class="colonne" style="gap:1.75rem;align-items:center">
-            ${titre('Quelles roues sont sur ma voiture ?')}
+        milieu: `<div class="colonne" style="gap:1.5rem;align-items:center">
+            <span class="pastille">${avant ? 'Roues avant' : 'Roues arrière'}</span>
+            ${titre(avant ? 'Quelles roues sont à l’avant ?' : 'Quelles roues sont à l’arrière ?')}
             <div class="cartes-roues">${roues
               .map((r) => `<button type="button" class="carte-roue" data-action="choisir-roues" data-r="${O.ech(r)}" aria-pressed="${sous.roues === r}">
                   <svg viewBox="0 0 100 100" style="width:${(7.5 * Number(r)) / plus}rem;height:${(7.5 * Number(r)) / plus}rem" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="6"/><circle cx="50" cy="50" r="9" fill="currentColor"/></svg>
@@ -73,7 +75,7 @@
             sous.roues = b.dataset.r;
             O.rafraichir();
           },
-          'roues-choisies': () => garder(S.noterEssai(v, 'roues', sous.roues)),
+          'roues-choisies': () => garder(S.noterEssai(v, ecran, sous.roues)),
         },
       });
     }
@@ -217,9 +219,13 @@
     if (ecran === 'changer') {
       const defs = P().changements || [];
       const def = defs.find((d) => d.id === sous.type);
+      const roues = def && def.choix === 'roues';
       let details = [];
-      if (def && def.choix === 'roues') details = (P().roues || []).filter((r) => r !== S.rouesDe(v)).map((r) => ({ id: r, nom: r + ' mm' }));
-      else if (def) details = def.choix || [];
+      if (roues && sous.cote) details = (P().roues || []).filter((r) => r !== S.rouesDe(v)[sous.cote]).map((r) => ({ id: r, nom: r + ' mm' }));
+      else if (def && !roues) details = def.choix || [];
+      const cotes = roues
+        ? `<div class="choix-details">${[['avant', 'Roues avant'], ['arriere', 'Roues arrière']].map(([id, nom]) => `<button type="button" class="carte-choix mode" data-action="choisir-cote" data-cote="${id}" aria-pressed="${sous.cote === id}">${O.pic('roue')}${nom}</button>`).join('')}</div>`
+        : '';
       return vue({
         milieu: `<div class="colonne" style="gap:1.25rem;align-items:center">
             ${titre('Je change une seule chose.', 'Je change une seule chose : ' + defs.map((d) => d.nom).join(', ') + '.')}
@@ -227,15 +233,22 @@
               .map((d) => `<button type="button" class="cause" data-action="choisir-changement" data-id="${O.ech(d.id)}" aria-pressed="${sous.type === d.id}"><span class="tuile">${O.pic(d.picto)}</span>${O.ech(d.nom)}</button>`)
               .join('')}</div>
             ${sous.deux ? `<div class="msg msg-ambre" role="alert">${O.pic('main-stop')}Choisis un seul changement.</div>` : ''}
+            ${cotes}
             ${details.length ? `<div class="choix-details">${details.map((c) => `<button type="button" class="carte-choix mode" data-action="choisir-detail" data-c="${O.ech(c.id)}" aria-pressed="${sous.choix === c.id}">${O.ech(c.nom)}</button>`).join('')}</div>` : ''}
           </div>`,
-        principal: O.boutonPrincipal('change-fait', 'C’est changé', 'coche', !(sous.type && sous.choix)),
+        principal: O.boutonPrincipal('change-fait', 'C’est changé', 'coche', !(sous.type && sous.choix && (!roues || sous.cote))),
         actions: {
           'choisir-changement': (b) => {
             const id = b.dataset.id;
             if (sous.type && sous.type !== id) sous.deux = true;
-            else if (sous.type === id) Object.assign(sous, { type: null, choix: null, deux: false });
-            else Object.assign(sous, { type: id, choix: null, deux: false });
+            else if (sous.type === id) Object.assign(sous, { type: null, cote: null, choix: null, deux: false });
+            else Object.assign(sous, { type: id, cote: null, choix: null, deux: false });
+            O.rafraichir();
+          },
+          'choisir-cote': (b) => {
+            sous.cote = b.dataset.cote;
+            sous.choix = null;
+            sous.deux = false;
             O.rafraichir();
           },
           'choisir-detail': (b) => {
@@ -243,7 +256,7 @@
             sous.deux = false;
             O.rafraichir();
           },
-          'change-fait': () => garder(S.noterEssai(v, 'changer', { type: sous.type, choix: sous.choix })),
+          'change-fait': () => garder(S.noterEssai(v, 'changer', { type: sous.type, cote: sous.cote, choix: sous.choix })),
         },
       });
     }

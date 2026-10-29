@@ -84,13 +84,16 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
 ## Voiture à ballon — jalon V2 (séance 4 et univers Grand prix)
 - [ ] L'univers : bitume, damier en haut, cartes bordées orange et blanc, stands numérotés dans Ma mission ; tout se lit bien
       au vidéoprojecteur et sur les postes élèves.
-- [ ] Séance 4 : roues du départ (20 à 50 mm), puis pour chaque essai : je pose · je gonfle (coups de pompe, − et +) · je lâche ·
+- [ ] Séance 4 : roues du départ, **avant puis arrière** (20 à 50 mm, elles peuvent différer), puis pour chaque essai : je pose · je gonfle (coups de pompe, − et +) · je lâche ·
       je mesure (pavé, en cm) · ma voiture roule comment ?
 - [ ] Une mesure 10 fois plus grande (ou plus petite) que les autres → message ambre « Mesure encore une fois ? » avec « Je
       mesure encore » et « C'est juste ».
 - [ ] Je change une seule chose : deux cartes touchées → « Choisis un seul changement » (ambre) ; roues, ballon (plus ou moins
-      gonflé), poids (j'enlève, j'ajoute).
+      gonflé), poids (j'enlève, j'ajoute) ; pour les roues : roues avant **ou** roues arrière, puis le diamètre.
 - [ ] Après 3 essais : « Encore un essai ? » ou « Mon graphique » ; au 5e essai, le graphique directement ; « Retour » défait
       le dernier geste sans rien perdre.
 - [ ] Mon graphique : une barre par essai, la distance écrite, le changement dessous, « Le plus loin » sous le meilleur.
+- [ ] La bande orange et blanche ne cache jamais le bas d'un bouton ou d'un texte ; les prénoms se lisent sur la page Bravo.
+- [ ] On peut toujours revenir en arrière : « Retour » sur chaque étape, après une photo prise, et sur la page Bravo (retour à
+      la dernière étape de la séance, même en rouvrant une séance finie depuis Ma mission).
 - [ ] Gabarits (page professeur) : imprimer à 100 %, le trait mesure 50 mm ; les languettes entrent dans les fentes.

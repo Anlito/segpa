@@ -62,8 +62,17 @@ async function sansDefilement(page, nom) {
     // Rien du milieu ne passe sous la barre du bas (boutons) ni au-dessus de celle du haut.
     const bas = document.querySelector('#app .bas');
     const haut = document.querySelector('#app .haut');
-    const limiteBas = bas ? bas.getBoundingClientRect().top + 1 : h;
-    const limiteHaut = haut ? haut.getBoundingClientRect().bottom - 1 : 0;
+    let limiteBas = bas ? bas.getBoundingClientRect().top + 1 : h;
+    let limiteHaut = haut ? haut.getBoundingClientRect().bottom - 1 : 0;
+    // Milieu en panneau bordé (univers d'un projet, ex. la bande de piste de la voiture) : rien ne passe sous la bordure
+    // ni ne sort du panneau.
+    const milieu = document.querySelector('#app .milieu');
+    const bordure = milieu && getComputedStyle(milieu, '::after');
+    if (bordure && bordure.content !== 'none' && parseFloat(bordure.height) > 0) {
+      const r = milieu.getBoundingClientRect();
+      limiteBas = Math.min(limiteBas, r.bottom - parseFloat(bordure.height) + 1);
+      limiteHaut = Math.max(limiteHaut, r.top - 1);
+    }
     const chevauche = [...document.querySelectorAll('#app .milieu *')]
       .filter((el) => el.offsetParent !== null)
       .map((el) => ({ el, r: el.getBoundingClientRect() }))
@@ -145,6 +154,7 @@ async function faireEcran(page, nom, captures, demo) {
     await page.locator('.msg-ambre').waitFor();
     await sansDefilement(page, nom + '-deux');
     if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '-deux.png') });
+    if (await visible(page, '[data-action="choisir-cote"]')) await page.locator('[data-action="choisir-cote"]').nth(1).click();
     await cliquer(page, '[data-action="choisir-detail"]');
     await cliquer(page, '[data-action="change-fait"]');
   } else if (await visible(page, '.pave')) {
@@ -261,6 +271,13 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   for (const s of ['s1', 's2', 's3']) {
     await cliquer(page, '[data-action="continuer"]');
     ecrans.push(await faireSeance(page, 'voiture-' + s, captures));
+    if (s === 's1') {
+      // Une équipe allée trop vite : « Retour » depuis Bravo ramène à la dernière étape, déjà cochée.
+      await cliquer(page, '[data-action="derniere-etape"]');
+      assert.match(await page.locator('.consigne-texte').first().textContent(), /Je range/);
+      await cliquer(page, '[data-action="fait"]');
+      await page.locator('[data-action="fini"]').waitFor();
+    }
     await cliquer(page, '[data-action="fini"]');
     await page.locator('.carte-seance').first().waitFor();
   }

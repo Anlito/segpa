@@ -14,16 +14,17 @@ body { background: var(--bitume); }
 body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; height: 0.875rem; background: var(--damier) 0 0 / 0.875rem 0.875rem; z-index: 5; pointer-events: none; }
 
 /* Ce qui est posé directement sur le bitume s'écrit en blanc. */
-.titre-ecran, .grand-titre, .progression .texte, .plus-binome, .chemin .sep, .album-vide, .pages { color: #fff; }
+/* (le milieu, lui, est un panneau clair : ce qui s'y trouve garde l'encre foncée du socle) */
+.haut .titre-ecran, [data-ecran="accueil"] .grand-titre, .progression .texte, .plus-binome, .album-vide, .pages { color: #fff; }
 .titre-ecran, .grand-titre { transform: skewX(-7deg); }
-.sur-titre { color: #CBD5E1; }
+[data-ecran="accueil"] .sur-titre { color: #CBD5E1; }
 .compte { color: #E2E8F0; }
 .equipe { border-color: #fff; }
 
 /* Le milieu devient un panneau clair, bordé comme une piste. */
 .ecran:not([data-ecran="accueil"]):not([data-ecran="mission"]) .milieu {
   position: relative; margin: 0 1.75rem; border-radius: 2rem; background: var(--fond);
-  box-shadow: 0 0.5rem 0 #0B1220; overflow: hidden;
+  box-shadow: 0 0.5rem 0 #0B1220; overflow: hidden; padding-top: 0.75rem; padding-bottom: 1.75rem;
 }
 .ecran:not([data-ecran="accueil"]):not([data-ecran="mission"]) .milieu::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 0.875rem; background: var(--bordure-piste);

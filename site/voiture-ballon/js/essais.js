@@ -1,7 +1,9 @@
 // Moteur des essais de la séance 4 (« Je teste et j'améliore ») : utilisable dans le navigateur et dans Node (tests).
 // Une valeur d'essais, enregistrée dans la rubrique de l'étape « essais » :
-//   { roues: '30', essais: [{ changement, place, pompe, parti, distance, direction }], graphique: false }
-//   changement : null pour le premier essai, sinon { type: 'roues' | 'ballon' | 'poids', choix: '40' | 'plus' | … }
+//   { roues: { avant: '30', arriere: '40' }, essais: [{ changement, place, pompe, parti, distance, direction }], graphique: false }
+//   changement : null pour le premier essai, sinon { type: 'ballon' | 'poids', choix: 'plus' | … }
+//                ou { type: 'roues', cote: 'avant' | 'arriere', choix: '40' } (les roues avant et arrière peuvent différer).
+//   Ancien format (une seule taille, roues: '30') : lu comme les mêmes roues devant et derrière.
 // Chaque essai se fait en 5 écrans (je pose · je gonfle · je lâche · je mesure · ma voiture roule comment ?), puis on
 // change UNE chose avant l'essai suivant. Après le minimum d'essais, l'équipe choisit « encore un essai » ou son graphique.
 (function (global) {
@@ -14,23 +16,25 @@
   const regles = (r) => Object.assign({}, REGLES, r || {});
 
   function vide() {
-    return { roues: '', essais: [], graphique: false };
+    return { roues: { avant: '', arriere: '' }, essais: [], graphique: false };
   }
 
   function copie(v) {
     const c = v && typeof v === 'object' ? JSON.parse(JSON.stringify(v)) : vide();
     if (!Array.isArray(c.essais)) c.essais = [];
+    if (!c.roues || typeof c.roues !== 'object') c.roues = { avant: c.roues ? String(c.roues) : '', arriere: c.roues ? String(c.roues) : '' };
     return c;
   }
 
   const complet = (e) => !!(e && e.place && e.pompe > 0 && e.parti && typeof e.distance === 'number' && e.direction);
   const essaisFaits = (v) => copie(v).essais.filter(complet);
 
-  // Le prochain écran : roues · ligne · gonfle · lache · mesure · direction · changer · suite · graphique
+  // Le prochain écran : roues-avant · roues-arriere · ligne · gonfle · lache · mesure · direction · changer · suite · graphique
   function ecranEssai(valeur, r) {
     const R = regles(r);
     const v = copie(valeur);
-    if (!v.roues) return 'roues';
+    if (!v.roues.avant) return 'roues-avant';
+    if (!v.roues.arriere) return 'roues-arriere';
     const e = v.essais[v.essais.length - 1];
     if (!e) return 'ligne';
     if (!e.place) return 'ligne';
@@ -50,13 +54,14 @@
       if (!v.essais.length || complet(v.essais[v.essais.length - 1])) v.essais.push({ changement: null });
       return v.essais[v.essais.length - 1];
     };
-    if (quoi === 'roues') v.roues = String(donnee);
+    if (quoi === 'roues-avant') v.roues.avant = String(donnee);
+    else if (quoi === 'roues-arriere') v.roues.arriere = String(donnee);
     else if (quoi === 'ligne') dernier().place = true;
     else if (quoi === 'gonfle') dernier().pompe = Number(donnee);
     else if (quoi === 'lache') dernier().parti = true;
     else if (quoi === 'mesure') dernier().distance = Number(donnee);
     else if (quoi === 'direction') dernier().direction = String(donnee);
-    else if (quoi === 'changer') v.essais.push({ changement: { type: donnee.type, choix: String(donnee.choix) } });
+    else if (quoi === 'changer') v.essais.push({ changement: Object.assign({ type: donnee.type, choix: String(donnee.choix) }, donnee.type === 'roues' ? { cote: donnee.cote === 'arriere' ? 'arriere' : 'avant' } : {}) });
     else if (quoi === 'graphique') v.graphique = true;
     return v;
   }
@@ -71,8 +76,9 @@
     }
     const e = v.essais[v.essais.length - 1];
     if (!e) {
-      if (!v.roues) return null;
-      v.roues = '';
+      if (v.roues.arriere) v.roues.arriere = '';
+      else if (v.roues.avant) v.roues.avant = '';
+      else return null;
       return v;
     }
     if (e.direction) delete e.direction;
@@ -84,14 +90,14 @@
     return v;
   }
 
-  // Les roues sur la voiture au moment de l'essai i (celles du départ, puis le dernier changement de roues).
+  // Les roues sur la voiture au moment de l'essai i : { avant, arriere } (celles du départ, puis les changements).
   function rouesDe(valeur, i) {
     const v = copie(valeur);
-    let roues = v.roues;
+    const roues = Object.assign({}, v.roues);
     const fin = i === undefined ? v.essais.length - 1 : i;
     for (let k = 0; k <= fin && k < v.essais.length; k++) {
       const c = v.essais[k].changement;
-      if (c && c.type === 'roues') roues = c.choix;
+      if (c && c.type === 'roues') roues[c.cote === 'arriere' ? 'arriere' : 'avant'] = c.choix;
     }
     return roues;
   }

@@ -711,7 +711,8 @@
       colonne().innerHTML = `<div class="consigne-ligne"><p class="consigne-texte" style="font-size:2.875rem">Ta photo est bien ?</p>${boutonVoix('Ta photo est bien ?')}</div>
         <button type="button" class="btn btn-principal" data-action="garder" style="align-self:flex-start">${pic('coche')}Je garde</button>
         <button type="button" class="btn btn-second" data-action="recommencer" style="align-self:flex-start">${pic('photo')}Je recommence</button>`;
-      racine.querySelector('.bas .gauche').innerHTML = '';
+      // On peut toujours revenir en arrière, même après la photo (elle n'est pas gardée).
+      racine.querySelector('.bas .gauche').innerHTML = boutonRetour(o.retour || 'precedent').replace(' gauche', '');
     }
 
     async function garder(b) {
@@ -790,10 +791,15 @@
             }
           </div>
         </div>
-        ${bas({ gauche: '<button type="button" class="btn btn-second gauche" data-action="album">' + pic('album') + 'Mon album</button>', principal: boutonPrincipal('fini', 'Ma mission', 'maison') })}
+        ${bas({ gauche: `<div class="gauche" style="display:flex;gap:1rem">${boutonRetour('derniere-etape').replace(' gauche', '')}<button type="button" class="btn btn-second" data-action="album">${pic('album')}Mon album</button></div>`, principal: boutonPrincipal('fini', 'Ma mission', 'maison') })}
       </div>`,
       {
         album: () => ecranAlbum(s.id),
+        // Une équipe allée trop vite revient à la dernière étape de la séance (puis plus loin avec « Retour »).
+        'derniere-etape': () => {
+          etat.index = etapes().length - 1;
+          ecranEtape();
+        },
         fini: async () => {
           const se = etat.session;
           if (!se.lecture && se.dossier) {

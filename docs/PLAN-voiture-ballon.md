@@ -99,7 +99,7 @@ l'unité · explique pourquoi sa voiture avance (**à l'écrit**) · autonomie /
 | Jalon | Contenu |
 |---|---|
 | V1 ✓ 29/10 | données + écrans S1, S2 et S3 (nom, couleur, matériel, fabrication, « ma voiture ne roule pas », décoration, photo officielle) |
-| V2 ✓ 29/10 | S4 : essais, mesures, « je change une chose », graphique ; univers Grand prix ; S3 carrosserie |
+| V2 ✓ 29/10 | S4 : essais, mesures, « je change une chose », graphique ; univers Grand prix ; S3 carrosserie ; retours de Thomas : roues avant et arrière distinctes, bande de piste, prénoms de Bravo, « Retour » partout |
 | V3 | S5 et `course.html` (poules, finales, chrono, podiums, `course.json`, résultat côté élève) |
 | V4 | outil professeur : tuiles, onglet Essais, longueur de piste proposée, évaluation et exports |
 | V5 | recette automatique, essai réel (piste, mètre ruban, vraies voitures), publication |
