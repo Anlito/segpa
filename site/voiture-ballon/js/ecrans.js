@@ -2,7 +2,9 @@
 //   nom-voiture : cartes de noms amusants, ou « J'écris un nom » ;
 //   couleur     : la couleur d'équipe (toujours avec son nom), aperçu de la voiture ;
 //   materiel    : « J'ai pris … » pour chaque pièce du kit, avec de gros boutons − et +.
-// Les essais (séance 4) et la course (séance 5) viendront aux jalons suivants.
+//   resultat-course : le résultat de l'équipe, écrit par course.html dans son dossier (course.json) ;
+//   question-ecrite : une réponse toujours écrite (« Pourquoi ma voiture avance ? »).
+// Les essais (séance 4) sont dans js/ecran-essais.js.
 (function (global) {
   'use strict';
 
@@ -126,6 +128,86 @@
         plus: (b) => changer(b.dataset.id, 1),
         moins: (b) => changer(b.dataset.id, -1),
         compte: () => O.suivant(valeur),
+      },
+    };
+  });
+  // ---------- Mon résultat (séance 5) ----------
+  // course.html écrit course.json dans le dossier de chaque équipe : { application, type: 'course', equipe, resultat }.
+  // Pas encore de fichier (ou mode enseignant sans dossier) : « Le professeur te donnera ton résultat. »
+  const DEMO_RESULTAT = { course: 'Finale secondaire', finale: true, rang: 2, nombre: 3, arrivee: true, temps: 4.3, distance: null, record: false };
+
+  async function lireResultat(O) {
+    const se = O.etat.session;
+    if (se.lecture) return DEMO_RESULTAT;
+    if (!se.dossier) return null;
+    try {
+      const f = await (await se.dossier.getFileHandle('course.json')).getFile();
+      const c = JSON.parse(await f.text());
+      return c && c.type === 'course' && c.resultat ? c.resultat : null;
+    } catch {
+      return null;
+    }
+  }
+
+  S.ajouterEcran('resultat-course', (etape, O) => {
+    const sous = O.sous();
+    const voiture = S.voitureDe(O.D());
+    if (!('resultat' in sous))
+      return {
+        milieu: `<div class="consigne-ligne" style="align-items:center"><p class="consigne-texte">Je regarde mon résultat…</p></div>`,
+        principal: O.boutonPrincipal('resultat-suivant', 'Suivant', 'suivant', true),
+        actions: {},
+        apres: async () => {
+          sous.resultat = await lireResultat(O);
+          O.rafraichir();
+        },
+      };
+    const r = sous.resultat;
+    const m = S.messageResultat(r);
+    const couleur = voiture.couleur || 'var(--accent)';
+    const texte = m ? `${m.titre} ${m.sousTitre}` : 'Le professeur te donnera ton résultat.';
+    return {
+      milieu: `<div class="resultat-course">
+          <div class="medaille" style="background:${O.ech(couleur)}">${O.pic(r && r.arrivee && r.rang <= 3 ? 'drapeau' : 'voiture')}${r && r.arrivee ? `<strong>${O.ech(S.ordinal(r.rang))}</strong>` : ''}</div>
+          <div class="consigne">
+            <span class="pastille">${O.ech(voiture.nom || 'Ma voiture')}${r ? ' · ' + O.ech(r.course) : ''}</span>
+            <div class="consigne-ligne"><p class="consigne-texte">${O.ech(m ? m.titre : 'Le professeur te donnera ton résultat.')}</p>${O.boutonVoix(texte)}</div>
+            <p class="consigne-detail">${O.ech(m ? m.sousTitre : 'Tu peux regarder encore dans un moment.')}</p>
+            ${r ? '' : `<button type="button" class="btn btn-second" data-action="resultat-encore" style="align-self:flex-start">${O.pic('remonter')}Je regarde encore</button>`}
+          </div>
+        </div>`,
+      principal: O.boutonPrincipal('resultat-suivant', 'Suivant', 'suivant'),
+      actions: {
+        'resultat-encore': () => {
+          delete sous.resultat;
+          O.rafraichir();
+        },
+        'resultat-suivant': () => O.suivant(r ? { resultat: r } : { resultat: null }),
+      },
+    };
+  });
+
+  // ---------- Une réponse écrite ----------
+
+  S.ajouterEcran('question-ecrite', (etape, O) => {
+    const valeur = brouillon(O, etape, { texte: '' });
+    return {
+      milieu: `<div class="colonne" style="gap:1.25rem;align-self:stretch;justify-content:center;max-width:64rem">
+          <div class="consigne-ligne" style="align-items:center"><span class="tuile-picto">${O.pic(etape.picto || 'texte')}</span><p class="consigne-texte" style="font-size:2.5rem">${O.ech(etape.texte)}</p>${O.boutonVoix(etape.texte + ' J’écris ma réponse.')}</div>
+          <label class="etiquette-reponse">${S.picto('texte')}J’écris ma réponse</label>
+          <textarea class="champ-libre" rows="3" maxlength="300" aria-label="Ma réponse">${O.ech(valeur.texte)}</textarea>
+        </div>`,
+      principal: O.boutonPrincipal('question-suivante', 'C’est écrit', 'coche', !valeur.texte.trim()),
+      actions: { 'question-suivante': () => O.suivant({ texte: O.racine.querySelector('.champ-libre').value.trim() }) },
+      apres: () => {
+        const t = O.racine.querySelector('.champ-libre');
+        t.focus();
+        t.setSelectionRange(t.value.length, t.value.length);
+        t.addEventListener('input', () => {
+          O.racine.querySelector('[data-action="question-suivante"]').disabled = !t.value.trim();
+          S.noterBrouillon(O.D(), O.seance().id, etape.id, { texte: t.value });
+          O.enregistrer(false);
+        });
       },
     };
   });

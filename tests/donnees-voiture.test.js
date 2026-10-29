@@ -6,7 +6,7 @@ const { moteur, donnees, pictos } = require('./outils.js');
 const S = moteur();
 const { projet, etapes, reglages, donneesProjet } = donnees('voiture-ballon');
 const PICTOS = new Set(pictos());
-const TYPES = ['regle', 'consigne', 'photo', 'cases', 'bilan', 'nom-voiture', 'couleur', 'materiel', 'essais', 'course'];
+const TYPES = ['regle', 'consigne', 'photo', 'cases', 'bilan', 'nom-voiture', 'couleur', 'materiel', 'essais', 'resultat-course', 'question-ecrite'];
 
 test('identité, classe et dossier du projet', () => {
   assert.equal(projet.id, 'voiture-ballon');
@@ -25,6 +25,7 @@ test('5 séances, identifiants uniques, types connus, pictogrammes dessinés, co
       for (const p of [e.picto, ...(e.lignes || []).map((l) => l.picto)].filter(Boolean)) assert.ok(PICTOS.has(p), `${s.id}/${e.id} : picto ${p}`);
       for (const t of [e.texte, ...(e.lignes || []).map((l) => l.texte)].filter(Boolean)) assert.ok(S.nombreDeMots(t) <= 8, `${s.id}/${e.id} : « ${t} »`);
       if (e.type === 'photo') assert.ok(e.legende, `${s.id}/${e.id} : légende`);
+      for (const ph of e.phrases || []) assert.ok(S.nombreDeMots(ph) <= 8, `${s.id}/${e.id} : « ${ph} »`);
     }
   }
 });

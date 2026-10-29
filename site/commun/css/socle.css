@@ -433,3 +433,9 @@ input.champ-libre { height: 6rem; }
 .nom-essai span { display: flex; align-items: center; gap: 0.375rem; }
 .nom-essai .picto { width: 1.75rem; height: 1.75rem; color: var(--accent); }
 .nom-essai em { font-style: normal; font-weight: 700; color: var(--accent-fonce); background: var(--accent-clair); border-radius: 1rem; padding: 0.125rem 0.75rem; }
+
+/* ---------- Mon résultat (voiture à ballon, séance 5) ---------- */
+.resultat-course { display: flex; align-items: center; gap: 3rem; }
+.medaille { width: 17rem; height: 17rem; border-radius: 50%; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem; border: 0.5rem solid var(--surface); box-shadow: 0 0 0 0.375rem var(--encre); flex-shrink: 0; }
+.medaille .picto { width: 7rem; height: 7rem; }
+.medaille strong { font-size: 3.5rem; line-height: 1; }

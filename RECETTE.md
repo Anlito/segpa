@@ -97,3 +97,18 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
 - [ ] On peut toujours revenir en arrière : « Retour » sur chaque étape, après une photo prise, et sur la page Bravo (retour à
       la dernière étape de la séance, même en rouvrant une séance finie depuis Ma mission).
 - [ ] Gabarits (page professeur) : imprimer à 100 %, le trait mesure 50 mm ; les languettes entrent dans les fentes.
+
+## Voiture à ballon — jalon V3 (séance 5 et course au vidéoprojecteur)
+Page professeur → « La course (vidéoprojecteur) » (d'abord en « Démonstration », puis avec le vrai dossier Voiture-ballon) :
+- [ ] Les voitures du jour : nom, couleur et photo officielle de chaque équipe ; toucher une voiture la marque « Absente ».
+- [ ] Couloirs du jour (2, 3 ou 4) → les poules ; toucher une voiture la fait changer de poule.
+- [ ] Une course : « Top départ ! » (ou la barre d'espace), le chrono tourne ; « Arrivée » dans chaque couloir (ou les touches
+      1 à 4) ; « N'arrive pas » avec la distance en cm ; « Faux départ » efface la course.
+- [ ] Après les poules : les finales par niveau (principale, secondaire, tertiaire), courues de la dernière à la principale ;
+      un podium par finale ; « Bravo à tous » avec le record de la classe.
+- [ ] « Enregistrer les résultats » : course.json dans le dossier Voiture-ballon et dans le dossier de chaque équipe ;
+      « Tableau (CSV) » s'ouvre dans le tableur ; « Diplômes de pilote » s'imprime en noir et blanc, une page par voiture.
+- [ ] Page rechargée au milieu de la course : « Reprendre la course » repart où on en était.
+- [ ] Côté élève, séance 5 : voiture prête, 3 règles, « Je regarde la piste ! », **Mon résultat** (message encourageant, ou
+      « Le professeur te donnera ton résultat » et « Je regarde encore »), « Pourquoi ma voiture avance ? » (réponse écrite),
+      bilan, photo finale.

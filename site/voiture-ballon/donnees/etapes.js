@@ -1,7 +1,7 @@
 // Les séances de la voiture à ballon et leurs écrans (plan validé le 29/10/2026 : docs/PLAN-voiture-ballon.md).
 // Types d'écran du socle : regle · consigne (image : photo de Thomas, pictogramme en attendant) · photo · cases · bilan.
-// Écrans propres : nom-voiture · couleur · materiel (js/ecrans.js) ; essais (js/ecran-essais.js) ; course (jalon V3 :
-// tant qu'il n'existe pas, le site le saute).
+// Écrans propres : nom-voiture · couleur · materiel · resultat-course · question-ecrite (js/ecrans.js) ;
+// essais (js/ecran-essais.js). La course elle-même se fait au vidéoprojecteur (course.html).
 // Séance 3 : carrosserie en carton fixée dans les fentes du châssis, à partir d'un gabarit imprimé (documents/ ; la
 // version gardée, 4 pièces ou patron à plier, sera choisie après les essais de Thomas). Photos : img/carrosserie/.
 // depannage : bouton « Ma voiture ne roule pas » sur les écrans de la séance ; chaque cause ramène à une étape
@@ -124,10 +124,15 @@
       {
         "id": "s5", "titre": "La course", "sousTitre": "", "picto": "drapeau",
         "etapes": [
+          { "id": "prete", "type": "consigne", "picto": "voiture", "texte": "Ma voiture est prête.", "detail": "Roues, ballon, carrosserie : tout tient.", "bouton": "Elle est prête" },
           { "id": "regle-piste", "type": "regle", "pastille": "Règle de la course", "picto": "drapeau", "texte": "La piste reste libre.", "detail": "Je reste derrière la ligne." },
           { "id": "regle-signal", "type": "regle", "pastille": "Règle de la course", "picto": "main-stop", "texte": "Je lâche au signal.", "detail": "Pas avant." },
           { "id": "regle-pousser", "type": "regle", "pastille": "Règle de la course", "picto": "voiture", "texte": "Je ne pousse pas la voiture.", "detail": "Seul le ballon la fait avancer." },
-          { "id": "course", "type": "course", "titre": "La course" }
+          { "id": "attente", "type": "consigne", "picto": "oeil", "texte": "Je regarde la piste !", "detail": "J'attends mon tour, derrière la ligne.", "bouton": "La course est finie" },
+          { "id": "resultat", "type": "resultat-course", "titre": "Mon résultat" },
+          { "id": "pourquoi", "type": "question-ecrite", "picto": "ballon", "texte": "Pourquoi ma voiture avance ?" },
+          { "id": "bilan", "type": "bilan", "phrases": ["J'ai suivi la fiche de fabrication.", "J'ai changé une seule chose à la fois.", "J'ai bien travaillé avec mon binôme."] },
+          { "id": "photo-finale", "type": "photo", "picto": "drapeau", "texte": "Je photographie ma voiture à l'arrivée.", "legende": "Photo finale" }
         ]
       }
     ]

@@ -79,3 +79,10 @@ body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; height: 
 /* ---------- Bravo, album : photos posées sur le bitume ---------- */
 .fait-ligne { color: var(--encre); }
 
+
+/* Bilan (smileys) : un peu plus compact, pour que 3 phrases tiennent dans le panneau. */
+.questions-bilan { gap: 0.875rem; }
+.question-bilan { padding: 0.5rem 1.25rem; }
+.question-bilan p { font-size: 1.875rem; }
+.visage { width: 7.5rem; height: 7.5rem; }
+.visage .picto { width: 4rem; height: 4rem; }

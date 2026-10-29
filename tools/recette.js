@@ -173,7 +173,7 @@ async function faireEcran(page, nom, captures, demo) {
     await page.locator('textarea.champ-libre').fill('Elle fait tourner la lame.');
     await cliquer(page, '[data-action="question-suivante"]');
   } else {
-    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'fleche-faite', 'remise', 'fait', 'essai-place', 'essai-parti', 'essais-finis'];
+    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'fleche-faite', 'remise', 'fait', 'essai-place', 'essai-parti', 'essais-finis', 'resultat-suivant'];
     for (const a of suite)
       if (await visible(page, `[data-action="${a}"]`)) {
         await cliquer(page, `[data-action="${a}"]`);
@@ -306,10 +306,72 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   const r = await page.evaluate(() => Segpa.resumeEssais(Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's4', 'essais')));
   assert.equal(r.nombre, 3);
   assert.equal(r.changements.length, 2);
+  // Séance 5 : prête, règles, attente, mon résultat (démonstration), réponse écrite, bilan, photo finale.
+  await cliquer(page, '[data-action="continuer"]');
+  ecrans.push(await faireSeance(page, 'voiture-s5', captures));
+  await cliquer(page, '[data-action="fini"]');
+  await page.locator('.carte-seance').first().waitFor();
+  assert.equal(await page.locator('.carte-seance.fait').count(), 5);
+  const s5 = await page.evaluate(() => ({ r: Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's5', 'resultat'), q: Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's5', 'pourquoi') }));
+  assert.equal(s5.r.resultat.course, 'Finale secondaire');
+  assert.ok(s5.q.texte.length > 0, 'réponse écrite gardée');
   assert.deepEqual(erreurs, []);
   assert.deepEqual(horsSite, []);
   await contexte.close();
   return ecrans;
+}
+
+// La course au vidéoprojecteur (démonstration) : voitures (une absente), 3 couloirs, poules, chaque course au chrono
+// (touches 1 à 3, une voiture qui n'arrive pas), finales par niveau, podiums, « Bravo à tous ».
+async function scenarioCourse(navigateur, base, taille, captures) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
+  await page.goto(base + 'voiture-ballon/course.html');
+  const ecran = async (nom) => {
+    await page.waitForTimeout(120);
+    await sansDefilement(page, 'course-' + nom);
+    if (captures) await page.screenshot({ path: path.join(SORTIE, 'course-' + nom + '.png') });
+  };
+  await ecran('accueil');
+  await cliquer(page, '[data-action="demo"]');
+  await cliquer(page, '[data-action="absente"]');
+  await cliquer(page, '[data-action="couloirs"][data-n="3"]');
+  await ecran('voitures');
+  await cliquer(page, '[data-action="poules"]');
+  await ecran('poules');
+  await cliquer(page, '[data-action="lancer-poules"]');
+  let courses = 0;
+  for (let tour = 0; tour < 30; tour++) {
+    const etape = await page.evaluate(() => Segpa.course.etat().etape);
+    if (etape === 'course') {
+      courses++;
+      await cliquer(page, '[data-action="top-depart"]');
+      await page.waitForTimeout(250);
+      const n = await page.locator('[data-action="arrivee"]').count();
+      for (let i = 0; i < n - 1; i++) {
+        await page.keyboard.press(String(i + 1));
+        await page.waitForTimeout(150);
+      }
+      await page.locator('.distance input').first().fill('320');
+      await cliquer(page, '[data-action="distance"]');
+      await ecran('course-' + courses);
+      await cliquer(page, '[data-action="course-suivante"]');
+    } else if (etape === 'classement') {
+      await ecran('finales');
+      await cliquer(page, '[data-action="lancer-finales"]');
+    } else if (etape === 'podium') {
+      await ecran('podium-' + courses);
+      await cliquer(page, '[data-action="apres-podium"]');
+    } else if (etape === 'fin') break;
+  }
+  await ecran('fin');
+  const e = await page.evaluate(() => Segpa.course.etat());
+  assert.deepEqual(e.poules.map((p) => p.voitures.length), [3, 2, 2]);
+  assert.deepEqual(e.finales.map((f) => f.nom), ['Finale principale', 'Finale secondaire', 'Finale tertiaire']);
+  assert.equal(courses, 6, '3 poules + 3 finales');
+  assert.ok(await page.locator('.record').count());
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
 }
 
 // Dossier « réseau » simulé par le dossier privé du navigateur (même interface que le vrai dossier).
@@ -584,10 +646,21 @@ async function scenarioProfesseur(navigateur, base) {
         const t = `${taille.width}×${taille.height}`;
         try {
           const ecrans = await scenarioVoiture(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
-          noter(`- OK ${nomBase} ${t} · voiture à ballon : séances 1 à 4 de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, carrosserie, photo officielle, 3 essais avec un changement à la fois et graphique), Ma mission à 5 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
+          noter(`- OK ${nomBase} ${t} · voiture à ballon : séances 1 à 5 de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, carrosserie, photo officielle, 3 essais avec un changement à la fois et graphique, résultat de la course, réponse écrite), Ma mission à 5 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
         } catch (e) {
           ok = false;
           noter(`- ÉCHEC ${nomBase} ${t} · voiture à ballon : ${e.message.split('\n')[0]}`);
+        }
+      }
+    for (const [nomBase, base] of bases)
+      for (const taille of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+        const t = `${taille.width}×${taille.height}`;
+        try {
+          await scenarioCourse(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
+          noter(`- OK ${nomBase} ${t} · course au vidéoprojecteur (démonstration) : 7 voitures dont une absente retirée, 3 couloirs, poules de 3, 2 et 2, 6 courses au chrono (touches du clavier, une voiture qui n’arrive pas), finales principale, secondaire et tertiaire, podiums, record, rien ne dépasse, aucune erreur.`);
+        } catch (e) {
+          ok = false;
+          noter(`- ÉCHEC ${nomBase} ${t} · course : ${e.message.split('\n')[0]}`);
         }
       }
     // Le dossier privé du navigateur n'existe pas en file:// : ce scénario passe par le serveur local.
