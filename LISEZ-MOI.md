@@ -41,6 +41,20 @@ en favori. Elle mène au suivi de la classe et aux écrans élèves en démonstr
    Différenciation (vos notes, visibles sur la tuile, jamais par les élèves).
 Vos notes vont dans `professeur.json`, dans le dossier du projet ; l'outil n'écrit jamais dans le fichier d'une équipe.
 
+## Voiture à ballon
+Même fonctionnement que le taille-crayon, dossier `… › 6A › COMMUN › TECHNOLOGIE › Voiture-ballon` (avec `classe.json`).
+- **Suivre la classe** : `site/voiture-ballon/prof.html`. Tuiles : nom et couleur de la voiture, matériel, essais,
+  course ; alertes « matériel pris différent du kit », « voiture qui n'avance pas » ; bandeau **Piste** avec une
+  longueur proposée d'après les meilleurs essais ; onglets **Essais** et **Voiture et course**.
+- **La course** : `site/voiture-ballon/course.html`, au vidéoprojecteur. Ouvrir le dossier Voiture-ballon (ou
+  « Démonstration »), retirer les absents, choisir les couloirs, puis les poules, chaque course au chrono (« Top départ »,
+  « Arrivée » ou touches 1 à 4, « N'arrive pas » avec la distance), les finales et les podiums. « Enregistrer les
+  résultats » écrit `course.json` dans le dossier du projet et dans celui de chaque équipe : les élèves voient leur
+  résultat sur l'écran « Mon résultat ». Tableau CSV et diplômes de pilote à imprimer.
+- **Gabarits de carrosserie** (`site/voiture-ballon/documents/`) : 4 pièces ou patron à plier (PDF, à imprimer à
+  100 %), et le patron en SVG pour la Cricut (188 × 134 mm, calques découpe et plis), pour le châssis v8.
+- Les 7 critères d'évaluation de la voiture sont une **proposition à valider** (`donnees/criteres.js`).
+
 ## Évaluer
 Fiche d'une équipe → onglet **Évaluation** : les 7 critères de votre Excel, une colonne par élève, 4 boutons par case
 (✗ R Rouge · ~ J Jaune · ✓ V Vert clair · ★ VV Vert foncé ; toucher encore le même bouton efface). « Même niveau pour
