@@ -291,6 +291,7 @@
             : ''
         }
         <div class="pc-resume"><span><b>${etat.equipes.length}</b> équipe${etat.equipes.length > 1 ? 's' : ''}</span>${S.etapes.seances.map((s, i) => `<span>Séance ${i + 1} finie : <b>${finies(s.id)}</b></span>`).join('')}<span>Aides en cours : <b>${aides.length}</b></span></div>
+        ${P().bandeauClasse ? P().bandeauClasse(etat.equipes) : ''}
         ${S.criteres ? `<div class="pc-exports"><span>Évaluation :</span><button type="button" class="pb-btn" data-action="excel">Excel</button><button type="button" class="pb-btn" data-action="csv">CSV</button><button type="button" class="pb-btn" data-action="carnet" title="Niveaux 1 à 4 par critère, à importer dans le Carnet de classe">Carnet de classe</button><button type="button" class="pb-btn" data-action="ceintures">Feuilles ceinture</button>${etat.dossier ? '' : '<span class="pc-attention">Fichiers importés : l’évaluation n’est pas enregistrée, pensez à exporter.</span>'}</div>` : ''}
         <div class="pc-tuiles">${liste.map(tuile).join('') || '<p class="pc-vide">Aucune équipe pour l’instant.</p>'}</div>
         ${etat.invalides.length ? `<details class="pc-invalides"><summary>${etat.invalides.length} fichier(s) non lu(s)</summary><ul>${etat.invalides.map((x) => `<li>${ech(x.nom)} : ${ech(x.raison)}</li>`).join('')}</ul></details>` : ''}

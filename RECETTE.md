@@ -70,3 +70,56 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
 - Voix française : oui / non
 - Webcam : modèle, image nette ? lumière ?
 - Remarques des élèves :
+
+## Voiture à ballon — jalon V1 (séances 1 à 3)
+`site/professeur.html` → « Course de voitures à ballon » → Écrans élèves (démonstration) :
+- [ ] Ma mission : 5 séances lisibles, sans défilement.
+- [ ] Séance 1 : 4 règles, nom de la voiture (cartes ou « J'écris un nom »), couleur d'équipe (aperçu de la voiture), modèle
+      (photo `img/modele.jpg` quand elle existe), « J'ai pris… » avec − et +, photo des pièces, rangement.
+- [ ] Séance 2 : la fabrication pas à pas (photos `img/fabrication/1.jpg`… quand elles existent), « Ma voiture ne roule pas »
+      → la cause ramène à la bonne étape.
+- [ ] Séance 3 (carrosserie) : gabarit, tracé, découpe, pli, languettes dans les fentes, roues qui tournent, décoration,
+      vérification, **photo officielle**, rangement.
+
+## Voiture à ballon — jalon V2 (séance 4 et univers Grand prix)
+- [ ] L'univers : bitume, damier en haut, cartes bordées orange et blanc, stands numérotés dans Ma mission ; tout se lit bien
+      au vidéoprojecteur et sur les postes élèves.
+- [ ] Séance 4 : roues du départ, **avant puis arrière** (20 à 50 mm, elles peuvent différer), puis pour chaque essai : je pose · je gonfle (coups de pompe, − et +) · je lâche ·
+      je mesure (pavé, en cm) · ma voiture roule comment ?
+- [ ] Une mesure 10 fois plus grande (ou plus petite) que les autres → message ambre « Mesure encore une fois ? » avec « Je
+      mesure encore » et « C'est juste ».
+- [ ] Je change une seule chose : deux cartes touchées → « Choisis un seul changement » (ambre) ; roues, ballon (plus ou moins
+      gonflé), poids (j'enlève, j'ajoute) ; pour les roues : roues avant **ou** roues arrière, puis le diamètre.
+- [ ] Après 3 essais : « Encore un essai ? » ou « Mon graphique » ; au 5e essai, le graphique directement ; « Retour » défait
+      le dernier geste sans rien perdre.
+- [ ] Mon graphique : une barre par essai, la distance écrite, le changement dessous, « Le plus loin » sous le meilleur.
+- [ ] La bande orange et blanche ne cache jamais le bas d'un bouton ou d'un texte ; les prénoms se lisent sur la page Bravo.
+- [ ] On peut toujours revenir en arrière : « Retour » sur chaque étape, après une photo prise, et sur la page Bravo (retour à
+      la dernière étape de la séance, même en rouvrant une séance finie depuis Ma mission).
+- [ ] Gabarits (page professeur) : imprimer à 100 %, le trait mesure 50 mm ; les languettes entrent dans les fentes.
+
+## Voiture à ballon — jalon V3 (séance 5 et course au vidéoprojecteur)
+Page professeur → « La course (vidéoprojecteur) » (d'abord en « Démonstration », puis avec le vrai dossier Voiture-ballon) :
+- [ ] Les voitures du jour : nom, couleur et photo officielle de chaque équipe ; toucher une voiture la marque « Absente ».
+- [ ] Couloirs du jour (2, 3 ou 4) → les poules ; toucher une voiture la fait changer de poule.
+- [ ] Une course : « Top départ ! » (ou la barre d'espace), le chrono tourne ; « Arrivée » dans chaque couloir (ou les touches
+      1 à 4) ; « N'arrive pas » avec la distance en cm ; « Faux départ » efface la course.
+- [ ] Après les poules : les finales par niveau (principale, secondaire, tertiaire), courues de la dernière à la principale ;
+      un podium par finale ; « Bravo à tous » avec le record de la classe.
+- [ ] « Enregistrer les résultats » : course.json dans le dossier Voiture-ballon et dans le dossier de chaque équipe ;
+      « Tableau (CSV) » s'ouvre dans le tableur ; « Diplômes de pilote » s'imprime en noir et blanc, une page par voiture.
+- [ ] Page rechargée au milieu de la course : « Reprendre la course » repart où on en était.
+- [ ] Côté élève, séance 5 : voiture prête, 3 règles, « Je regarde la piste ! », **Mon résultat** (message encourageant, ou
+      « Le professeur te donnera ton résultat » et « Je regarde encore »), « Pourquoi ma voiture avance ? » (réponse écrite),
+      bilan, photo finale.
+
+## Voiture à ballon — jalon V4 (outil professeur)
+Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemples`, puis ouvrir `exemples/Voiture-ballon`) :
+- [ ] Tuiles : nom et couleur de la voiture, matériel (kit complet ou écart), essais (nombre, meilleur, changements), course.
+- [ ] Alertes en ambre : matériel pris différent du kit, voiture qui n'avance pas (deux essais à 0 cm), rien depuis 15 min.
+- [ ] Bandeau « Piste » : longueur proposée d'après les meilleurs essais (vous la gardez ou la changez sur la piste).
+- [ ] Fiche d'une équipe : onglets Essais (tableau, graphique, roues avant et arrière) et Voiture et course (matériel,
+      carrosserie, résultat, réponse écrite « Pourquoi ma voiture avance ? »).
+- [ ] Évaluation : les 7 critères (à valider), repères automatiques à côté, note /20, ceinture ; exports Excel, CSV, Carnet,
+      feuilles ceinture.
+- [ ] Patron pour la Cricut (SVG) : s'importe à la bonne taille (188 × 134 mm), découpe et plis sur deux calques.

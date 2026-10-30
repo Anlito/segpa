@@ -164,7 +164,7 @@
   function ecranAccueil() {
     const p = S.projet;
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="accueil">
         <div class="accueil-titre">
           <div class="logo-projet${p.photo ? ' avec-photo' : ''}">${S.photoOuPicto(p.photo, p.picto)}</div>
           <div><div class="sur-titre">${ech(p.niveau)}</div><h1 class="grand-titre">${ech(p.titre)}</h1></div>
@@ -197,7 +197,7 @@
     const chemin = cheminProjet();
     const cible = chemin[chemin.length - 1];
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="dossier">
         <div class="haut">
           <button type="button" class="btn btn-second" data-action="accueil">${pic('retour')}Retour</button>
           <h1 class="titre-ecran">Ouvre le dossier ${ech(cible)}</h1>
@@ -259,7 +259,7 @@
         </div></div>`;
     }
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="prenoms">
         <div class="haut">
           <button type="button" class="btn btn-second" data-action="retour">${pic('retour')}Retour</button>
           <h1 class="titre-ecran">${avecBoutons ? 'Touche vos deux prénoms' : 'Écris vos deux prénoms'}</h1>
@@ -332,7 +332,7 @@
     const visibles = liste.slice(p * parPage, (p + 1) * parPage);
     const pages = Math.ceil(liste.length / parPage);
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="equipes">
         <div class="haut">
           <button type="button" class="btn btn-second" data-action="retour">${pic('retour')}Retour</button>
           <h1 class="titre-ecran">Touche votre équipe</h1>
@@ -420,7 +420,7 @@
       })
       .join('');
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="mission">
         <div class="haut">
           <h1 class="titre-ecran">Ma mission</h1>
           ${boutonVoix('Ma mission. ' + seances().map((s, i) => `Séance ${i + 1} : ${s.titre} ${s.sousTitre || ''}.`).join(' '))}
@@ -429,7 +429,7 @@
           <button type="button" class="btn btn-maison btn-petit" data-action="son" aria-pressed="${S.voix.sonActif()}">${pic(S.voix.sonActif() ? 'son' : 'sans-son')}Son</button>
           ${etiquetteEquipe()}
         </div>
-        <div class="milieu"><div class="frise">${cartes}</div></div>
+        <div class="milieu${seances().length > 3 ? ' milieu-large' : ''}"><div class="frise${seances().length > 3 ? ' nombreuses' : ''}">${cartes}</div></div>
         ${bas({ gauche: `<div class="gauche">${etatEnregistrement()}</div>`, principal: boutonPrincipal('continuer', 'Je continue', 'lecture') })}
       </div>`,
       {
@@ -475,13 +475,50 @@
     if (!etat.sous || etat.sous.cle !== cle) etat.sous = { cle };
     const vue = TYPES[etape.type](etape);
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="etape">
         ${hautEtape(etape)}
         <div class="milieu">${vue.milieu}</div>
-        ${bas({ gauche: vue.gauche || boutonRetour('precedent'), principal: vue.principal })}
+        ${bas({ gauche: (vue.gauche || boutonRetour('precedent')) + boutonDepannage(), principal: vue.principal })}
       </div>`,
-      Object.assign({ precedent }, vue.actions),
+      Object.assign({ precedent, depannage: ecranDepannage }, vue.actions),
       vue.apres
+    );
+  }
+
+  // Dépannage d'une séance (données : seance.depannage = { texte, picto, causes: [{ picto, texte, etape }] }) :
+  // l'élève touche la cause qu'il voit, l'outil le ramène à l'étape concernée, sans donner la solution.
+  const boutonDepannage = () => {
+    const d = etat.seance && etat.seance.depannage;
+    return d ? `<button type="button" class="btn btn-second btn-depannage" data-action="depannage">${pic(d.picto || 'question')}${ech(d.texte)}</button>` : '';
+  };
+
+  function ecranDepannage() {
+    const d = etat.seance.depannage;
+    afficher(
+      `<div class="ecran" data-ecran="depannage">
+        <div class="haut">${boutonMaison()}<h1 class="titre-ecran">${ech(d.texte)}</h1>${boutonVoix(d.texte + '. Qu’est-ce que tu vois ? ' + d.causes.map((c) => c.texte).join('. ') + '.')}<div class="espace"></div>${etiquetteEquipe()}</div>
+        <div class="milieu" style="flex-direction:column;gap:2rem">
+          <p class="consigne-texte" style="font-size:2.5rem">Qu’est-ce que tu vois ?</p>
+          <div class="causes">${d.causes
+            .map((c, i) => `<button type="button" class="cause" data-action="cause" data-i="${i}"><span class="tuile">${pic(c.picto)}</span>${ech(c.texte)}</button>`)
+            .join('')}</div>
+        </div>
+        ${bas({ gauche: boutonRetour('retour-etape') })}
+      </div>`,
+      {
+        'retour-etape': () => ecranEtape(),
+        cause: (b) => {
+          // etape : « verifier » (même séance) ou « s2/verifier » (étape d'une autre séance).
+          const c = d.causes[Number(b.dataset.i)];
+          const [idSeance, idEtape] = c.etape.includes('/') ? c.etape.split('/') : [etat.seance.id, c.etape];
+          const autre = seances().find((x) => x.id === idSeance);
+          if (autre && autre !== etat.seance) etat.seance = autre;
+          const i = etapes().findIndex((e) => e.id === idEtape);
+          if (i >= 0) etat.index = i;
+          ecranEtape();
+          message('Regarde bien cette étape, puis réessaie.', 4000);
+        },
+      }
     );
   }
 
@@ -503,8 +540,9 @@
   }
 
   function blocConsigne(etape, pastille) {
-    const pictos = etape.picto2 ? S.pictoDouble(etape.picto, etape.picto2, 120) : pic(etape.picto);
-    return `<div class="picto-grand${etape.picto2 ? '' : ' seul'}">${pictos}</div>
+    // image : photo de Thomas (modèle, étape de fabrication) ; tant qu'elle manque, le pictogramme s'affiche.
+    const pictos = etape.image ? S.photoOuPicto(etape.image, etape.picto) : etape.picto2 ? S.pictoDouble(etape.picto, etape.picto2, 120) : pic(etape.picto);
+    return `<div class="picto-grand${etape.picto2 && !etape.image ? '' : ' seul'}${etape.image ? ' avec-photo' : ''}">${pictos}</div>
       <div class="consigne">
         ${pastille ? `<span class="pastille">${ech(pastille)}</span>` : ''}
         <div class="consigne-ligne"><p class="consigne-texte">${ech(etape.texte)}</p>${boutonVoix(lisible(etape.texte, etape.detail))}</div>
@@ -673,7 +711,8 @@
       colonne().innerHTML = `<div class="consigne-ligne"><p class="consigne-texte" style="font-size:2.875rem">Ta photo est bien ?</p>${boutonVoix('Ta photo est bien ?')}</div>
         <button type="button" class="btn btn-principal" data-action="garder" style="align-self:flex-start">${pic('coche')}Je garde</button>
         <button type="button" class="btn btn-second" data-action="recommencer" style="align-self:flex-start">${pic('photo')}Je recommence</button>`;
-      racine.querySelector('.bas .gauche').innerHTML = '';
+      // On peut toujours revenir en arrière, même après la photo (elle n'est pas gardée).
+      racine.querySelector('.bas .gauche').innerHTML = boutonRetour(o.retour || 'precedent').replace(' gauche', '');
     }
 
     async function garder(b) {
@@ -738,7 +777,7 @@
     if (!lignes.length) lignes.push('Séance terminée');
     const noms = d.equipe.eleves.length > 1 ? d.equipe.eleves.slice(0, -1).join(', ') + ' et ' + d.equipe.eleves.slice(-1) : d.equipe.eleves[0];
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="bravo">
         <div class="haut">${boutonMaison()}<div class="espace"></div>${etatEnregistrement()}</div>
         <div class="milieu" style="gap:3.5rem">
           <div class="collage">${photos.length ? photos.map(() => '<img class="photo" alt="">').join('') : `<div class="sans-photo">${pic(s.picto)}</div>`}</div>
@@ -752,10 +791,15 @@
             }
           </div>
         </div>
-        ${bas({ gauche: '<button type="button" class="btn btn-second gauche" data-action="album">' + pic('album') + 'Mon album</button>', principal: boutonPrincipal('fini', 'Ma mission', 'maison') })}
+        ${bas({ gauche: `<div class="gauche" style="display:flex;gap:1rem">${boutonRetour('derniere-etape').replace(' gauche', '')}<button type="button" class="btn btn-second" data-action="album">${pic('album')}Mon album</button></div>`, principal: boutonPrincipal('fini', 'Ma mission', 'maison') })}
       </div>`,
       {
         album: () => ecranAlbum(s.id),
+        // Une équipe allée trop vite revient à la dernière étape de la séance (puis plus loin avec « Retour »).
+        'derniere-etape': () => {
+          etat.index = etapes().length - 1;
+          ecranEtape();
+        },
         fini: async () => {
           const se = etat.session;
           if (!se.lecture && se.dossier) {
@@ -792,7 +836,7 @@
     const visibles = toutes.slice(p * parPage, (p + 1) * parPage);
     const pages = Math.max(1, Math.ceil(toutes.length / parPage));
     afficher(
-      `<div class="ecran">
+      `<div class="ecran" data-ecran="album">
         <div class="haut">
           ${boutonMaison()}
           <h1 class="titre-ecran">Mon album</h1>

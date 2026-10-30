@@ -8,6 +8,9 @@ Dépôt proposé : `Anlito/course-voiture-ballon` (à confirmer). Dossier résea
 
 ---
 
+> **Mise à jour 28/10/2026** : les réponses de Thomas aux questions du §2 et le plan sont dans `PLAN-voiture-ballon.md`
+> (châssis 3D fourni, piques de 3 mm, roues 3D de 20 à 50 mm, pompe à ballon, colle chaude avec le professeur, réponses écrites).
+
 ## 1. Le projet en deux mots
 
 Chaque binôme **fabrique une voiture propulsée par un ballon** (l'air qui s'échappe pousse la voiture), la **décore**, la **teste**

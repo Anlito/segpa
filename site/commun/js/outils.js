@@ -48,12 +48,15 @@
   S.college = null;
   S.modele = null;
   S.criteres = null;
+  S.donneesProjet = {};
   global.definirProjet = (p) => (S.projet = p);
   global.definirEtapes = (e) => (S.etapes = e);
   global.definirReglagesAtelier = (r) => (S.reglages = r);
   global.definirCollege = (c) => (S.college = c);
   global.definirModele = (m) => (S.modele = m);
   global.definirCriteres = (c) => (S.criteres = c);
+  // Données propres à un projet (kit, noms, couleurs…) : plusieurs fichiers peuvent en ajouter.
+  global.definirDonneesProjet = (d) => Object.assign(S.donneesProjet, d);
 
   Object.assign(S, { simplifierNom, nomEquipe, majuscule, remplirChemin, echapper, maintenant });
 

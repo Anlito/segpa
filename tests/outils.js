@@ -26,9 +26,10 @@ function donnees(projet) {
     definirCollege: (c) => (lu.college = c),
     definirModele: (m) => (lu.modele = m),
     definirCriteres: (c) => (lu.criteres = c),
+    definirDonneesProjet: (d) => (lu.donneesProjet = Object.assign(lu.donneesProjet || {}, d)),
   };
   vm.createContext(bac);
-  for (const f of ['projet.js', 'classes.js', 'modele.js', 'etapes.js', 'criteres.js']) vm.runInContext(fs.readFileSync(path.join(SITE, projet, 'donnees', f), 'utf8'), bac, { filename: f });
+  for (const f of fs.readdirSync(path.join(SITE, projet, 'donnees')).filter((n) => n.endsWith('.js'))) vm.runInContext(fs.readFileSync(path.join(SITE, projet, 'donnees', f), 'utf8'), bac, { filename: f });
   vm.runInContext(fs.readFileSync(path.join(SITE, 'commun/donnees/college.js'), 'utf8'), bac);
   return JSON.parse(JSON.stringify(lu));
 }

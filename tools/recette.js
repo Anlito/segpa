@@ -38,7 +38,7 @@ async function nouvellePage(navigateur, taille) {
   });
   // Les photos du professeur (img/…) sont facultatives : un fichier absent n'est pas une erreur (le pictogramme s'affiche).
   // Tout autre fichier manquant en est une.
-  const facultatif = (u) => /\/taille-crayon\/img\//.test(u);
+  const facultatif = (u) => /\/(?!commun\/)[a-z-]+\/img\/.+\.(jpe?g|png)$/.test(u);
   page.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && erreurs.push(m.text()));
   page.on('requestfailed', (r) => !facultatif(r.url()) && erreurs.push('fichier introuvable : ' + r.url()));
   page.on('response', (r) => r.status() >= 400 && !facultatif(r.url()) && erreurs.push(`fichier introuvable (${r.status()}) : ${r.url()}`));
@@ -59,7 +59,26 @@ async function sansDefilement(page, nom) {
       .map((el) => ({ el, r: el.getBoundingClientRect() }))
       .filter(({ r }) => r.width && r.height && (r.bottom > h + 1 || r.right > w + 1 || r.top < -1 || r.left < -1))
       .map(({ el, r }) => `${el.tagName.toLowerCase()}.${el.className && el.className.baseVal === undefined ? el.className : ''} (${Math.round(r.bottom)}×${Math.round(r.right)})`);
-    return { defile: document.documentElement.scrollHeight > h + 1 || document.documentElement.scrollWidth > w + 1, depasse: depasse.slice(0, 5) };
+    // Rien du milieu ne passe sous la barre du bas (boutons) ni au-dessus de celle du haut.
+    const bas = document.querySelector('#app .bas');
+    const haut = document.querySelector('#app .haut');
+    let limiteBas = bas ? bas.getBoundingClientRect().top + 1 : h;
+    let limiteHaut = haut ? haut.getBoundingClientRect().bottom - 1 : 0;
+    // Milieu en panneau bordé (univers d'un projet, ex. la bande de piste de la voiture) : rien ne passe sous la bordure
+    // ni ne sort du panneau.
+    const milieu = document.querySelector('#app .milieu');
+    const bordure = milieu && getComputedStyle(milieu, '::after');
+    if (bordure && bordure.content !== 'none' && parseFloat(bordure.height) > 0) {
+      const r = milieu.getBoundingClientRect();
+      limiteBas = Math.min(limiteBas, r.bottom - parseFloat(bordure.height) + 1);
+      limiteHaut = Math.max(limiteHaut, r.top - 1);
+    }
+    const chevauche = [...document.querySelectorAll('#app .milieu *')]
+      .filter((el) => el.offsetParent !== null)
+      .map((el) => ({ el, r: el.getBoundingClientRect() }))
+      .filter(({ el, r }) => r.width && r.height && (r.bottom > limiteBas || r.top < limiteHaut) && !el.closest('.msg-flottant'))
+      .map(({ el, r }) => `${el.tagName.toLowerCase()}.${typeof el.className === 'string' ? el.className : ''} chevauche (${Math.round(r.top)}-${Math.round(r.bottom)})`);
+    return { defile: document.documentElement.scrollHeight > h + 1 || document.documentElement.scrollWidth > w + 1, depasse: depasse.concat(chevauche).slice(0, 5) };
   });
   assert.ok(!r.defile && !r.depasse.length, `${nom} : ça dépasse de l'écran ${JSON.stringify(r.depasse)}`);
 }
@@ -93,6 +112,17 @@ async function faireEcran(page, nom, captures, demo) {
     await page.locator('[data-action="garder"]').waitFor();
     await sansDefilement(page, nom + '-apercu');
     await cliquer(page, '[data-action="garder"]');
+  } else if (await visible(page, '[data-action="choisir-nom"]')) {
+    await cliquer(page, '[data-action="choisir-nom"]');
+    await cliquer(page, '[data-action="nom-choisi"]');
+  } else if (await visible(page, '[data-action="choisir-couleur"]')) {
+    await cliquer(page, '[data-action="choisir-couleur"]');
+    await page.locator('.apercu-voiture').waitFor();
+    await sansDefilement(page, nom + '-apercu');
+    await cliquer(page, '[data-action="couleur-choisie"]');
+  } else if (await visible(page, '.ligne-materiel')) {
+    for (const b of await page.locator('[data-action="plus"]').all()) await b.click();
+    await cliquer(page, '[data-action="compte"]');
   } else if (await visible(page, '[data-action="decouvrir"]')) {
     await cliquer(page, '[data-action="decouvrir"]');
   } else if (await visible(page, '[data-action="piece"]')) {
@@ -104,6 +134,29 @@ async function faireEcran(page, nom, captures, demo) {
   } else if (await visible(page, 'input.champ-libre')) {
     await page.locator('input.champ-libre').fill('Ressort');
     await cliquer(page, '[data-action="nomme"]');
+  } else if (await visible(page, '[data-action="choisir-roues"]')) {
+    // Essais de la voiture (séance 4) : un écran par geste.
+    await cliquer(page, '[data-action="choisir-roues"]');
+    await cliquer(page, '[data-action="roues-choisies"]');
+  } else if (await visible(page, '[data-action="pompe-plus"]')) {
+    for (let i = 0; i < 3; i++) await cliquer(page, '[data-action="pompe-plus"]');
+    await cliquer(page, '[data-action="essai-pompe"]');
+  } else if (await visible(page, '[data-action="choisir-direction"]')) {
+    await cliquer(page, '[data-action="choisir-direction"]');
+    await cliquer(page, '[data-action="direction-choisie"]');
+  } else if (await visible(page, '[data-action="voir-graphique"]')) {
+    await cliquer(page, '[data-action="voir-graphique"]');
+  } else if (await visible(page, '[data-action="choisir-changement"]')) {
+    // Deux cartes : message ambre « Choisis un seul changement », puis le détail du premier.
+    const cartes = page.locator('[data-action="choisir-changement"]');
+    await cartes.nth(0).click();
+    await cartes.nth(1).click();
+    await page.locator('.msg-ambre').waitFor();
+    await sansDefilement(page, nom + '-deux');
+    if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '-deux.png') });
+    if (await visible(page, '[data-action="choisir-cote"]')) await page.locator('[data-action="choisir-cote"]').nth(1).click();
+    await cliquer(page, '[data-action="choisir-detail"]');
+    await cliquer(page, '[data-action="change-fait"]');
   } else if (await visible(page, '.pave')) {
     // Démonstration : une première mesure hors de la plage (message ambre), puis la bonne.
     const premiere = demo && !(await visible(page, '.msg-ambre'));
@@ -120,7 +173,7 @@ async function faireEcran(page, nom, captures, demo) {
     await page.locator('textarea.champ-libre').fill('Elle fait tourner la lame.');
     await cliquer(page, '[data-action="question-suivante"]');
   } else {
-    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'fleche-faite', 'remise', 'fait'];
+    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'fleche-faite', 'remise', 'fait', 'essai-place', 'essai-parti', 'essais-finis', 'resultat-suivant'];
     for (const a of suite)
       if (await visible(page, `[data-action="${a}"]`)) {
         await cliquer(page, `[data-action="${a}"]`);
@@ -198,6 +251,175 @@ async function scenarioEnseignant(navigateur, base, taille, captures, demo) {
   assert.deepEqual(horsSite, []);
   await contexte.close();
   return ecrans;
+}
+
+// Voiture à ballon (jalons V1 et V2) : séances 1 à 4, Ma mission à 5 séances, dépannage « Ma voiture ne roule pas »,
+// essais (un changement à la fois, message ambre si deux cartes, graphique).
+async function scenarioVoiture(navigateur, base, taille, captures) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
+  await page.goto(base + 'voiture-ballon/index.html?enseignant=1');
+  await sansDefilement(page, 'voiture-accueil');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'voiture-accueil.png') });
+  await cliquer(page, '[data-action="commencer"]');
+  await cliquer(page, '[data-prenom="Léa"]');
+  await cliquer(page, '[data-prenom="Tom"]');
+  await cliquer(page, '[data-action="valider"]');
+  assert.equal(await page.locator('.carte-seance').count(), 5);
+  await sansDefilement(page, 'voiture-mission');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'voiture-mission.png') });
+  const ecrans = [];
+  for (const s of ['s1', 's2', 's3']) {
+    await cliquer(page, '[data-action="continuer"]');
+    ecrans.push(await faireSeance(page, 'voiture-' + s, captures));
+    if (s === 's1') {
+      // Une équipe allée trop vite : « Retour » depuis Bravo ramène à la dernière étape, déjà cochée.
+      await cliquer(page, '[data-action="derniere-etape"]');
+      assert.match(await page.locator('.consigne-texte').first().textContent(), /Je range/);
+      await cliquer(page, '[data-action="fait"]');
+      await page.locator('[data-action="fini"]').waitFor();
+    }
+    await cliquer(page, '[data-action="fini"]');
+    await page.locator('.carte-seance').first().waitFor();
+  }
+  assert.equal(await page.locator('.carte-seance.fait').count(), 3);
+  const d = await page.evaluate(() => Segpa.voitureDe(Segpa.app.etat.session.donnees));
+  assert.equal(d.nom, 'Turbo Ballon');
+  assert.equal(d.nomCouleur, 'Bleu');
+  assert.ok(await page.evaluate(() => Segpa.app.etat.session.donnees.photos.some((p) => p.legende === 'Photo officielle')));
+  // Séance 4 : « Ma voiture ne roule pas » → « Une roue frotte » ramène à l'étape de la séance 2.
+  await cliquer(page, '[data-action="continuer"]');
+  await cliquer(page, '[data-action="depannage"]');
+  await page.locator('.cause').first().waitFor();
+  await sansDefilement(page, 'voiture-depannage');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'voiture-depannage.png') });
+  await cliquer(page, '.cause');
+  assert.match(await page.locator('.consigne-texte').first().textContent(), /Je vérifie : les roues tournent/);
+  assert.match(await page.locator('.etiquette-seance').textContent(), /Séance 2/);
+  // Séance 4 : les essais (3 essais, un changement à la fois, graphique).
+  await cliquer(page, '[data-action="mission"]');
+  await page.locator('.carte-seance').first().waitFor();
+  await cliquer(page, '[data-action="continuer"]');
+  ecrans.push(await faireSeance(page, 'voiture-s4', captures));
+  await cliquer(page, '[data-action="fini"]');
+  await page.locator('.carte-seance').first().waitFor();
+  assert.equal(await page.locator('.carte-seance.fait').count(), 4);
+  const r = await page.evaluate(() => Segpa.resumeEssais(Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's4', 'essais')));
+  assert.equal(r.nombre, 3);
+  assert.equal(r.changements.length, 2);
+  // Séance 5 : prête, règles, attente, mon résultat (démonstration), réponse écrite, bilan, photo finale.
+  await cliquer(page, '[data-action="continuer"]');
+  ecrans.push(await faireSeance(page, 'voiture-s5', captures));
+  await cliquer(page, '[data-action="fini"]');
+  await page.locator('.carte-seance').first().waitFor();
+  assert.equal(await page.locator('.carte-seance.fait').count(), 5);
+  const s5 = await page.evaluate(() => ({ r: Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's5', 'resultat'), q: Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's5', 'pourquoi') }));
+  assert.equal(s5.r.resultat.course, 'Finale secondaire');
+  assert.ok(s5.q.texte.length > 0, 'réponse écrite gardée');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+  return ecrans;
+}
+
+// Outil professeur de la voiture : 4 équipes fictives (essais, course, matériel), piste proposée, onglets Essais et
+// Voiture et course, évaluation à 7 critères avec repères, exports.
+async function scenarioProfesseurVoiture(navigateur, base) {
+  require('./exemples-voiture.js');
+  const tree = arbre(path.join(RACINE, 'exemples', 'Voiture-ballon'));
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  await injecterDossier(page, tree);
+  await page.goto(base + 'voiture-ballon/prof.html');
+  await cliquer(page, '[data-action="ouvrir"]');
+  await page.locator('.pt').first().waitFor();
+  assert.equal(await page.locator('.pt').count(), 4);
+  assert.match(await page.locator('.pt').first().textContent(), /Léa · Tom/, 'aide en premier');
+  const tuile = (noms) => page.locator('.pt', { hasText: noms }).textContent();
+  assert.match(await tuile('Léa · Tom'), /Turbo Ballon · Bleu/);
+  assert.match(await tuile('Léa · Tom'), /Essais : 2 · meilleur 280 cm · 1 changement/);
+  assert.match(await tuile('Inès · Noah'), /Matériel : Piques 1\/2/);
+  assert.match(await tuile('Inès · Noah'), /Matériel pris différent du kit/);
+  assert.match(await tuile('Inès · Noah'), /Course : 2e · Finale principale/);
+  assert.match(await tuile('Adam · Jade'), /Voiture qui n’avance pas/);
+  assert.match(await page.locator('.pc-piste').textContent(), /longueur proposée 1,5 m \(3 voitures sur 3/);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-classe.png'), fullPage: true });
+  await page.locator('.pt', { hasText: 'Inès · Noah' }).click();
+  await page.locator('.pe-onglets').waitFor();
+  await cliquer(page, '[data-action="onglet"][data-id="essais"]');
+  assert.match(await page.locator('.pe-contenu').textContent(), /Essai 3.*420 cm \(le plus loin\)/s);
+  assert.equal(await page.locator('.pp-barre').count(), 3);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-essais.png'), fullPage: true });
+  await cliquer(page, '[data-action="onglet"][data-id="voiture"]');
+  assert.match(await page.locator('.pe-contenu').textContent(), /L’air sort du ballon/);
+  await cliquer(page, '[data-action="onglet"][data-id="evaluation"]');
+  assert.match(await page.locator('.ev-table').textContent(), /Distances saisies \(pavé en cm\) : 310 cm · 390 cm · 420 cm/);
+  for (const c of ['fabrication', 'regles', 'fonctionne', 'essais', 'mesure', 'explique', 'autonomie']) {
+    const bouton = `.niv-btn[data-eleve="Inès"][data-critere="${c}"][data-n="3"]`;
+    await cliquer(page, bouton);
+    await page.locator(`${bouton}[aria-pressed="true"]`).waitFor();
+  }
+  await page.waitForFunction(() => /20 \/ 20|20,0|\b20\b/.test(document.querySelector('.ev-bilans').textContent));
+  assert.match(await page.locator('.ev-bilans').textContent(), /Ceinture vert foncé/);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-evaluation.png'), fullPage: true });
+  await page.keyboard.press('Escape');
+  const [d] = await Promise.all([page.waitForEvent('download'), cliquer(page, '[data-action="excel"]')]);
+  assert.match(d.suggestedFilename(), /^voiture-ballon-6A-\d{4}-\d{2}-\d{2}-evaluation\.xlsx$/);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'pas de défilement horizontal');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
+// La course au vidéoprojecteur (démonstration) : voitures (une absente), 3 couloirs, poules, chaque course au chrono
+// (touches 1 à 3, une voiture qui n'arrive pas), finales par niveau, podiums, « Bravo à tous ».
+async function scenarioCourse(navigateur, base, taille, captures) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
+  await page.goto(base + 'voiture-ballon/course.html');
+  const ecran = async (nom) => {
+    await page.waitForTimeout(120);
+    await sansDefilement(page, 'course-' + nom);
+    if (captures) await page.screenshot({ path: path.join(SORTIE, 'course-' + nom + '.png') });
+  };
+  await ecran('accueil');
+  await cliquer(page, '[data-action="demo"]');
+  await cliquer(page, '[data-action="absente"]');
+  await cliquer(page, '[data-action="couloirs"][data-n="3"]');
+  await ecran('voitures');
+  await cliquer(page, '[data-action="poules"]');
+  await ecran('poules');
+  await cliquer(page, '[data-action="lancer-poules"]');
+  let courses = 0;
+  for (let tour = 0; tour < 30; tour++) {
+    const etape = await page.evaluate(() => Segpa.course.etat().etape);
+    if (etape === 'course') {
+      courses++;
+      await cliquer(page, '[data-action="top-depart"]');
+      await page.waitForTimeout(250);
+      const n = await page.locator('[data-action="arrivee"]').count();
+      for (let i = 0; i < n - 1; i++) {
+        await page.keyboard.press(String(i + 1));
+        await page.waitForTimeout(150);
+      }
+      await page.locator('.distance input').first().fill('320');
+      await cliquer(page, '[data-action="distance"]');
+      await ecran('course-' + courses);
+      await cliquer(page, '[data-action="course-suivante"]');
+    } else if (etape === 'classement') {
+      await ecran('finales');
+      await cliquer(page, '[data-action="lancer-finales"]');
+    } else if (etape === 'podium') {
+      await ecran('podium-' + courses);
+      await cliquer(page, '[data-action="apres-podium"]');
+    } else if (etape === 'fin') break;
+  }
+  await ecran('fin');
+  const e = await page.evaluate(() => Segpa.course.etat());
+  assert.deepEqual(e.poules.map((p) => p.voitures.length), [3, 2, 2]);
+  assert.deepEqual(e.finales.map((f) => f.nom), ['Finale principale', 'Finale secondaire', 'Finale tertiaire']);
+  assert.equal(courses, 6, '3 poules + 3 finales');
+  assert.ok(await page.locator('.record').count());
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
 }
 
 // Dossier « réseau » simulé par le dossier privé du navigateur (même interface que le vrai dossier).
@@ -298,10 +520,8 @@ function arbre(chemin) {
   return { kind: 'file', name: nom, data: fs.readFileSync(chemin).toString('base64') };
 }
 
-async function scenarioProfesseur(navigateur, base) {
-  require('./exemples-equipes.js');
-  const tree = arbre(path.join(RACINE, 'exemples', 'Taille-crayon'));
-  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+// Faux dossier réseau (en mémoire) donné au navigateur à la place de la fenêtre « choisir un dossier ».
+async function injecterDossier(page, tree) {
   await page.addInitScript((tree) => {
     const octets = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
     const fichier = (n) => ({
@@ -343,6 +563,13 @@ async function scenarioProfesseur(navigateur, base) {
     };
     window.showDirectoryPicker = async () => dossier(tree);
   }, tree);
+}
+
+async function scenarioProfesseur(navigateur, base) {
+  require('./exemples-equipes.js');
+  const tree = arbre(path.join(RACINE, 'exemples', 'Taille-crayon'));
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  await injecterDossier(page, tree);
   await page.goto(base + 'taille-crayon/prof.html');
   await cliquer(page, '[data-action="ouvrir"]');
   await page.locator('.pt').first().waitFor();
@@ -467,6 +694,28 @@ async function scenarioProfesseur(navigateur, base) {
           }
         }
       }
+    for (const [nomBase, base] of bases)
+      for (const taille of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+        const t = `${taille.width}×${taille.height}`;
+        try {
+          const ecrans = await scenarioVoiture(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
+          noter(`- OK ${nomBase} ${t} · voiture à ballon : séances 1 à 5 de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, carrosserie, photo officielle, 3 essais avec un changement à la fois et graphique, résultat de la course, réponse écrite), Ma mission à 5 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
+        } catch (e) {
+          ok = false;
+          noter(`- ÉCHEC ${nomBase} ${t} · voiture à ballon : ${e.message.split('\n')[0]}`);
+        }
+      }
+    for (const [nomBase, base] of bases)
+      for (const taille of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+        const t = `${taille.width}×${taille.height}`;
+        try {
+          await scenarioCourse(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
+          noter(`- OK ${nomBase} ${t} · course au vidéoprojecteur (démonstration) : 7 voitures dont une absente retirée, 3 couloirs, poules de 3, 2 et 2, 6 courses au chrono (touches du clavier, une voiture qui n’arrive pas), finales principale, secondaire et tertiaire, podiums, record, rien ne dépasse, aucune erreur.`);
+        } catch (e) {
+          ok = false;
+          noter(`- ÉCHEC ${nomBase} ${t} · course : ${e.message.split('\n')[0]}`);
+        }
+      }
     // Le dossier privé du navigateur n'existe pas en file:// : ce scénario passe par le serveur local.
     for (const [nomBase, base] of bases.filter(([n]) => n === 'serveur')) {
       try {
@@ -485,6 +734,15 @@ async function scenarioProfesseur(navigateur, base) {
       } catch (e) {
         ok = false;
         noter(`- ÉCHEC ${nomBase} 1366×768 · professeur : ${e.message.split('\n')[0]}`);
+      }
+    }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioProfesseurVoiture(navigateur, base);
+        noter(`- OK ${nomBase} 1366×768 · professeur de la voiture : 4 équipes fictives, aide en premier, tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n’avance pas), longueur de piste proposée, onglets Essais (tableau et graphique) et Voiture et course (réponse écrite), évaluation à 7 critères avec repères et ceinture, export Excel.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · professeur de la voiture : ${e.message.split('\n')[0]}`);
       }
     }
   } finally {
