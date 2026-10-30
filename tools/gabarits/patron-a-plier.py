@@ -107,7 +107,7 @@ open('patron.html','w').write('<!doctype html><meta charset="utf-8"><style>@page
 # ---------- Version pour une machine de découpe (Cricut Design Space) ----------
 # Pas de texte, pas de hachures, pas de remplissage : un calque « decoupe » (contour fermé + trou du ballon) et un
 # calque « plis » (traits simples, à régler sur « Rainurer » ou « Dessiner » dans Design Space). Unités : mm.
-MARGE = 5
+MARGE = 0  # pas de marge : la taille du fichier est celle du dessin (Design Space mesure le dessin)
 net = tout.simplify(0.05, preserve_topology=True)
 minx, miny, maxx, maxy = net.bounds
 LARG, HAUT = maxx - minx + 2 * MARGE, maxy - miny + 2 * MARGE
