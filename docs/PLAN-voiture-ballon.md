@@ -22,7 +22,7 @@ Version 2 · 29/10/2026 · **validé par Thomas** (avec ses retours : 5 séances
 | Photos | webcam à chaque moment clé, dont une **photo officielle** de la voiture décorée (page de course, podium, diplôme) |
 | Course | **poules** (selon le nombre de couloirs du jour), puis **finales par niveau** : principale, secondaire, tertiaire ; personne n'est éliminé, chaque voiture court au moins deux fois |
 | Univers graphique (29/10) | **A · Grand prix** (maquette https://claude.ai/artifact/A4HWMn9pWPbUaaCAnS7igQ) : bitume, damier, bordures orange et blanches, stands numérotés ; `css/univers.css`, le socle n'est pas touché |
-| Carrosserie (29/10) | séance 3 : **carrosserie en carton** fixée dans les **fentes** du châssis v5 (7 fentes 20 × 2 mm, carton 1,6 mm), plus basse que le tube du ballon (40 mm) ; à partir d'un **gabarit imprimé** : 4 pièces ou patron à plier (`documents/`, sources `tools/gabarits/`), version choisie après les essais de Thomas |
+| Carrosserie (29/10, châssis v8 le 30/10) | séance 3 : **carrosserie en carton** fixée dans les **fentes** du châssis (7 fentes 20 × 2 mm, carton 1,6 mm) ; châssis **v8** : tuyère Ø 7 sur un tube incliné, d'où une fente de 51 × 23 mm dans le toit et une arche arrière de 20 mm ; à partir d'un **gabarit imprimé** : 4 pièces ou patron à plier (`documents/`, sources `tools/gabarits/`), version choisie après les essais de Thomas |
 
 ## 2. Dans le dépôt
 

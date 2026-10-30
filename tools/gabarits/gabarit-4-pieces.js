@@ -1,4 +1,4 @@
-// Gabarit de carrosserie (châssis v5) — cotes en mm, échelle 1
+// Gabarit de carrosserie (châssis v8) — cotes en mm, échelle 1
 const fs = require('fs');
 const TAB = 3, LT = 19.5;           // languette : profondeur = épaisseur de la plaque, largeur = fente 20 - 0,5
 function chemin(x0, y0, pts) { return 'M' + pts.map(([u, h]) => `${(x0 + u).toFixed(2)},${(y0 - h).toFixed(2)}`).join(' L') + ' Z'; }
@@ -37,7 +37,7 @@ function avant(x0, y0) {
 }
 // ARRIÈRE : 75,6 de large, fentes y -3,7..16,3 et 48,8..68,8 ; arche pour la sortie d'air (y 20..45, 18 de haut)
 function arriere(x0, y0) {
-  const W = 75.6, h = 35, a = 25.5, b = 50.5, ha = 18, r = (b - a) / 2;
+  const W = 75.6, h = 35, a = 25.5, b = 50.5, ha = 20, r = (b - a) / 2;
   const c1 = 1.8 + 10, c2 = 54.3 + 10;
   const p = [[0, 0], [c1 - LT / 2, 0], [c1 - LT / 2, -TAB], [c1 + LT / 2, -TAB], [c1 + LT / 2, 0], [a, 0], [a, ha - r]];
   let d = chemin(x0, y0, p).replace(' Z', '');
@@ -93,7 +93,7 @@ ${avant(125, 182)}
 <line x1="100" y1="223.5" x2="110" y2="223.5" class="coupe"/><text x="112" y="224.8" class="mini">je découpe</text>
 <text x="15" y="234" class="petit" style="font-weight:700">Vu de dessus : où va chaque pièce</text>
 ${schema(30, 238)}
-<text x="15" y="290" class="mini">Châssis v5 : fentes 20 × 2 mm, carton 1,6 mm. Hauteur maximale 35 mm (le tube du ballon monte à 40 mm).</text>
+<text x="15" y="290" class="mini">Châssis v8 : fentes 20 × 2 mm, carton 1,6 mm. Hauteur maximale 35 mm ; le tube incliné du ballon sort sous l'arche arrière.</text>
 </g>
 </svg>`;
 fs.writeFileSync('gabarit.svg', svg);

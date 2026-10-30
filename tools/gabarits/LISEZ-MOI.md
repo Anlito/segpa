@@ -1,7 +1,8 @@
 # Gabarits de carrosserie (voiture à ballon, séance 3)
 
-Prototypes calculés d'après le châssis v5 de Thomas (`Ch_ssis_voiture_ballon_5.stl`, 29/10/2026) : 7 fentes de
-20 × 2 mm, plaque de 3 mm, supports d'axes de 11 mm, sortie d'air de 18 mm, tube du ballon de 40 mm. Carton de 1,6 mm.
+Calculés d'après le châssis **v8** de Thomas (`Ch_ssis_voiture_ballon_8.stl`, 30/10/2026) : 7 fentes de 20 × 2 mm
+(comme le v5), plaque de 2 mm, 4 plots d'axes de 10 mm, ballon sur un tube incliné (23°, Ø 10, passage Ø 7) porté par
+une tour de 20 × 20 mm. Toit : fente de 51 × 23 mm ; arche arrière de 20 mm. Carton de 1,6 mm.
 La version gardée sera choisie après les essais de Thomas.
 
 | Fichier produit (`site/voiture-ballon/documents/`) | Source | Commande |
