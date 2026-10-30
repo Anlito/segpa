@@ -112,3 +112,14 @@ Page professeur → « La course (vidéoprojecteur) » (d'abord en « Démonstra
 - [ ] Côté élève, séance 5 : voiture prête, 3 règles, « Je regarde la piste ! », **Mon résultat** (message encourageant, ou
       « Le professeur te donnera ton résultat » et « Je regarde encore »), « Pourquoi ma voiture avance ? » (réponse écrite),
       bilan, photo finale.
+
+## Voiture à ballon — jalon V4 (outil professeur)
+Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemples`, puis ouvrir `exemples/Voiture-ballon`) :
+- [ ] Tuiles : nom et couleur de la voiture, matériel (kit complet ou écart), essais (nombre, meilleur, changements), course.
+- [ ] Alertes en ambre : matériel pris différent du kit, voiture qui n'avance pas (deux essais à 0 cm), rien depuis 15 min.
+- [ ] Bandeau « Piste » : longueur proposée d'après les meilleurs essais (vous la gardez ou la changez sur la piste).
+- [ ] Fiche d'une équipe : onglets Essais (tableau, graphique, roues avant et arrière) et Voiture et course (matériel,
+      carrosserie, résultat, réponse écrite « Pourquoi ma voiture avance ? »).
+- [ ] Évaluation : les 7 critères (à valider), repères automatiques à côté, note /20, ceinture ; exports Excel, CSV, Carnet,
+      feuilles ceinture.
+- [ ] Patron pour la Cricut (SVG) : s'importe à la bonne taille (environ 198 × 144 mm), découpe et plis sur deux calques.

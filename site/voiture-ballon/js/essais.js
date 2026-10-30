@@ -145,7 +145,17 @@
     };
   }
 
-  const API = { REGLES_ESSAIS: REGLES, essaisVides: vide, ecranEssai, noterEssai: noter, reculerEssai: reculer, rouesDe, essaisFaits, mesureSuspecte, meilleurEssai: meilleur, resumeEssais, mediane };
+  // Longueur de piste proposée au professeur (plan §4) : d'après la meilleure distance de chaque équipe en séance 4,
+  // un peu moins que la plupart (le quart le plus faible), arrondie aux 50 cm en dessous, pour que la plupart des voitures
+  // arrivent au bout. → { longueur, depassent, sur } ou null s'il y a moins de 2 équipes mesurées. Le professeur décide.
+  function longueurPiste(meilleures) {
+    const t = meilleures.filter((d) => typeof d === 'number' && d > 0).sort((a, b) => a - b);
+    if (t.length < 2) return null;
+    const longueur = Math.max(50, Math.floor(t[Math.floor((t.length - 1) * 0.25)] / 50) * 50);
+    return { longueur, depassent: t.filter((d) => d >= longueur).length, sur: t.length };
+  }
+
+  const API = { longueurPiste, REGLES_ESSAIS: REGLES, essaisVides: vide, ecranEssai, noterEssai: noter, reculerEssai: reculer, rouesDe, essaisFaits, mesureSuspecte, meilleurEssai: meilleur, resumeEssais, mediane };
   Object.assign(S, API);
   if (enNode) module.exports = S;
 })(typeof window !== 'undefined' ? window : globalThis);

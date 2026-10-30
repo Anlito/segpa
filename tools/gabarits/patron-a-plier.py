@@ -103,3 +103,21 @@ svg.append('</svg>')
 s = '\n'.join(svg)
 open('patron.svg','w').write(s)
 open('patron.html','w').write('<!doctype html><meta charset="utf-8"><style>@page{size:A4 landscape;margin:0}html,body{margin:0}</style>' + s)
+
+# ---------- Version pour une machine de découpe (Cricut Design Space) ----------
+# Pas de texte, pas de hachures, pas de remplissage : un calque « decoupe » (contour fermé + trou du ballon) et un
+# calque « plis » (traits simples, à régler sur « Rainurer » ou « Dessiner » dans Design Space). Unités : mm.
+MARGE = 5
+net = tout.simplify(0.05, preserve_topology=True)
+minx, miny, maxx, maxy = net.bounds
+LARG, HAUT = maxx - minx + 2 * MARGE, maxy - miny + 2 * MARGE
+dx, dy = MARGE - minx, MARGE - miny
+def anneau_c(c): return 'M' + ' L'.join(f'{x+dx:.3f},{y+dy:.3f}' for x, y in c.coords) + ' Z'
+contours = [anneau_c(net.exterior)] + [anneau_c(i) for i in net.interiors]
+cricut = [f'<?xml version="1.0" encoding="UTF-8"?>',
+  f'<svg xmlns="http://www.w3.org/2000/svg" width="{LARG:.2f}mm" height="{HAUT:.2f}mm" viewBox="0 0 {LARG:.2f} {HAUT:.2f}">',
+  '<title>Patron de carrosserie, voiture à ballon (châssis v5) : découpe et plis</title>',
+  '<g id="decoupe" fill="none" stroke="#000000" stroke-width="0.25">'] + [f'<path d="{c}"/>' for c in contours] + ['</g>',
+  '<g id="plis" fill="none" stroke="#E11D48" stroke-width="0.25">'] + [f'<line x1="{a[0]+dx:.3f}" y1="{a[1]+dy:.3f}" x2="{b[0]+dx:.3f}" y2="{b[1]+dy:.3f}"/>' for a, b in plis] + ['</g>', '</svg>']
+open('patron-carrosserie-cricut.svg', 'w').write('\n'.join(cricut) + '\n')
+print('cricut', round(LARG, 1), '×', round(HAUT, 1), 'mm,', len(contours), 'contours,', len(plis), 'plis,', len(net.exterior.coords), 'points')

@@ -321,6 +321,54 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   return ecrans;
 }
 
+// Outil professeur de la voiture : 4 équipes fictives (essais, course, matériel), piste proposée, onglets Essais et
+// Voiture et course, évaluation à 7 critères avec repères, exports.
+async function scenarioProfesseurVoiture(navigateur, base) {
+  require('./exemples-voiture.js');
+  const tree = arbre(path.join(RACINE, 'exemples', 'Voiture-ballon'));
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  await injecterDossier(page, tree);
+  await page.goto(base + 'voiture-ballon/prof.html');
+  await cliquer(page, '[data-action="ouvrir"]');
+  await page.locator('.pt').first().waitFor();
+  assert.equal(await page.locator('.pt').count(), 4);
+  assert.match(await page.locator('.pt').first().textContent(), /Léa · Tom/, 'aide en premier');
+  const tuile = (noms) => page.locator('.pt', { hasText: noms }).textContent();
+  assert.match(await tuile('Léa · Tom'), /Turbo Ballon · Bleu/);
+  assert.match(await tuile('Léa · Tom'), /Essais : 2 · meilleur 280 cm · 1 changement/);
+  assert.match(await tuile('Inès · Noah'), /Matériel : Piques 1\/2/);
+  assert.match(await tuile('Inès · Noah'), /Matériel pris différent du kit/);
+  assert.match(await tuile('Inès · Noah'), /Course : 2e · Finale principale/);
+  assert.match(await tuile('Adam · Jade'), /Voiture qui n’avance pas/);
+  assert.match(await page.locator('.pc-piste').textContent(), /longueur proposée 1,5 m \(3 voitures sur 3/);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-classe.png'), fullPage: true });
+  await page.locator('.pt', { hasText: 'Inès · Noah' }).click();
+  await page.locator('.pe-onglets').waitFor();
+  await cliquer(page, '[data-action="onglet"][data-id="essais"]');
+  assert.match(await page.locator('.pe-contenu').textContent(), /Essai 3.*420 cm \(le plus loin\)/s);
+  assert.equal(await page.locator('.pp-barre').count(), 3);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-essais.png'), fullPage: true });
+  await cliquer(page, '[data-action="onglet"][data-id="voiture"]');
+  assert.match(await page.locator('.pe-contenu').textContent(), /L’air sort du ballon/);
+  await cliquer(page, '[data-action="onglet"][data-id="evaluation"]');
+  assert.match(await page.locator('.ev-table').textContent(), /Distances saisies \(pavé en cm\) : 310 cm · 390 cm · 420 cm/);
+  for (const c of ['fabrication', 'regles', 'fonctionne', 'essais', 'mesure', 'explique', 'autonomie']) {
+    const bouton = `.niv-btn[data-eleve="Inès"][data-critere="${c}"][data-n="3"]`;
+    await cliquer(page, bouton);
+    await page.locator(`${bouton}[aria-pressed="true"]`).waitFor();
+  }
+  await page.waitForFunction(() => /20 \/ 20|20,0|\b20\b/.test(document.querySelector('.ev-bilans').textContent));
+  assert.match(await page.locator('.ev-bilans').textContent(), /Ceinture vert foncé/);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-evaluation.png'), fullPage: true });
+  await page.keyboard.press('Escape');
+  const [d] = await Promise.all([page.waitForEvent('download'), cliquer(page, '[data-action="excel"]')]);
+  assert.match(d.suggestedFilename(), /^voiture-ballon-6A-\d{4}-\d{2}-\d{2}-evaluation\.xlsx$/);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'pas de défilement horizontal');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
 // La course au vidéoprojecteur (démonstration) : voitures (une absente), 3 couloirs, poules, chaque course au chrono
 // (touches 1 à 3, une voiture qui n'arrive pas), finales par niveau, podiums, « Bravo à tous ».
 async function scenarioCourse(navigateur, base, taille, captures) {
@@ -472,10 +520,8 @@ function arbre(chemin) {
   return { kind: 'file', name: nom, data: fs.readFileSync(chemin).toString('base64') };
 }
 
-async function scenarioProfesseur(navigateur, base) {
-  require('./exemples-equipes.js');
-  const tree = arbre(path.join(RACINE, 'exemples', 'Taille-crayon'));
-  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+// Faux dossier réseau (en mémoire) donné au navigateur à la place de la fenêtre « choisir un dossier ».
+async function injecterDossier(page, tree) {
   await page.addInitScript((tree) => {
     const octets = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
     const fichier = (n) => ({
@@ -517,6 +563,13 @@ async function scenarioProfesseur(navigateur, base) {
     };
     window.showDirectoryPicker = async () => dossier(tree);
   }, tree);
+}
+
+async function scenarioProfesseur(navigateur, base) {
+  require('./exemples-equipes.js');
+  const tree = arbre(path.join(RACINE, 'exemples', 'Taille-crayon'));
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  await injecterDossier(page, tree);
   await page.goto(base + 'taille-crayon/prof.html');
   await cliquer(page, '[data-action="ouvrir"]');
   await page.locator('.pt').first().waitFor();
@@ -681,6 +734,15 @@ async function scenarioProfesseur(navigateur, base) {
       } catch (e) {
         ok = false;
         noter(`- ÉCHEC ${nomBase} 1366×768 · professeur : ${e.message.split('\n')[0]}`);
+      }
+    }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioProfesseurVoiture(navigateur, base);
+        noter(`- OK ${nomBase} 1366×768 · professeur de la voiture : 4 équipes fictives, aide en premier, tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n’avance pas), longueur de piste proposée, onglets Essais (tableau et graphique) et Voiture et course (réponse écrite), évaluation à 7 critères avec repères et ceinture, export Excel.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · professeur de la voiture : ${e.message.split('\n')[0]}`);
       }
     }
   } finally {

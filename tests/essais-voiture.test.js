@@ -110,3 +110,10 @@ test('ancienne sauvegarde (une seule taille de roues) : mêmes roues devant et d
   assert.deepEqual(S.rouesDe(v), { avant: '30', arriere: '30' });
   assert.equal(S.ecranEssai(v), 'ligne');
 });
+
+test('longueur de piste proposée : la plupart des voitures arrivent au bout', () => {
+  assert.deepEqual(S.longueurPiste([420, 310, 280, 520, 390, 150, 460, 330]), { longueur: 250, depassent: 7, sur: 8 });
+  assert.deepEqual(S.longueurPiste([90, 120]), { longueur: 50, depassent: 2, sur: 2 });
+  assert.equal(S.longueurPiste([300]), null, 'une seule équipe mesurée : pas de proposition');
+  assert.equal(S.longueurPiste([0, null, 300]), null);
+});

@@ -101,7 +101,7 @@ l'unité · explique pourquoi sa voiture avance (**à l'écrit**) · autonomie /
 | V1 ✓ 29/10 | données + écrans S1, S2 et S3 (nom, couleur, matériel, fabrication, « ma voiture ne roule pas », décoration, photo officielle) |
 | V2 ✓ 29/10 | S4 : essais, mesures, « je change une chose », graphique ; univers Grand prix ; S3 carrosserie ; retours de Thomas : roues avant et arrière distinctes, bande de piste, prénoms de Bravo, « Retour » partout |
 | V3 ✓ 29/10 | S5 et `course.html` (poules, finales, chrono, podiums, `course.json`, résultat côté élève) : `js/course.js` (testé), `js/course-page.js` ; résultat écrit dans le dossier de chaque équipe (`course.json`), lu par « Mon résultat » ; CSV ; diplômes N&B |
-| V4 | outil professeur : tuiles, onglet Essais, longueur de piste proposée, évaluation et exports |
+| V4 ✓ 30/10 | outil professeur (`prof.html`, `js/prof-projet.js`) : tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n'avance pas), longueur de piste proposée, onglets Essais et Voiture et course, évaluation à 7 critères (`donnees/criteres.js`, **proposition à valider** : libellés, compétences, ceinture sur « voiture terminée et qui fonctionne », drapeaux de différenciation) et exports du socle ; patron en SVG pour la Cricut |
 | V5 | recette automatique, essai réel (piste, mètre ruban, vraies voitures), publication |
 
 ## 7. Réglé et restant

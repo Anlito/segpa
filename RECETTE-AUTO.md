@@ -1,4 +1,4 @@
-# Recette automatique — 29/10/2026 08:57:53
+# Recette automatique — 30/10/2026 17:17:05
 
 Navigateur : Chromium (Playwright) 153.0.8010.12 · caméra simulée
 
@@ -21,5 +21,7 @@ Navigateur : Chromium (Playwright) 153.0.8010.12 · caméra simulée
 - OK serveur 1366×768 · dossier : prénoms lus dans classe.json, dossier Ines_Noah créé, sauvegarde et photo JPEG écrites (pas d’image dans le .json), page rechargée et équipe retrouvée en séance 2, « Je commence » avec les mêmes prénoms reprend la sauvegarde.
 - OK file:// 1366×768 · professeur : 5 équipes fictives, aide en premier avec son étape, alertes (inactivité, pièces dehors, mesure), dernière photo, « J’y vais » écrit dans professeur.json, onglets Bilan, Évaluation (niveaux, note, ceinture), Album, Pièces et réponses, Séance 2, Historique, Différenciation ; exports Excel, CSV, Carnet de classe ; feuilles ceinture.
 - OK serveur 1366×768 · professeur : 5 équipes fictives, aide en premier avec son étape, alertes (inactivité, pièces dehors, mesure), dernière photo, « J’y vais » écrit dans professeur.json, onglets Bilan, Évaluation (niveaux, note, ceinture), Album, Pièces et réponses, Séance 2, Historique, Différenciation ; exports Excel, CSV, Carnet de classe ; feuilles ceinture.
+- OK file:// 1366×768 · professeur de la voiture : 4 équipes fictives, aide en premier, tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n’avance pas), longueur de piste proposée, onglets Essais (tableau et graphique) et Voiture et course (réponse écrite), évaluation à 7 critères avec repères et ceinture, export Excel.
+- OK serveur 1366×768 · professeur de la voiture : 4 équipes fictives, aide en premier, tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n’avance pas), longueur de piste proposée, onglets Essais (tableau et graphique) et Voiture et course (réponse écrite), évaluation à 7 critères avec repères et ceinture, export Excel.
 
 À faire à la main sur un poste du collège (voir RECETTE.md) : vraie webcam, voix française, dossier réseau.
