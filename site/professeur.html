@@ -16,6 +16,11 @@
   .projet small { font-size: 1.25rem; color: var(--encre-douce); font-weight: 600; }
   .projet a { font-size: 1.25rem; }
   .projet.bientot { opacity: 0.7; }
+  .memo { background: var(--surface); border: 0.1875rem solid var(--trait); border-radius: 2rem; padding: 1.5rem 1.75rem; font-size: 1.125rem; line-height: 1.5; }
+  .memo h2 { margin: 0 0 0.5rem; font-size: 1.5rem; }
+  .memo ol { margin: 0.5rem 0; padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.375rem; }
+  .memo p { margin: 0.5rem 0 0; color: var(--encre-douce); }
+  .memo b { color: var(--encre); }
   .note { font-size: 1.125rem; color: var(--encre-douce); line-height: 1.5; margin: 0; }
   @media (max-width: 52rem) { .projets { grid-template-columns: 1fr; } }
 </style>
@@ -37,9 +42,31 @@
       <a class="btn btn-second" href="voiture-ballon/documents/gabarit-carrosserie.pdf">Gabarit carrosserie (4 pièces)</a>
       <a class="btn btn-second" href="voiture-ballon/documents/patron-carrosserie.pdf">Patron carrosserie à plier</a>
       <a class="btn btn-second" href="voiture-ballon/documents/patron-carrosserie-cricut.svg" download>Patron pour la Cricut (SVG)</a>
+      <a class="btn btn-second" href="#cricut">Réglages Design Space</a>
     </div>
     <div class="projet bientot"><strong>Film en stop motion</strong><small>Bientôt</small></div>
   </div>
+  <section class="memo" id="cricut">
+    <h2>Découper la carrosserie à la Cricut (Design Space)</h2>
+    <p style="margin-top:0">Fichier : <a href="voiture-ballon/documents/patron-carrosserie-cricut.svg" download>patron-carrosserie-cricut.svg</a>
+      — châssis v8, toit à 30 mm, languettes de 10 mm en biseau, rabats de 12 mm.</p>
+    <ol>
+      <li><b>Matériel</b> : Cricut Maker avec la <b>lame couteau</b> (Knife Blade), carton gris d’environ 1,6 mm (pas de carton
+        ondulé), tapis à forte adhérence ; scotcher les bords du carton sur le tapis.</li>
+      <li>Nouveau projet → <b>Importer</b> le fichier SVG → l’ajouter au canevas.</li>
+      <li><b>Vérifier la taille : 207 × 154 mm</b> (unités en cm dans les réglages de Design Space). Si ce n’est pas le cas :
+        cadenas des proportions fermé, taper 20,7 cm en largeur.</li>
+      <li><b>Dissocier</b> : le calque noir (contour et fente du toit) en <b>Couper</b> ; le calque rouge (plis) en
+        <b>Rainurer</b> avec la molette, ou en <b>Dessiner</b> au stylo sur du carton épais (la molette marque mal à 1,6 mm).</li>
+      <li>Tout sélectionner → <b>Attacher</b>, sinon la machine replace les plis ailleurs sur le tapis.</li>
+      <li><b>Créer</b> → matériau « carton gris / chipboard » de l’épaisseur la plus proche : la lame couteau fait plusieurs
+        passages. Avant de décharger le tapis, vérifier que la découpe traverse ; sinon, relancer un passage.</li>
+      <li>Après la découpe : marquer chaque pli à la règle, plier, glisser les languettes dans les fentes du châssis, les
+        rabattre et les scotcher dessous ; coller ou agrafer les rabats.</li>
+    </ol>
+    <p>Pour un exemple à afficher : <a href="voiture-ballon/documents/patron-carrosserie.pdf">patron en PDF</a>, à imprimer
+      en A3 à 100 % (le trait de 50 mm sert à vérifier).</p>
+  </section>
   <p class="note">Cette page n’est pas liée depuis le portail des élèves : gardez son adresse en favori.
     « Suivre la classe » lit les dossiers des équipes sur le réseau, dans votre navigateur ; rien n’est envoyé ailleurs.
     « Écrans élèves (démonstration) » ouvre tous les écrans avec une équipe fictive : rien n’y est enregistré.</p>
