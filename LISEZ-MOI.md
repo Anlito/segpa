@@ -51,8 +51,8 @@ Même fonctionnement que le taille-crayon, dossier `… › 6A › COMMUN › TE
   « Arrivée » ou touches 1 à 4, « N'arrive pas » avec la distance), les finales et les podiums. « Enregistrer les
   résultats » écrit `course.json` dans le dossier du projet et dans celui de chaque équipe : les élèves voient leur
   résultat sur l'écran « Mon résultat ». Tableau CSV et diplômes de pilote à imprimer.
-- **Gabarits de carrosserie** (`site/voiture-ballon/documents/`) : 4 pièces ou patron à plier (PDF, à imprimer à
-  100 %), et le patron en SVG pour la Cricut (188 × 134 mm, calques découpe et plis), pour le châssis v8.
+- **Gabarits de carrosserie** (`site/voiture-ballon/documents/`) : 4 pièces (PDF A4) ou patron à plier (PDF A3 : toit à 40 mm,
+  languettes de 10 mm à plier et scotcher sous le châssis, rabats de 12 mm à coller ou agrafer ; imprimer à 100 %), et le patron en SVG pour la Cricut (223 × 174 mm, calques découpe et plis), pour le châssis v8.
 - Les 7 critères d'évaluation de la voiture sont une **proposition à valider** (`donnees/criteres.js`).
 
 ## Évaluer
