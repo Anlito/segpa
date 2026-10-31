@@ -1,16 +1,18 @@
 # Patron de carrosserie (une pièce) pour le châssis v8 — cotes en mm, échelle 1 (retours de Thomas du 31/10/2026)
 # Châssis v8 : mêmes 7 fentes que le v5 ; ballon sur un tube incliné (23°, Ø 10, passage Ø 7) porté par une tour 20 × 20.
-# Toit à 40 mm au-dessus de la plaque : l'embout du ballon dépasse encore de 13 mm. Fente du toit de 28 × 23 mm (tout ce
-# qui dépasse du toit, entre x 11,5 et 35,5, mesuré sur le STL) : la carrosserie se pose par le dessus.
-# Languettes de 10 mm : elles traversent la plaque (2 mm) et se plient dessous (scotch, colle). Rabats de 12 mm, assez
-# pour coller ou agrafer. L'arche arrière monte à 20 mm (le tube y passe entre 9 et 17 mm au-dessus de la plaque).
-# Patron d'environ 18 × 24 cm : tapis Cricut 30 × 30 cm ; PDF d'exemple en A3.
+# Toit à 30 mm au-dessus de la plaque (40 était trop haut, 31/10) : l'embout du ballon dépasse de 23 mm. Fente du toit de
+# 46 × 23 mm (tout ce qui dépasse du toit, tour comprise, entre x 11,5 et 54, mesuré sur le STL) : la carrosserie se pose
+# par le dessus.
+# Languettes de 10 mm, le bout en biseau (3 mm de chaque côté sur les 4 derniers mm) pour entrer facilement dans les
+# fentes : elles traversent la plaque (2 mm) et se plient dessous (scotch, colle). Rabats de 12 mm, assez pour coller ou
+# agrafer. L'arche arrière monte à 20 mm (le tube y passe entre 9 et 17 mm au-dessus de la plaque).
+# Patron d'environ 20 × 15 cm : tapis Cricut 30 × 30 cm ; PDF d'exemple en A3.
 import math
 from shapely.geometry import Polygon, Point, LineString
 from shapely.ops import unary_union
 from shapely import affinity
 
-H0, H1, H2 = 18, 24, 40            # hauteurs au-dessus de la plaque : avant, fin du nez, toit
+H0, H1, H2 = 13, 18, 30            # hauteurs au-dessus de la plaque : avant, fin du nez, toit
 XN, XR = -47, 78.9                  # fin du nez, arrière (x châssis)
 W = 37                              # demi-largeur (axe des flancs)
 LNH = math.hypot(15.4, H1 - H0)     # capot du nez (pente)
@@ -20,16 +22,19 @@ s_fw = s_nh - H0
 LD = math.hypot(15.4, 17.1)         # pan de nez (longueur au sol)
 TAB, LT = 10, 19.5                  # languette : 10 de long (plaque 2 + 8 à plier dessous), 19,5 de large
 PLI_TAB = 2.5                       # pli des languettes : sous la plaque (2 mm + jeu)
+BISEAU, BOUT = 3, 4                 # biseau du bout des languettes : 3 mm de chaque côté, sur les 4 derniers mm
 RABAT = 12                          # rabats à coller ou agrafer
 
 def tab(cx, cw, axe, sens):
     # languette : centre cx le long d'un bord droit
+    # le long du bord : u ; en s'éloignant du mur : v. Le bout est en biseau pour guider la languette dans la fente.
+    contour = [(-LT/2, 0), (LT/2, 0), (LT/2, TAB-BOUT), (LT/2-BISEAU, TAB), (-LT/2+BISEAU, TAB), (-LT/2, TAB-BOUT)]
     if axe == 's':  # bord à w = cw, languette vers sens (±w)
-        return Polygon([(cx-LT/2, cw), (cx+LT/2, cw), (cx+LT/2, cw+sens*TAB), (cx-LT/2, cw+sens*TAB)])
-    return Polygon([(cw, cx-LT/2), (cw, cx+LT/2), (cw+sens*TAB, cx+LT/2), (cw+sens*TAB, cx-LT/2)])
+        return Polygon([(cx+u, cw+sens*v) for u, v in contour])
+    return Polygon([(cw+sens*v, cx+u) for u, v in contour])
 
 faces = {}
-FENTE_TOIT = LineString([(21.5, 0), (26, 0)]).buffer(11.5, 32)   # haut du tube et embout du ballon : x 10 à 37,5, 23 de large
+FENTE_TOIT = LineString([(21.5, 0), (44, 0)]).buffer(11.5, 32)   # tour, tube et embout du ballon : x 10 à 55,5, 23 de large
 faces['TOIT'] = Polygon([(0,-W),(XR,-W),(XR,W),(0,W)]).difference(FENTE_TOIT)
 faces['CAPOT'] = Polygon([(s_mh,-W),(0,-W),(0,W),(s_mh,W)])
 faces['NEZ'] = Polygon([(s_nh,-20),(s_mh,-W),(s_mh,W),(s_nh,20)])
@@ -39,9 +44,8 @@ faces['PAN1'] = D; faces['PAN2'] = affinity.scale(D, 1, -1, origin=(0,0))
 def flanc():
     pts = [(XR,W),(0,W),(XN,W+(H2-H1)),(XN,W+H2)]
     b = W+H2
-    for a, c, kind in [(-44,-31,'e'),(-15.5-LT/2,-15.5+LT/2,'t'),(43.5-LT/2,43.5+LT/2,'t'),(55,68,'e')]:
-        d = b-9 if kind == 'e' else b
-        pts += [(a,b),(a,d if kind=='e' else b+TAB),(c,d if kind=='e' else b+TAB),(c,b)]
+    for a, c in [(-44,-31),(55,68)]:   # encoches au-dessus des plots d'axes (les languettes sont ajoutées à part, en biseau)
+        pts += [(a,b),(a,b-9),(c,b-9),(c,b)]
     pts += [(XR,b)]
     return Polygon(pts)
 faces['CÔTÉ1'] = flanc(); faces['CÔTÉ2'] = affinity.scale(flanc(), 1, -1, origin=(0,0))
@@ -110,7 +114,7 @@ for t in tabs + tabs_flanc: svg.append(f'<path d="{chemin(t)}" class="h"/>')
 svg.append(f'<path d="{chemin(tout)}" class="c" fill-rule="evenodd"/>')
 for (a,b) in plis: svg.append(f'<line x1="{a[0]+OX:.2f}" y1="{a[1]+OY:.2f}" x2="{b[0]+OX:.2f}" y2="{b[1]+OY:.2f}" class="p"/>')
 def txt(x, y, t, cl='t'): svg.append(f'<text x="{x+OX:.2f}" y="{y+OY:.2f}" class="{cl}" text-anchor="middle">{t}</text>')
-txt(62, -20, 'TOIT'); txt(24, 16.5, 'fente du tube', 's'); txt(-26, 2, 'CAPOT'); txt(s_mh - LNH/2, 2, 'NEZ', 's'); txt(s_fw + H0/2, 1.5, 'AVANT', 's')
+txt(66, -20, 'TOIT'); txt(33, 16.5, 'fente du tube', 's'); txt(-26, 2, 'CAPOT'); txt(s_mh - LNH/2, 2, 'NEZ', 's'); txt(s_fw + H0/2, 1.5, 'AVANT', 'm')
 txt(30, W + H2/2 + 2, 'CÔTÉ'); txt(30, -W - H2/2 + 4, 'CÔTÉ'); txt(XR + H2/2, -24, 'ARRIÈRE', 's')
 txt(s_fw + 6, 20 + LD/2 + 1, 'pan', 'm'); txt(s_fw + 6, -20 - LD/2 + 2, 'pan', 'm')
 for x in (-37.5, 61.5): txt(x, W + H2 - 4, 'axe', 'm'); txt(x, -W - H2 + 6.5, 'axe', 'm')
