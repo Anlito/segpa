@@ -122,4 +122,4 @@ Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemp
       carrosserie, résultat, réponse écrite « Pourquoi ma voiture avance ? »).
 - [ ] Évaluation : les 7 critères (à valider), repères automatiques à côté, note /20, ceinture ; exports Excel, CSV, Carnet,
       feuilles ceinture.
-- [ ] Patron pour la Cricut (SVG) : s'importe à la bonne taille (223 × 174 mm), découpe et plis sur deux calques.
+- [ ] Patron pour la Cricut (SVG) : s'importe à la bonne taille (207 × 154 mm), découpe et plis sur deux calques.

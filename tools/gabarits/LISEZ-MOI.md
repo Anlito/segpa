@@ -3,9 +3,9 @@
 Calculés d'après le châssis **v8** de Thomas (`Ch_ssis_voiture_ballon_8.stl`, 30/10/2026) : 7 fentes de 20 × 2 mm
 (comme le v5), plaque de 2 mm, 4 plots d'axes de 10 mm, ballon sur un tube incliné (23°, Ø 10, passage Ø 7) porté par
 une tour de 20 × 20 mm. Carton de 1,6 mm.
-Patron à plier (retours de Thomas du 31/10) : toit à 40 mm (fente de 28 × 23 mm, l'embout dépasse de 13 mm), languettes
-de 10 mm pliées sous la plaque, rabats de 12 mm (colle ou agrafes), arche arrière de 20 mm ; 223 × 174 mm (tapis Cricut
-30 × 30 cm), PDF d'exemple en A3.
+Patron à plier (retours de Thomas du 31/10) : toit à 30 mm (fente de 46 × 23 mm, l'embout dépasse de 23 mm), languettes
+de 10 mm au bout en biseau, pliées sous la plaque, rabats de 12 mm (colle ou agrafes), arche arrière de 20 mm ;
+207 × 154 mm (tapis Cricut 30 × 30 cm), PDF d'exemple en A3.
 La version gardée sera choisie après les essais de Thomas.
 
 | Fichier produit (`site/voiture-ballon/documents/`) | Source | Commande |
