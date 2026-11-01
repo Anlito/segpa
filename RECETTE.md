@@ -153,3 +153,19 @@ Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemp
 - [ ] Bandeau « Piste » : « Tous les patrons (.zip) » → un SVG par équipe décorée.
 - [ ] Dans Design Space : calques decoupe (noir), plis (vert), dessin-bleu / dessin-rouge / dessin-marron ; la Cricut demande de changer de stylo entre deux couleurs ; taille 207 × 154 mm.
 - [ ] Dans Design Space, chaque dessin est un seul objet : un clic sélectionne un mot, un numéro (« 10 ») ou un tampon (damier) en entier.
+
+## Film en stop motion — jalon M1 (écran de tournage, univers « Cinéma en briques »)
+À faire sur un vrai poste du collège, avec la webcam sur son support et une plaque devant (ouvrir
+`site/stop-motion/index.html`, ou `?enseignant=1` pour essayer sans rien enregistrer).
+- [ ] Accueil, Ma mission : studio sombre, clap en haut, bande de film en bas ; boutons et cartes en briques, 5 séances « J'invente · Je construis · Je filme · Je filme · Je projette ».
+- [ ] Séance 3 : 3 rappels (la caméra ne bouge pas · je bouge un tout petit peu · je prends une photo), puis l'écran de tournage.
+- [ ] La webcam s'allume dans le cadre de cinéma ; si elle est débranchée : message ambre et « Réessayer » ; avec 2 caméras, « Autre caméra ».
+- [ ] Le gros bouton jaune et la **barre d'espace** prennent une image (déclic, flash) ; « Image 1 / 30 », la barre avance ; la pellicule montre les 6 dernières.
+- [ ] Le **calque** (l'image précédente à 40 %) aide à bouger un tout petit peu ; « Calque » et « Grille » se coupent et se remettent.
+- [ ] « Enlever la dernière » : la dernière image en grand, « J'enlève cette image ? » ; « Non, je la garde » ne change rien ; « Oui, j'enlève » l'enlève du film (le fichier reste dans le dossier).
+- [ ] « Voir » : les 10 dernières images en boucle (6 par seconde) ; « Stop » revient à la caméra.
+- [ ] « Pause café » : écran noir « La caméra ne bouge pas ! » ; « Je reviens » (ou la barre d'espace) revient au tournage.
+- [ ] Le conseil en bas change toutes les 40 secondes.
+- [ ] Dans le dossier de l'équipe : `photos/film/0001.jpg`, `0002.jpg`… ; 10 images prises vite : le poste ne ralentit pas.
+- [ ] « J'arrête pour aujourd'hui », rangement, Bravo ; en séance 4, le film reprend là où il en était (« Image 12 / 30 »).
+- [ ] Les briques bougées entre deux images se voient-elles bien avec la webcam du collège (lumière, netteté) ?

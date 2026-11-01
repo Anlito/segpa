@@ -1,6 +1,6 @@
 # Plan court — Film en stop motion avec des briques (6e SEGPA)
 
-Version 2 · 01/11/2026 · **réponses de Thomas reportées** (§1 et §7). À lire avec `BRIEF-CLAUDE-CODE-stop-motion.md` (proposition d'origine) et
+Version 3 · 01/11/2026 · réponses de Thomas reportées (§1 et §7) · **jalon M1 fait** (§6, §8). À lire avec `BRIEF-CLAUDE-CODE-stop-motion.md` (proposition d'origine) et
 `PLAN.md` (organisation du dépôt, socle commun).
 
 ## 1. Décisions déjà prises
@@ -66,8 +66,8 @@ lus directement dans les dossiers.
 
 | Jalon | Contenu |
 |---|---|
-| M0 | maquette de l'univers graphique (deux directions au choix) |
-| M1 | écran de tournage et sauvegarde des images (calque, grille, pellicule, enlever, voir) — **essai sur un vrai poste** |
+| M0 | maquette de l'univers graphique (deux directions au choix) — **fait : direction C « Cinéma en briques » choisie le 01/11** |
+| M1 | écran de tournage et sauvegarde des images (calque, grille, pellicule, enlever, voir) — **essai sur un vrai poste** — **fait le 01/11, recette de Thomas à faire** (`RECETTE.md`) |
 | M2 | S5 : lecture, vitesses, enlever des images, titre et générique ; `cinema.html` |
 | M3 | S1 et S2 : histoire en 3 temps, titre, briques, construction |
 | M4 | outil professeur, 7 critères et ceinture (à valider), exports |
@@ -77,3 +77,14 @@ lus directement dans les dossiers.
 
 - Dimensions de la webcam (ou photo avec une règle) pour dessiner le support 3D.
 - Bandes-son : après la première version (sons écrits dans le dépôt ou fichiers libres de droits, rien en ligne).
+
+## 8. Fait au jalon M1 (01/11/2026)
+
+- `site/stop-motion/` : `index.html`, univers C (`css/univers.css`), données (`projet`, `classes`, `etapes`, `film` : réglages et conseils).
+- `js/studio.js` (testé) : noms des images, compteur, enlever, pellicule, vitesses, conseils ; le film est gardé dans `d.film`
+  (à part des séances, pour que la séance 4 continue le film de la séance 3).
+- `js/ecran-tournage.js` : l'écran du §4. Pendant une question (« J'enlève cette image ? ») ou la pause café, la barre
+  d'espace touche le bouton qui a la main (« Non, je la garde », « Je reviens ») : jamais de photo prise par erreur.
+- Socle : `session.ecrireImage` (image écrite sans entrée dans l'album, jamais par-dessus un fichier), `O.ecrireImage`,
+  `O.nettoyer` (écouteurs et minuteurs d'un écran propre), pictogrammes film, brique, calque, grille, café, annuler, stop.
+- Séances 1, 2 et 5 : seulement leurs règles et photos en attendant M2 et M3. Le portail garde « bientôt » jusqu'à M5.

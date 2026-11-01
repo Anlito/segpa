@@ -357,6 +357,137 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   return ecrans;
 }
 
+// Film en stop motion (jalon M1) : Ma mission à 5 séances, séance 3 jusqu'au tournage, 5 images (bouton et barre
+// d'espace), « Enlever la dernière » (Non puis Oui), « Voir », calque et grille, pause café, « J'arrête pour
+// aujourd'hui » ; la séance 4 reprend le même film.
+async function tourner(page, nom, captures, n) {
+  await page.waitForFunction(() => document.querySelector('.ecran-cinema video') && document.querySelector('.ecran-cinema video').videoWidth > 0, null, { timeout: 10000 });
+  await sansDefilement(page, nom);
+  for (let i = 0; i < n; i++) {
+    const avant = await page.evaluate(() => Segpa.filmDe(Segpa.app.etat.session.donnees).images.length);
+    if (i % 2) await page.keyboard.press('Space');
+    else await cliquer(page, '[data-action="prendre"]');
+    await page.waitForFunction((a) => Segpa.filmDe(Segpa.app.etat.session.donnees).images.length === a + 1 && !document.querySelector('[data-action="prendre"]').disabled, avant);
+  }
+  await page.waitForTimeout(200);
+  await sansDefilement(page, nom + '-images');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '.png') });
+}
+
+async function scenarioStopMotion(navigateur, base, taille, captures) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
+  await page.goto(base + 'stop-motion/index.html?enseignant=1');
+  await sansDefilement(page, 'sm-accueil');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm-accueil.png') });
+  await cliquer(page, '[data-action="commencer"]');
+  await cliquer(page, '[data-prenom="Léa"]');
+  await cliquer(page, '[data-prenom="Tom"]');
+  await cliquer(page, '[data-action="valider"]');
+  assert.equal(await page.locator('.carte-seance').count(), 5);
+  await sansDefilement(page, 'sm-mission');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm-mission.png') });
+  await cliquer(page, '[data-action="seance"][data-id="s3"]');
+  for (let i = 0; i < 3; i++) {
+    await sansDefilement(page, 'sm-s3-rappel-' + (i + 1));
+    if (captures && !i) await page.screenshot({ path: path.join(SORTIE, 'sm-s3-rappel.png') });
+    await cliquer(page, '[data-action="fait"]');
+  }
+  assert.equal(await page.locator('[data-action="enlever"]').isDisabled(), true, 'pas d’image : rien à enlever');
+  assert.equal(await page.locator('[data-action="voir"]').isDisabled(), true);
+  assert.equal(await page.locator('.calque-image').isHidden(), true);
+  await tourner(page, 'sm-tournage', captures, 5);
+  assert.equal(await page.locator('.compteur-film strong').textContent(), 'Image 5 / 30');
+  assert.equal(await page.locator('.pellicule img').count(), 5);
+  assert.equal(await page.locator('.calque-image').isVisible(), true, 'le calque montre la dernière image');
+  // Enlever la dernière : « Non » garde l'image, « Oui » l'enlève.
+  await cliquer(page, '[data-action="enlever"]');
+  await page.locator('.question-image img').waitFor();
+  await sansDefilement(page, 'sm-enlever');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm-enlever.png') });
+  // Pendant la question, la barre d'espace touche « Non, je la garde » (le bouton qui a la main) : rien n'est perdu.
+  await page.keyboard.press('Space');
+  await page.locator('.question-image').waitFor({ state: 'detached' });
+  assert.equal(await page.locator('.compteur-film strong').textContent(), 'Image 5 / 30', 'ni photo ni image enlevée');
+  await cliquer(page, '[data-action="enlever"]');
+  await cliquer(page, '[data-action="oui-enlever"]');
+  await page.waitForFunction(() => document.querySelector('.compteur-film strong').textContent === 'Image 4 / 30');
+  // Voir : les dernières images en boucle, puis Stop.
+  await cliquer(page, '[data-action="voir"]');
+  await page.locator('.lecture-film img[src]').waitFor();
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm-voir.png') });
+  await cliquer(page, '[data-action="voir"]');
+  assert.equal(await page.locator('.lecture-film').count(), 0);
+  // Calque et grille se coupent et se remettent.
+  await cliquer(page, '[data-action="calque"]');
+  assert.equal(await page.locator('.calque-image').isHidden(), true);
+  await cliquer(page, '[data-action="calque"]');
+  await cliquer(page, '[data-action="grille"]');
+  assert.equal(await page.locator('.grille-tiers').isHidden(), true);
+  await cliquer(page, '[data-action="grille"]');
+  // Pause café : écran noir ; la barre d'espace touche « Je reviens » (elle ne prend pas de photo).
+  await cliquer(page, '[data-action="pause"]');
+  await sansDefilement(page, 'sm-pause');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm-pause.png') });
+  await page.keyboard.press('Space');
+  await page.locator('.pause-cafe').waitFor({ state: 'detached' });
+  assert.equal(await page.locator('.compteur-film strong').textContent(), 'Image 4 / 30');
+  await cliquer(page, '[data-action="fin"]');
+  await faireSeance(page, 'sm-s3-fin', false);
+  await cliquer(page, '[data-action="fini"]');
+  // Séance 4 : le même film continue.
+  await cliquer(page, '[data-action="seance"][data-id="s4"]');
+  for (let i = 0; i < 3; i++) await cliquer(page, '[data-action="fait"]');
+  await page.locator('.compteur-film strong', { hasText: 'Image 4 / 30' }).waitFor();
+  await tourner(page, 'sm-s4-tournage', false, 2);
+  const film = await page.evaluate(() => Segpa.filmDe(Segpa.app.etat.session.donnees).images.map((i) => i.fichier));
+  assert.deepEqual(film, ['0001', '0002', '0003', '0004', '0006', '0007'].map((n) => `photos/film/${n}.jpg`), 'l’image enlevée garde son numéro (rien n’est écrasé)');
+  assert.equal(await page.evaluate(() => Segpa.app.etat.session.donnees.photos.length), 0, 'les images du film ne vont pas dans l’album');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
+// Stop motion avec un dossier de classe (simulé en mémoire) : les images sont des fichiers JPEG dans
+// Prénom_Prénom/photos/film/, jamais dans le .json.
+async function scenarioStopMotionDossier(navigateur, base) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  const classe = Buffer.from(JSON.stringify({ classe: '6A', eleves: ['Léa', 'Tom', 'Ines', 'Noah'] })).toString('base64');
+  await injecterDossier(page, { kind: 'directory', name: 'Stop-motion', children: [{ kind: 'file', name: 'classe.json', data: classe }] });
+  await page.addInitScript(() =>
+    document.addEventListener('DOMContentLoaded', () => {
+      window.Segpa.fichiers.memoriser = async () => {};
+      window.Segpa.fichiers.memorise = async () => null;
+    })
+  );
+  await page.goto(base + 'stop-motion/index.html');
+  await cliquer(page, '[data-action="commencer"]');
+  await cliquer(page, '[data-action="ouvrir"]');
+  await cliquer(page, '[data-prenom="Ines"]');
+  await cliquer(page, '[data-prenom="Noah"]');
+  await cliquer(page, '[data-action="valider"]');
+  await cliquer(page, '[data-action="seance"][data-id="s3"]');
+  for (let i = 0; i < 3; i++) await cliquer(page, '[data-action="fait"]');
+  await tourner(page, 'sm-dossier', false, 3);
+  await cliquer(page, '[data-action="enlever"]');
+  await cliquer(page, '[data-action="oui-enlever"]');
+  await cliquer(page, '[data-action="fin"]');
+  await page.waitForTimeout(600);
+  const r = await page.evaluate(() => {
+    const eq = window.__arbre.children.find((c) => c.name === 'Ines_Noah');
+    const json = eq.children.find((c) => c.name === 'Ines_Noah.json');
+    const film = eq.children.find((c) => c.name === 'photos').children.find((c) => c.name === 'film');
+    return { json: new TextDecoder().decode(Uint8Array.from(atob(json.data), (c) => c.charCodeAt(0))), images: film.children.map((c) => [c.name, atob(c.data).slice(0, 3).split('').map((x) => x.charCodeAt(0))]) };
+  });
+  assert.deepEqual(r.images.map((i) => i[0]), ['0001.jpg', '0002.jpg', '0003.jpg'], 'les 3 fichiers restent (l’image enlevée n’est pas effacée)');
+  for (const [, debut] of r.images) assert.deepEqual(debut, [0xff, 0xd8, 0xff], 'JPEG');
+  const d = JSON.parse(r.json);
+  assert.deepEqual(d.film.images.map((i) => i.fichier), ['photos/film/0001.jpg', 'photos/film/0002.jpg']);
+  assert.ok(!r.json.includes('data:image'), 'aucune image dans le .json');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
 // Outil professeur de la voiture : 4 équipes fictives (essais, course, matériel), piste proposée, onglets Essais et
 // Voiture et course, évaluation à 7 critères avec repères, exports.
 async function scenarioProfesseurVoiture(navigateur, base) {
@@ -765,6 +896,26 @@ async function scenarioProfesseur(navigateur, base) {
           noter(`- ÉCHEC ${nomBase} ${t} · course : ${e.message.split('\n')[0]}`);
         }
       }
+    for (const [nomBase, base] of bases)
+      for (const taille of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+        const t = `${taille.width}×${taille.height}`;
+        try {
+          await scenarioStopMotion(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
+          noter(`- OK ${nomBase} ${t} · stop motion (jalon M1) : Ma mission à 5 séances, 3 rappels, écran de tournage (5 images au bouton et à la barre d’espace, pellicule, compteur, calque, grille, « Enlever la dernière » avec confirmation, « Voir », pause café), séance 4 qui reprend le même film, rien ne dépasse, aucune erreur.`);
+        } catch (e) {
+          ok = false;
+          noter(`- ÉCHEC ${nomBase} ${t} · stop motion : ${e.message.split('\n').slice(0, 4).join(' ')}`);
+        }
+      }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioStopMotionDossier(navigateur, base);
+        noter(`- OK ${nomBase} 1366×768 · stop motion avec dossier : images JPEG écrites dans Ines_Noah/photos/film/ (0001.jpg…), l’image enlevée reste dans le dossier, aucune image dans le .json.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · stop motion avec dossier : ${e.message.split('\n')[0]}`);
+      }
+    }
     // Le dossier privé du navigateur n'existe pas en file:// : ce scénario passe par le serveur local.
     for (const [nomBase, base] of bases.filter(([n]) => n === 'serveur')) {
       try {
