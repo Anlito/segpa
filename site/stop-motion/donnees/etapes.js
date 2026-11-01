@@ -1,10 +1,11 @@
 // Les séances du film en stop motion (plan : docs/PLAN-stop-motion.md §3).
 // Jalon M1 : les séances 3 et 4 (« Je filme ») et l'écran de tournage (js/ecran-tournage.js).
 // Jalon M2 : la séance 5 (titre, vitesse, images ratées, film avec titre et générique ; js/ecrans-montage.js).
-// Les écrans propres des séances 1 et 2 (histoire en 3 temps, construction) arrivent au jalon M3 : en attendant, elles
-// n'ont que leurs règles et leurs photos. Le titre se choisira en séance 1 ; en séance 5, il est repris (on peut le changer).
+// Jalon M3 : la séance 1 (héros, lieu, problème, fin, l'histoire en 3 temps, le titre, le storyboard) et la séance 2
+// (la plaque, le décor, le héros, les objets, avec le rappel de l'histoire ; js/ecrans-histoire.js).
+// Le titre choisi en séance 1 est repris en séance 5 (on peut le changer).
 // Types d'écran du socle : regle · consigne · photo · cases · bilan. Écrans propres : tournage · titre-film ·
-// projection (mode 'vitesse' ou 'final') · trier-images.
+// projection (mode 'vitesse' ou 'final') · trier-images · idee-histoire · histoire-resume · construire.
 (function () {
   const REGLES_MATERIEL = [
     { "id": "regle-objectif", "type": "regle", "picto": "camera", "texte": "Je ne touche pas l'objectif de la caméra.", "detail": "Sinon, l'image devient floue." },
@@ -30,17 +31,35 @@
       {
         "id": "s1", "titre": "J'invente", "sousTitre": "mon histoire", "picto": "crayon",
         "etapes": REGLES_MATERIEL.concat([
+          { "id": "heros", "type": "idee-histoire", "partie": "heros", "texte": "Qui est mon héros ?", "texteEcrire": "J'écris mon héros." },
+          { "id": "lieu", "type": "idee-histoire", "partie": "lieu", "texte": "Où se passe mon histoire ?", "texteEcrire": "J'écris le lieu." },
+          { "id": "probleme", "type": "idee-histoire", "partie": "probleme", "texte": "Quel problème arrive ?", "texteEcrire": "J'écris le problème." },
+          { "id": "fin", "type": "idee-histoire", "partie": "fin", "texte": "Comment finit mon histoire ?", "texteEcrire": "J'écris la fin." },
+          { "id": "histoire", "type": "histoire-resume", "texte": "Mon histoire en 3 temps.", "detail": "Je dessine ces 3 cases sur mon storyboard.", "bravo": "L'histoire est inventée" },
+          { "id": "titre", "type": "titre-film", "texte": "Je choisis le titre de mon film." },
           { "id": "storyboard", "type": "photo", "picto": "crayon", "texte": "Je photographie mon storyboard.", "detail": "Les 3 cases : début, milieu, fin.", "legende": "Mon storyboard" }
         ])
       },
       {
         "id": "s2", "titre": "Je construis", "sousTitre": "mon décor", "picto": "brique",
         "etapes": [
-          REGLES_MATERIEL[0], REGLES_MATERIEL[2],
-          { "id": "plaque", "type": "consigne", "picto": "brique", "texte": "Je prends ma plaque.", "bouton": "J'ai pris ma plaque" },
+          REGLES_MATERIEL[1], REGLES_MATERIEL[2],
+          { "id": "plaque", "type": "consigne", "picto": "brique", "texte": "Je prends ma plaque.", "detail": "Une plaque par équipe.", "bouton": "J'ai pris ma plaque" },
+          { "id": "construire-decor", "type": "construire", "partie": "lieu", "picto": "brique", "texte": "Je construis le décor.", "detail": "Sur la plaque. Je regarde mon storyboard.", "bouton": "Le décor est fini" },
           { "id": "decor", "type": "photo", "picto": "brique", "texte": "Je photographie mon décor.", "legende": "Mon décor" },
+          { "id": "construire-heros", "type": "construire", "partie": "heros", "picto": "brique", "texte": "Je construis mon héros.", "detail": "Il doit tenir debout tout seul.", "bouton": "Mon héros est fini" },
+          { "id": "heros", "type": "photo", "picto": "brique", "texte": "Je photographie mon héros.", "legende": "Mon héros" },
+          { "id": "construire-objets", "type": "construire", "partie": "objets", "picto": "brique", "texte": "Je construis les objets de l'histoire.", "detail": "Ce qu'il faut pour le problème et la fin.", "bouton": "Les objets sont finis" },
+          { "id": "objets", "type": "photo", "picto": "brique", "texte": "Je photographie mes objets.", "legende": "Mes objets" },
           { "id": "secouer", "type": "consigne", "picto": "main-stop", "texte": "Je secoue doucement la table.", "detail": "Rien ne tombe ? Sinon, je renforce.", "bouton": "Rien ne tombe" },
-          RANGEMENT("Le décor est construit")
+          {
+            "id": "rangement", "type": "cases", "picto": "balai", "texte": "Je range.", "minuteur": 5, "bravo": "Le décor est construit",
+            "lignes": [
+              { "picto": "brique", "texte": "Les briques sont rangées par couleur." },
+              { "picto": "table", "texte": "Le décor reste sur la plaque." },
+              { "picto": "etiquette", "texte": "Mon nom est sur la plaque." }
+            ]
+          }
         ]
       },
       {

@@ -1,4 +1,4 @@
-# Recette automatique — 01/11/2026 14:57:51
+# Recette automatique — 01/11/2026 15:21:24
 
 Navigateur : Chromium (Playwright) 153.0.8010.12 · caméra simulée
 
@@ -24,6 +24,10 @@ Navigateur : Chromium (Playwright) 153.0.8010.12 · caméra simulée
 - OK serveur 1920×1080 · stop motion (jalon M1) : Ma mission à 5 séances, 3 rappels, écran de tournage (5 images au bouton et à la barre d’espace, pellicule, compteur, calque, grille, « Enlever la dernière » avec confirmation, « Voir », pause café), séance 4 qui reprend le même film, rien ne dépasse, aucune erreur.
 - OK file:// 1366×768 · stop motion avec dossier : images JPEG écrites dans Ines_Noah/photos/film/ (0001.jpg…), l’image enlevée reste dans le dossier, aucune image dans le .json.
 - OK serveur 1366×768 · stop motion avec dossier : images JPEG écrites dans Ines_Noah/photos/film/ (0001.jpg…), l’image enlevée reste dans le dossier, aucune image dans le .json.
+- OK file:// 1366×768 · stop motion, séances 1 et 2 (jalon M3) : 3 règles, héros, lieu et fin en cartes-idées, problème écrit au clavier, l’histoire en 3 temps, le titre, la photo du storyboard ; la plaque, décor, héros et objets avec le rappel de l’histoire et une photo chacun, la table secouée, le rangement, rien ne dépasse, aucune erreur.
+- OK file:// 1920×1080 · stop motion, séances 1 et 2 (jalon M3) : 3 règles, héros, lieu et fin en cartes-idées, problème écrit au clavier, l’histoire en 3 temps, le titre, la photo du storyboard ; la plaque, décor, héros et objets avec le rappel de l’histoire et une photo chacun, la table secouée, le rangement, rien ne dépasse, aucune erreur.
+- OK serveur 1366×768 · stop motion, séances 1 et 2 (jalon M3) : 3 règles, héros, lieu et fin en cartes-idées, problème écrit au clavier, l’histoire en 3 temps, le titre, la photo du storyboard ; la plaque, décor, héros et objets avec le rappel de l’histoire et une photo chacun, la table secouée, le rangement, rien ne dépasse, aucune erreur.
+- OK serveur 1920×1080 · stop motion, séances 1 et 2 (jalon M3) : 3 règles, héros, lieu et fin en cartes-idées, problème écrit au clavier, l’histoire en 3 temps, le titre, la photo du storyboard ; la plaque, décor, héros et objets avec le rappel de l’histoire et une photo chacun, la table secouée, le rangement, rien ne dépasse, aucune erreur.
 - OK file:// 1366×768 · stop motion, séance 5 (jalon M2) : titre (carte-idée puis écrit au clavier), vitesse « Lent » gardée, 2 images ratées enlevées (une autre enlevée puis remise), le film avec sa carte-titre et « Un film de Léa et Tom », cinéma, bilan, rien ne dépasse, aucune erreur.
 - OK file:// 1920×1080 · stop motion, séance 5 (jalon M2) : titre (carte-idée puis écrit au clavier), vitesse « Lent » gardée, 2 images ratées enlevées (une autre enlevée puis remise), le film avec sa carte-titre et « Un film de Léa et Tom », cinéma, bilan, rien ne dépasse, aucune erreur.
 - OK serveur 1366×768 · stop motion, séance 5 (jalon M2) : titre (carte-idée puis écrit au clavier), vitesse « Lent » gardée, 2 images ratées enlevées (une autre enlevée puis remise), le film avec sa carte-titre et « Un film de Léa et Tom », cinéma, bilan, rien ne dépasse, aucune erreur.

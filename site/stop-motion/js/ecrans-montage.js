@@ -1,5 +1,5 @@
 // Écrans de la séance 5 « Je monte et on projette » (plan : docs/PLAN-stop-motion.md §3) :
-//   titre-film     le titre (une carte-idée de donnees/idees.js, ou « J'écris un titre »)
+//   titre-film     le titre (une carte-idée de donnees/idees.js, ou « J'écris un titre ») ; aussi en séance 1
 //   projection     je regarde mon film : mode 'vitesse' (🐢 lent · 🚶 normal · 🐇 rapide) ou 'final' (titre et générique)
 //   trier-images   j'enlève les images ratées (toucher une image l'enlève, la toucher encore la remet)
 // Le film (images, vitesse, titre) est gardé dans la sauvegarde (d.film) ; la logique est dans js/studio.js (testée).
@@ -30,75 +30,24 @@
 
   // ---------- Le titre du film ----------
 
-  S.ajouterEcran('titre-film', (etape, O) => {
-    const { ech, pic } = O;
-    const sous = O.sous();
-    const film = S.filmDe(O.D());
-    if (sous.titre === undefined) sous.titre = film.titre || '';
-    const idees = ((P().idees || {}).titres || []).slice(0, 6);
-    const ecrit = sous.ecrire || (sous.titre && !idees.includes(sous.titre));
-    const garder = () => {
-      S.noterFilm(O.D(), S.noterTitre(S.filmDe(O.D()), sous.titre));
-      O.suivant({ titre: S.filmDe(O.D()).titre });
-    };
-    const apercu = `<div class="carte-titre-apercu"><small>Le titre</small><strong>${ech(sous.titre || '…')}</strong></div>`;
-    if (ecrit) {
-      return {
-        milieu: `<div class="colonne montage-colonne">
-            ${titreLigne(O, 'J’écris le titre de mon film.')}
-            <input class="champ-titre" type="text" maxlength="${S.LONGUEUR_TITRE}" autocomplete="off" spellcheck="false" aria-label="Le titre du film" value="${ech(sous.titre)}">
-            ${apercu}
-          </div>`,
-        gauche: O.boutonRetour('idees'),
-        principal: O.boutonPrincipal('garder', 'C’est mon titre', 'coche', !sous.titre.trim()),
-        actions: {
-          idees: () => {
-            sous.ecrire = false;
-            if (!idees.includes(sous.titre)) sous.titre = '';
-            O.rafraichir();
-          },
-          garder,
-        },
-        apres: () => {
-          const champ = O.racine.querySelector('.champ-titre');
-          champ.focus();
-          champ.setSelectionRange(champ.value.length, champ.value.length);
-          champ.addEventListener('input', () => {
-            sous.titre = champ.value;
-            O.racine.querySelector('.carte-titre-apercu strong').textContent = champ.value.trim() || '…';
-            O.racine.querySelector('[data-action="garder"]').disabled = !champ.value.trim();
-          });
-          champ.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && champ.value.trim()) garder();
-          });
-        },
-      };
-    }
-    return {
-      milieu: `<div class="colonne montage-colonne">
-          ${titreLigne(O, etape.texte || 'Je choisis le titre de mon film.')}
-          <div class="cartes-titres">${idees
-            .map((t) => `<button type="button" class="carte-titre" data-action="choisir" data-titre="${ech(t)}" aria-pressed="${sous.titre === t}">${ech(t)}</button>`)
-            .join('')}
-            <button type="button" class="carte-titre ecrire" data-action="ecrire">${pic('crayon')}J’écris un titre</button>
-          </div>
-        </div>`,
-      principal: O.boutonPrincipal('garder', 'C’est mon titre', 'coche', !sous.titre),
-      actions: {
-        choisir: (b) => {
-          sous.titre = b.dataset.titre;
-          for (const x of O.racine.querySelectorAll('[data-action="choisir"]')) x.setAttribute('aria-pressed', String(x === b));
-          O.racine.querySelector('[data-action="garder"]').disabled = false;
-        },
-        ecrire: () => {
-          sous.ecrire = true;
-          sous.titre = '';
-          O.rafraichir();
-        },
-        garder,
+  // Le titre se choisit en séance 1 (après l'histoire) ; en séance 5, il est repris et peut être changé.
+  S.ajouterEcran('titre-film', (etape, O) =>
+    S.vueChoixOuTexte(O, {
+      texte: etape.texte || 'Je choisis le titre de mon film.',
+      texteEcrire: 'J’écris le titre de mon film.',
+      idees: (P().idees || {}).titres,
+      valeur: S.filmDe(O.D()).titre,
+      longueur: S.LONGUEUR_TITRE,
+      libelleEcrire: 'J’écris un titre',
+      libelleGarder: 'C’est mon titre',
+      nomChamp: 'Le titre du film',
+      apercu: (t) => `<div class="carte-titre-apercu" data-apercu><small>Le titre</small><strong>${O.ech(String(t).trim() || '…')}</strong></div>`,
+      garder: (t) => {
+        S.noterFilm(O.D(), S.noterTitre(S.filmDe(O.D()), t));
+        O.suivant({ titre: S.filmDe(O.D()).titre });
       },
-    };
-  });
+    })
+  );
 
   // ---------- Je regarde mon film ----------
 

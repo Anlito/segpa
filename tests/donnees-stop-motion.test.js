@@ -6,7 +6,7 @@ const { moteur, donnees, pictos } = require('./outils.js');
 const S = moteur();
 const { projet, etapes, reglages, donneesProjet } = donnees('stop-motion');
 const PICTOS = new Set(pictos());
-const TYPES = ['regle', 'consigne', 'photo', 'cases', 'bilan', 'tournage', 'titre-film', 'projection', 'trier-images'];
+const TYPES = ['regle', 'consigne', 'photo', 'cases', 'bilan', 'tournage', 'titre-film', 'projection', 'trier-images', 'idee-histoire', 'histoire-resume', 'construire'];
 
 test('identité, classe et dossier du projet', () => {
   assert.equal(projet.id, 'stop-motion');
@@ -23,7 +23,7 @@ test('5 séances, identifiants uniques, types connus, pictogrammes dessinés, co
     for (const e of s.etapes) {
       assert.ok(TYPES.includes(e.type), `${s.id}/${e.id} : type ${e.type}`);
       for (const p of [e.picto, ...(e.lignes || []).map((l) => l.picto)].filter(Boolean)) assert.ok(PICTOS.has(p), `${s.id}/${e.id} : picto ${p}`);
-      for (const t of [e.texte, e.fin, ...(e.lignes || []).map((l) => l.texte)].filter(Boolean)) assert.ok(S.nombreDeMots(t) <= 8, `${s.id}/${e.id} : « ${t} »`);
+      for (const t of [e.texte, e.texteEcrire, e.fin, ...(e.lignes || []).map((l) => l.texte)].filter(Boolean)) assert.ok(S.nombreDeMots(t) <= 8, `${s.id}/${e.id} : « ${t} »`);
       if (e.type === 'photo') assert.ok(e.legende, `${s.id}/${e.id} : légende`);
       if (e.type === 'projection') assert.ok(['vitesse', 'final'].includes(e.mode), `${s.id}/${e.id} : mode`);
       for (const ph of e.phrases || []) assert.ok(S.nombreDeMots(ph) <= 8, `${s.id}/${e.id} : « ${ph} »`);
@@ -62,4 +62,26 @@ test('séance 5 : titre, vitesse, images ratées, film fini, cinéma, bilan ; id
   const titres = donneesProjet.idees.titres;
   assert.ok(titres.length >= 6);
   for (const t of titres) assert.ok(t.length <= 40 && S.nombreDeMots(t) <= 5, t);
+});
+
+test('séance 1 : héros, lieu, problème, fin, l’histoire, le titre, le storyboard ; idées pour chaque partie', () => {
+  const s1 = etapes.seances.find((x) => x.id === 's1');
+  assert.deepEqual(s1.etapes.filter((e) => e.type === 'idee-histoire').map((e) => e.partie), ['heros', 'lieu', 'probleme', 'fin']);
+  assert.deepEqual(s1.etapes.slice(-3).map((e) => e.type), ['histoire-resume', 'titre-film', 'photo']);
+  for (const partie of ['heros', 'lieu', 'probleme', 'fin']) {
+    const liste = donneesProjet.idees[partie];
+    assert.ok(liste.length >= 4 && liste.length <= 6, partie);
+    for (const t of liste) {
+      assert.ok(t.length <= 40 && S.nombreDeMots(t) <= 6, t);
+      assert.ok(!/\b(il|elle)\b/i.test(t), `« ${t} » : sans « il » ni « elle »`);
+    }
+  }
+});
+
+test('séance 2 : la plaque, puis décor, héros et objets (une photo après chaque construction)', () => {
+  const s2 = etapes.seances.find((x) => x.id === 's2');
+  const types = s2.etapes.map((e) => e.type);
+  assert.ok(s2.etapes.some((e) => e.id === 'plaque'));
+  for (let i = 0; i < types.length; i++) if (types[i] === 'construire') assert.equal(types[i + 1], 'photo', s2.etapes[i].id);
+  assert.deepEqual(s2.etapes.filter((e) => e.type === 'construire').map((e) => e.partie), ['lieu', 'heros', 'objets']);
 });

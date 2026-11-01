@@ -101,3 +101,18 @@ test('vitesse, titre, générique et séquence de projection', () => {
   assert.equal(S.sequenceFilm(film(1), { vitesse: 'lent' })[1].duree, 0.25, 'la vitesse peut être choisie à la projection');
   assert.equal(S.sequenceFilm(S.filmVide(), {})[0].texte, 'Mon film');
 });
+
+test('l’histoire en 3 temps : gardée à part, en 3 phrases', () => {
+  const d = { equipe: { eleves: ['Léa', 'Tom'] }, seances: {}, photos: [] };
+  assert.deepEqual(S.histoireDe(d), { heros: '', lieu: '', probleme: '', fin: '' });
+  S.noterHistoire(d, 'heros', 'Un dragon');
+  S.noterHistoire(d, 'lieu', '  dans   la forêt ');
+  S.noterHistoire(d, 'probleme', 'Une tempête arrive.');
+  S.noterHistoire(d, 'fin', 'c’est la fête !');
+  S.noterHistoire(d, 'autre', 'rien');
+  assert.deepEqual(Object.keys(d.histoire), ['heros', 'lieu', 'probleme', 'fin']);
+  assert.ok(d.modifieLe);
+  assert.deepEqual(S.phrasesHistoire(d.histoire), { debut: 'Un dragon, dans la forêt.', milieu: 'Une tempête arrive.', fin: 'C’est la fête !' });
+  assert.deepEqual(S.phrasesHistoire({ heros: 'mon chat.' }), { debut: 'Mon chat.', milieu: '', fin: '' });
+  assert.equal(S.noterHistoire(d, 'heros', 'x'.repeat(80)).heros.length, S.LONGUEUR_IDEE);
+});

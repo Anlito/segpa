@@ -116,6 +116,29 @@
   }
   const dureeSequence = (plans) => plans.reduce((t, p) => t + p.duree, 0);
 
+  // ---------- L'histoire en 3 temps (séance 1) ----------
+  // Gardée à part (d.histoire) : { heros, lieu, probleme, fin } — une carte-idée de donnees/idees.js ou « mon idée ».
+  const PARTIES_HISTOIRE = ['heros', 'lieu', 'probleme', 'fin'];
+  const LONGUEUR_IDEE = 40;
+  const histoireDe = (d) => Object.assign({ heros: '', lieu: '', probleme: '', fin: '' }, (d && d.histoire) || {});
+  function noterHistoire(d, partie, texte) {
+    if (!PARTIES_HISTOIRE.includes(partie)) return histoireDe(d);
+    d.histoire = Object.assign(histoireDe(d), { [partie]: String(texte || '').replace(/\s+/g, ' ').trim().slice(0, LONGUEUR_IDEE).trim() });
+    d.modifieLe = S.maintenant();
+    return d.histoire;
+  }
+  // Les 3 phrases de l'histoire : « Un dragon, dans la forêt. » · « Une tempête arrive. » · « C'est la fête ! »
+  const phrase = (t) => {
+    const x = String(t || '').trim();
+    if (!x) return '';
+    return x.charAt(0).toUpperCase() + x.slice(1) + (/[.!?…]$/.test(x) ? '' : '.');
+  };
+  function phrasesHistoire(h) {
+    const v = Object.assign({}, h);
+    const debut = [v.heros, v.lieu].map((x) => String(x || '').trim().replace(/[.!?…]+$/, '')).filter(Boolean).join(', ');
+    return { debut: phrase(debut), milieu: phrase(v.probleme), fin: phrase(v.fin) };
+  }
+
   // Le film de l'équipe, gardé à part des séances (d.film) : la séance 4 continue le film commencé en séance 3.
   const filmDe = (d) => copie(d && d.film);
   function noterFilm(d, valeur) {
@@ -124,7 +147,7 @@
     return d.film;
   }
 
-  const API = { imagesVisibles: visibles, basculerImage, choisirVitesse, noterTitre, LONGUEUR_TITRE, nomsGenerique, sequenceFilm, dureeSequence, filmDe, noterFilm, REGLAGES_FILM: REGLAGES, filmVide, prochainNomFilm: prochainNom, ajouterImageFilm: ajouterImage, enleverImageFilm: enleverImage, compteurFilm: compteur, dernieresImages: dernieres, derniereImage: derniere, imagesParSeconde, dureeFilm: duree, conseilDuMoment: conseil };
+  const API = { PARTIES_HISTOIRE, LONGUEUR_IDEE, histoireDe, noterHistoire, phrasesHistoire, imagesVisibles: visibles, basculerImage, choisirVitesse, noterTitre, LONGUEUR_TITRE, nomsGenerique, sequenceFilm, dureeSequence, filmDe, noterFilm, REGLAGES_FILM: REGLAGES, filmVide, prochainNomFilm: prochainNom, ajouterImageFilm: ajouterImage, enleverImageFilm: enleverImage, compteurFilm: compteur, dernieresImages: dernieres, derniereImage: derniere, imagesParSeconde, dureeFilm: duree, conseilDuMoment: conseil };
   Object.assign(S, API);
   if (enNode) module.exports = S;
 })(typeof window !== 'undefined' ? window : globalThis);

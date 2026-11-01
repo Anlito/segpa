@@ -1,6 +1,6 @@
 # Plan court — Film en stop motion avec des briques (6e SEGPA)
 
-Version 3 · 01/11/2026 · réponses de Thomas reportées (§1 et §7) · **jalons M1 et M2 faits** (§6, §8, §9). À lire avec `BRIEF-CLAUDE-CODE-stop-motion.md` (proposition d'origine) et
+Version 3 · 01/11/2026 · réponses de Thomas reportées (§1 et §7) · **jalons M1, M2 et M3 faits** (§6, §8 à §10). À lire avec `BRIEF-CLAUDE-CODE-stop-motion.md` (proposition d'origine) et
 `PLAN.md` (organisation du dépôt, socle commun).
 
 ## 1. Décisions déjà prises
@@ -69,7 +69,7 @@ lus directement dans les dossiers.
 | M0 | maquette de l'univers graphique (deux directions au choix) — **fait : direction C « Cinéma en briques » choisie le 01/11** |
 | M1 | écran de tournage et sauvegarde des images (calque, grille, pellicule, enlever, voir) — **essai sur un vrai poste** — **fait le 01/11, recette de Thomas à faire** (`RECETTE.md`) |
 | M2 | S5 : lecture, vitesses, enlever des images, titre et générique ; `cinema.html` — **fait le 01/11, recette de Thomas à faire** |
-| M3 | S1 et S2 : histoire en 3 temps, titre, briques, construction |
+| M3 | S1 et S2 : histoire en 3 temps, titre, briques, construction — **fait le 01/11, recette de Thomas à faire** |
 | M4 | outil professeur, 7 critères et ceinture (à valider), exports |
 | M5 | recette automatique (caméra simulée), essai réel, publication |
 
@@ -101,3 +101,13 @@ lus directement dans les dossiers.
   projection plein écran avec pupitre (et clavier), applaudissements, film suivant, « Bravo à tous les réalisateurs ».
   La page ne fait que lire les dossiers.
 - Le titre se choisira en séance 1 au jalon M3 ; en séance 5, il est repris et peut être changé.
+
+## 10. Fait au jalon M3 (01/11/2026)
+
+- Séance 1 : règles · `idee-histoire` pour le héros et le lieu (Début), le problème (Milieu), la fin · `histoire-resume`
+  (3 briques Début · Milieu · Fin, lues à voix haute) · le titre · la photo du storyboard.
+- Séance 2 : 2 règles · « J'ai pris ma plaque » · `construire` le décor, le héros, les objets (rappel de l'histoire en
+  pastille), une photo après chacun · « Je secoue doucement la table » · rangement (le décor reste sur la plaque).
+- `donnees/idees.js` : 6 héros, 6 lieux, 6 problèmes, 6 fins, 8 titres, sans « il » ni « elle ».
+- Moteur : `histoireDe`, `noterHistoire`, `phrasesHistoire` (testés) ; l'histoire est gardée dans `d.histoire`.
+- `js/choix-ou-texte.js` : l'écran « une carte-idée ou j'écris mon idée », commun au titre et à l'histoire.

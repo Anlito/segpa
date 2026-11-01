@@ -185,3 +185,14 @@ Professeur (`site/stop-motion/cinema.html`, au vidéoprojecteur) :
 - [ ] Pupitre : Précédent, Pause, Recommencer, Lent / Normal / Rapide (pour ce film), Suivant, Programme ; clavier : Espace, ←, →, R.
 - [ ] « Bravo à tous les réalisateurs ! » avec tous les titres ; « Tout revoir ».
 - [ ] Au vidéoprojecteur de la salle : les images sont-elles assez nettes, le texte assez grand ?
+
+## Film en stop motion — jalon M3 (séances 1 et 2)
+Séance 1 (`site/stop-motion/index.html`) :
+- [ ] Les 3 règles du matériel, puis « Qui est mon héros ? », « Où se passe mon histoire ? » (Début), « Quel problème arrive ? » (Milieu), « Comment finit mon histoire ? » (Fin) : 6 cartes-idées chacun ou « J'écris mon idée ».
+- [ ] Les idées (`donnees/idees.js`) vous conviennent-elles ? Elles sont écrites sans « il » ni « elle », pour aller avec tous les héros.
+- [ ] « Mon histoire en 3 temps » : 3 briques Début · Milieu · Fin (« Un dragon, sur la Lune. » · « Une tempête arrive. » · « C'est la fête ! »), lues à voix haute ; « Je dessine ces 3 cases sur mon storyboard ».
+- [ ] Le titre (cartes ou clavier), puis la photo du storyboard. En séance 5, le titre est déjà là (on peut le changer).
+
+Séance 2 :
+- [ ] « Je prends ma plaque » ; décor, héros, objets : chaque consigne rappelle l'histoire (« Mon lieu : sur la Lune ») et est suivie d'une photo.
+- [ ] « Je secoue doucement la table » ; rangement : briques par couleur, décor sur la plaque, nom sur la plaque.
