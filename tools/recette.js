@@ -134,6 +134,19 @@ async function faireEcran(page, nom, captures, demo) {
   } else if (await visible(page, 'input.champ-libre')) {
     await page.locator('input.champ-libre').fill('Ressort');
     await cliquer(page, '[data-action="nomme"]');
+  } else if (await visible(page, '[data-action="choisir-piece"]')) {
+    // Atelier « Je dessine ma carrosserie » : une pièce décorée, puis toute la voiture.
+    if (await visible(page, '.carte-piece-dessin.decoree')) await cliquer(page, '[data-action="voir-voiture"]');
+    else await cliquer(page, '[data-action="choisir-piece"]');
+  } else if (await visible(page, '.palette-tampons')) {
+    await cliquer(page, '[data-action="outil"][data-id="etoile"]');
+    const b = await page.locator('.plan-de-travail svg').boundingBox();
+    await page.mouse.click(b.x + b.width * 0.98, b.y + b.height * 0.5);
+    await page.locator('.plan-de-travail .element').first().waitFor();
+    await cliquer(page, '[data-action="agrandir"]');
+    await sansDefilement(page, nom + '-atelier');
+    if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '-atelier.png') });
+    await cliquer(page, '[data-action="piece-finie"]');
   } else if (await visible(page, '[data-action="choisir-roues"]')) {
     // Essais de la voiture (séance 4) : un écran par geste.
     await cliquer(page, '[data-action="choisir-roues"]');
@@ -173,7 +186,7 @@ async function faireEcran(page, nom, captures, demo) {
     await page.locator('textarea.champ-libre').fill('Elle fait tourner la lame.');
     await cliquer(page, '[data-action="question-suivante"]');
   } else {
-    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'fleche-faite', 'remise', 'fait', 'essai-place', 'essai-parti', 'essais-finis', 'resultat-suivant'];
+    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'fleche-faite', 'remise', 'fait', 'essai-place', 'essai-parti', 'essais-finis', 'resultat-suivant', 'dessin-fini'];
     for (const a of suite)
       if (await visible(page, `[data-action="${a}"]`)) {
         await cliquer(page, `[data-action="${a}"]`);
@@ -264,11 +277,11 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   await cliquer(page, '[data-prenom="Léa"]');
   await cliquer(page, '[data-prenom="Tom"]');
   await cliquer(page, '[data-action="valider"]');
-  assert.equal(await page.locator('.carte-seance').count(), 5);
+  assert.equal(await page.locator('.carte-seance').count(), 6);
   await sansDefilement(page, 'voiture-mission');
   if (captures) await page.screenshot({ path: path.join(SORTIE, 'voiture-mission.png') });
   const ecrans = [];
-  for (const s of ['s1', 's2', 's3']) {
+  for (const s of ['s1', 's2', 'sd', 's3']) {
     await cliquer(page, '[data-action="continuer"]');
     ecrans.push(await faireSeance(page, 'voiture-' + s, captures));
     if (s === 's1') {
@@ -281,7 +294,9 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
     await cliquer(page, '[data-action="fini"]');
     await page.locator('.carte-seance').first().waitFor();
   }
-  assert.equal(await page.locator('.carte-seance.fait').count(), 3);
+  assert.equal(await page.locator('.carte-seance.fait').count(), 4);
+  const dessin = await page.evaluate(() => Segpa.dessin.nombreElements(Segpa.valeurEtape(Segpa.app.etat.session.donnees, 'sd', 'dessin')));
+  assert.equal(dessin, 1, 'un dessin posé sur la carrosserie');
   const d = await page.evaluate(() => Segpa.voitureDe(Segpa.app.etat.session.donnees));
   assert.equal(d.nom, 'Turbo Ballon');
   assert.equal(d.nomCouleur, 'Bleu');
@@ -302,7 +317,7 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   ecrans.push(await faireSeance(page, 'voiture-s4', captures));
   await cliquer(page, '[data-action="fini"]');
   await page.locator('.carte-seance').first().waitFor();
-  assert.equal(await page.locator('.carte-seance.fait').count(), 4);
+  assert.equal(await page.locator('.carte-seance.fait').count(), 5);
   const r = await page.evaluate(() => Segpa.resumeEssais(Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's4', 'essais')));
   assert.equal(r.nombre, 3);
   assert.equal(r.changements.length, 2);
@@ -311,7 +326,7 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   ecrans.push(await faireSeance(page, 'voiture-s5', captures));
   await cliquer(page, '[data-action="fini"]');
   await page.locator('.carte-seance').first().waitFor();
-  assert.equal(await page.locator('.carte-seance.fait').count(), 5);
+  assert.equal(await page.locator('.carte-seance.fait').count(), 6);
   const s5 = await page.evaluate(() => ({ r: Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's5', 'resultat'), q: Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's5', 'pourquoi') }));
   assert.equal(s5.r.resultat.course, 'Finale secondaire');
   assert.ok(s5.q.texte.length > 0, 'réponse écrite gardée');
@@ -699,7 +714,7 @@ async function scenarioProfesseur(navigateur, base) {
         const t = `${taille.width}×${taille.height}`;
         try {
           const ecrans = await scenarioVoiture(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
-          noter(`- OK ${nomBase} ${t} · voiture à ballon : séances 1 à 5 de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, carrosserie, photo officielle, 3 essais avec un changement à la fois et graphique, résultat de la course, réponse écrite), Ma mission à 5 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
+          noter(`- OK ${nomBase} ${t} · voiture à ballon : 6 séances de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, atelier de dessin de la carrosserie, carrosserie, photo officielle, 3 essais avec un changement à la fois et graphique, résultat de la course, réponse écrite), Ma mission à 6 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
         } catch (e) {
           ok = false;
           noter(`- ÉCHEC ${nomBase} ${t} · voiture à ballon : ${e.message.split('\n')[0]}`);

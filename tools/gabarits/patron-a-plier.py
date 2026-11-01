@@ -149,3 +149,36 @@ cricut = [f'<?xml version="1.0" encoding="UTF-8"?>',
   '<g id="plis" fill="none" stroke="#E11D48" stroke-width="0.25">'] + [f'<line x1="{a[0]+dx:.3f}" y1="{a[1]+dy:.3f}" x2="{b[0]+dx:.3f}" y2="{b[1]+dy:.3f}"/>' for a, b in plis] + ['</g>', '</svg>']
 open('patron-carrosserie-cricut.svg', 'w').write('\n'.join(cricut) + '\n')
 print('cricut', round(LARG, 1), '×', round(HAUT, 1), 'mm,', len(contours), 'contours,', len(plis), 'plis,', len(net.exterior.coords), 'points')
+
+# ---------- Données pour l'atelier « Je dessine ma carrosserie » (site/voiture-ballon/donnees/patron.js) ----------
+# Pour chaque pièce à décorer : son contour à plat, sa zone de dessin (à 3 mm des bords, des plis, de la fente et de
+# l'arche : le stylo de la Cricut ne trace jamais sur un pli, un rabat ou une languette) et la rotation qui la montre à
+# l'endroit à l'élève (le haut de la pièce, côté toit, en haut ; jamais de miroir : la face imprimée est la face
+# extérieure). Plus le patron entier (découpe et plis) pour l'export SVG à trois calques. Le même repère que le SVG
+# pour la Cricut : l'atelier et le patron restent d'accord.
+import json
+MARGE_DESSIN = 3
+corps_arriere = rw.difference(arche)
+PIECES = [
+    ('cote-gauche', 'Côté gauche', 'CÔTÉ1', faces['CÔTÉ1'], 0),
+    ('cote-droit', 'Côté droit', 'CÔTÉ2', faces['CÔTÉ2'], 180),
+    ('capot', 'Capot', 'CAPOT', faces['CAPOT'], 0),
+    ('toit', 'Toit', 'TOIT', faces['TOIT'], 0),
+    ('arriere', 'Arrière', 'ARRIÈRE', corps_arriere, 90),
+]
+def anneaux(g):
+    def a(c): return [[round(x + dx, 2), round(y + dy, 2)] for x, y in c.coords]
+    if g.geom_type == 'MultiPolygon': g = max(g.geoms, key=lambda p: p.area)
+    return {'contour': a(g.exterior), 'trous': [a(i) for i in g.interiors]}
+donnees_patron = {
+    'unite': 'mm',
+    'version': 'châssis v8, toit à %d mm' % H2,
+    'taille': [round(LARG, 2), round(HAUT, 2)],
+    'decoupe': contours,
+    'plis': [[round(a[0] + dx, 2), round(a[1] + dy, 2), round(b[0] + dx, 2), round(b[1] + dy, 2)] for a, b in plis],
+    'pieces': [dict(id=i, nom=n, rotation=r, **anneaux(f.simplify(0.05)), zone=anneaux(f.buffer(-MARGE_DESSIN, join_style=2).simplify(0.05)))
+               for i, n, _, f, r in PIECES],
+}
+entete = '// Produit par tools/gabarits/patron-a-plier.py (ne pas modifier à la main) : le patron de carrosserie pour l\'atelier\n// « Je dessine ma carrosserie ». Cotes en mm, dans le repère du SVG pour la Cricut.\n'
+open('patron.js', 'w').write(entete + 'definirDonneesProjet({ "patron": ' + json.dumps(donnees_patron, ensure_ascii=False) + ' });\n')
+print('patron.js', len(PIECES), 'pièces', [round(f.buffer(-MARGE_DESSIN, join_style=2).area) for *_, f, r in PIECES])

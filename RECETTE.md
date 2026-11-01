@@ -123,3 +123,12 @@ Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemp
 - [ ] Évaluation : les 7 critères (à valider), repères automatiques à côté, note /20, ceinture ; exports Excel, CSV, Carnet,
       feuilles ceinture.
 - [ ] Patron pour la Cricut (SVG) : s'importe à la bonne taille (207 × 154 mm), découpe et plis sur deux calques.
+
+## Voiture à ballon — atelier « Je dessine ma carrosserie », jalon D1
+Écrans élèves (démonstration) → Ma mission (6 séances) → Séance 3 « Je dessine » :
+- [ ] Ma mission : les 6 séances tiennent sans défilement.
+- [ ] Je choisis une pièce : côté gauche, côté droit, capot, toit, arrière, chacune à l'endroit ; une coche verte sur les pièces décorées.
+- [ ] Sur une pièce : toucher un dessin en bas, puis cliquer sur la pièce le pose ; Agrandir, Rapetisser, Tourner, J'efface, Annuler.
+- [ ] Un dessin posé trop près d'un bord, d'un pli ou de la fente du toit est remis dans la pièce (« Je l'ai remis dans la pièce. », en ambre).
+- [ ] Toute ma voiture : le patron entier avec les dessins, aux bons endroits ; « C'est fini ».
+- [ ] Les dessins sont-ils assez gros et assez simples pour le stylo gel de 0,8 mm et le coloriage ?

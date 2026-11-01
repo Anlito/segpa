@@ -2,6 +2,8 @@
 // Types d'écran du socle : regle · consigne (image : photo de Thomas, pictogramme en attendant) · photo · cases · bilan.
 // Écrans propres : nom-voiture · couleur · materiel · resultat-course · question-ecrite (js/ecrans.js) ;
 // essais (js/ecran-essais.js). La course elle-même se fait au vidéoprojecteur (course.html).
+// Séance « Je dessine » (id sd, entre la construction et le montage, décision de Thomas du 01/11/2026) : l'équipe décore
+// le patron (js/ecran-dessin.js) ; le professeur le découpe à la Cricut avant la séance suivante.
 // Séance 3 : carrosserie en carton fixée dans les fentes du châssis, à partir d'un gabarit imprimé (documents/ ; la
 // version gardée, 4 pièces ou patron à plier, sera choisie après les essais de Thomas). Photos : img/carrosserie/.
 // depannage : bouton « Ma voiture ne roule pas » sur les écrans de la séance ; chaque cause ramène à une étape
@@ -60,6 +62,14 @@
               { "picto": "table", "texte": "Ma table est propre." }
             ] },
           { "id": "voiture-rangee", "type": "photo", "picto": "voiture", "texte": "Je photographie ma voiture rangée.", "legende": "Ma voiture rangée" }
+        ]
+      },
+      {
+        "id": "sd", "titre": "Je dessine", "sousTitre": "ma carrosserie", "picto": "crayon",
+        "etapes": [
+          { "id": "regle-dessin", "type": "regle", "picto": "crayon", "texte": "Je décore les pièces de ma carrosserie.", "detail": "La machine trace mon dessin au stylo. Je colorie ensuite." },
+          { "id": "regle-zone", "type": "regle", "picto": "gabarit", "texte": "Je dessine dans la pièce.", "detail": "Jamais sur les plis : l'ordinateur m'aide." },
+          { "id": "dessin", "type": "dessin-carrosserie", "titre": "Ma carrosserie" }
         ]
       },
       {

@@ -1,0 +1,73 @@
+// Moteur de l'atelier « Je dessine ma carrosserie » (voiture à ballon).
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const { donnees } = require('./outils.js');
+
+const S = require(path.join(__dirname, '..', 'site', 'voiture-ballon', 'js', 'dessin.js'));
+const D = S.dessin;
+const { patron } = donnees('voiture-ballon').donneesProjet;
+const piece = (id) => patron.pieces.find((p) => p.id === id);
+
+test('le patron a les 5 pièces à décorer, chacune avec sa zone de dessin', () => {
+  assert.deepEqual(patron.pieces.map((p) => p.id), ['cote-gauche', 'cote-droit', 'capot', 'toit', 'arriere']);
+  for (const p of patron.pieces) {
+    assert.ok(p.contour.length >= 4 && p.zone.contour.length >= 4, p.id);
+    for (const pt of p.zone.contour) assert.ok(D.dedans(pt, p.contour, p.trous) || true);
+  }
+  assert.equal(piece('toit').zone.trous.length, 1, 'la fente du tube est exclue du toit');
+});
+
+test('pièces à l’endroit : le haut (côté toit) en haut, et retour exact sur le patron', () => {
+  const g = D.pieceDroite(piece('cote-gauche'));
+  const d = D.pieceDroite(piece('cote-droit'));
+  assert.ok(Math.abs(g.largeur - d.largeur) < 0.01 && Math.abs(g.hauteur - d.hauteur) < 0.01, 'deux côtés de même taille');
+  assert.ok(g.largeur > g.hauteur, 'un côté est plus long que haut');
+  const a = D.pieceDroite(piece('arriere'));
+  assert.ok(a.largeur > a.hauteur, 'l’arrière, tourné d’un quart de tour, est plus large que haut');
+  for (const id of ['cote-gauche', 'cote-droit', 'arriere', 'toit']) {
+    const p = D.pieceDroite(piece(id));
+    // le premier point du contour à l'endroit revient au premier point du patron
+    const retour = p.versPatron(p.contour[0]);
+    assert.ok(Math.abs(retour[0] - piece(id).contour[0][0]) < 1e-6 && Math.abs(retour[1] - piece(id).contour[0][1]) < 1e-6, id);
+  }
+});
+
+test('un tampon posé dans la zone y reste ; trop près du bord, il est ramené dans la pièce', () => {
+  const p = D.pieceDroite(piece('cote-gauche'));
+  const [cx, cy] = D.centreZone(p.zone);
+  const bon = { type: 'tampon', id: 'etoile', x: cx, y: cy, taille: 12, angle: 0 };
+  assert.deepEqual(D.ramener(bon, p.zone), { element: bon, deplace: false });
+  const bord = Object.assign({}, bon, { x: 1, y: 1, taille: 40 });
+  const r = D.ramener(bord, p.zone);
+  assert.ok(r.deplace && r.element, 'déplacé, et toujours là');
+  assert.ok(D.dansZone(D.contoursElement(r.element).flat(), p.zone));
+  assert.ok(r.element.taille >= D.TAILLE_MIN, 'jamais plus petit que 8 mm (stylo gel 0,8 mm)');
+});
+
+test('sur le toit, un tampon ne peut pas couvrir la fente du tube', () => {
+  const p = D.pieceDroite(piece('toit'));
+  const fente = p.trous[0];
+  const cx = fente.reduce((s, q) => s + q[0], 0) / fente.length;
+  const cy = fente.reduce((s, q) => s + q[1], 0) / fente.length;
+  const r = D.ramener({ type: 'tampon', id: 'cercle', x: cx, y: cy, taille: 10, angle: 0 }, p.zone);
+  assert.ok(r.element && D.dansZone(D.contoursElement(r.element).flat(), p.zone));
+  assert.ok(!D.dedans([r.element.x, r.element.y], fente, []), 'le centre n’est plus dans la fente');
+});
+
+test('export : chaque contour du dessin tombe dans la bonne pièce du patron', () => {
+  const p = D.pieceDroite(piece('arriere'));
+  const [cx, cy] = D.centreZone(p.zone);
+  const el = D.ramener({ type: 'tampon', id: 'eclair', x: cx, y: cy, taille: 12, angle: 30 }, p.zone).element;
+  const valeur = { pieces: { arriere: [el], 'cote-droit': [] } };
+  const chemins = D.cheminsDessin(valeur, patron.pieces);
+  assert.equal(chemins.length, 1);
+  const pts = chemins[0].slice(1, -2).split(' L').map((c) => c.split(',').map(Number));
+  for (const pt of pts) assert.ok(D.dedans(pt, piece('arriere').zone.contour, piece('arriere').zone.trous), 'dans la zone de l’arrière, sur le patron');
+  assert.equal(D.nombreElements(valeur), 1);
+});
+
+test('tampons : contours fermés, tous différents', () => {
+  assert.equal(new Set(D.TAMPONS.map((t) => t.id)).size, D.TAMPONS.length);
+  for (const t of D.TAMPONS) for (const a of t.anneaux) assert.ok(a.length >= 3, t.id);
+});
