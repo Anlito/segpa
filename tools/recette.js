@@ -1038,7 +1038,7 @@ async function scenarioProfesseur(navigateur, base) {
   // Fiche d'une équipe : onglets.
   await page.locator('.pt', { hasText: 'Léa · Tom' }).click();
   await page.locator('.pe-onglets').waitFor();
-  assert.match(await page.locator('.pe-contenu').textContent(), /Séance 1 · Je démonte/);
+  assert.match(await page.locator('.pe-contenu').textContent(), /S1\s*Je démonte[\s\S]*écrans/);
   await cliquer(page, '[data-action="onglet"][data-id="album"]');
   await page.waitForFunction(() => document.querySelectorAll('.pp-photo img').length >= 7);
   await page.screenshot({ path: path.join(SORTIE, 'prof-album.png'), fullPage: true });

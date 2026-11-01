@@ -205,3 +205,11 @@ Essai sans élèves : `npm run exemples`, puis `site/stop-motion/prof.html` → 
 - [ ] Fiche d'une équipe → « Scénario » : début, milieu, fin et les 7 réponses ; « Film » : le film avec titre et générique, toutes les images (les enlevées grisées), images prises par séance.
 - [ ] « Évaluation » : les 7 critères proposés (à valider ou à changer dans `donnees/criteres.js`), repères à côté, ceinture d'après le critère « Son film est fini » ; exports Excel, CSV, Carnet de classe, feuilles ceinture.
 - [ ] Les 4 aides de différenciation proposées vous conviennent-elles ? (scénario dicté à l'adulte · rôles photographe / animateur · film plus court accepté · élève rapide tuteur)
+
+## Outils professeur (les 3 projets) — nouvelle interface (01/11/2026)
+- [ ] En-tête sur une ligne : logo du projet, « Professeur », dossier et classe, « En direct ».
+- [ ] Accueil : le projet en grand, « Ouvrir le dossier de la classe » mis en avant, le chemin du dossier en étiquettes.
+- [ ] Classe : bandeau violet des aides ; 3 compteurs (équipes, aides en cours, à regarder) ; l'avancement de chaque séance en barres (finies en vert, en cours hachurées) ; outils du projet et exports côte à côte.
+- [ ] Filtres : Toutes · À regarder · En séance N (avec le nombre d'équipes).
+- [ ] Tuiles : prénoms, « Active · il y a 2 min » (point vert), petite photo, frise des séances sur une ligne, lignes du projet, alertes en ambre avec icône.
+- [ ] Fiche d'une équipe : résumé toujours visible (photo, frise, lignes, alertes), onglets en pastilles (nombre de photos sur Album), bilan des séances en cartes avec barre d'avancement ; ← → pour changer d'équipe, Échap pour revenir.

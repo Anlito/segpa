@@ -1,10 +1,10 @@
-// Évaluation du film en stop motion : 7 critères — PROPOSITION À VALIDER par Thomas (même forme que la voiture).
+// Évaluation du film en stop motion : 7 critères validés par Thomas le 01/11/2026 (même forme que la voiture).
 //   libelle   : libellé du critère (aussi celui à créer dans le Carnet de classe pour l'import)
 //   entete    : en-tête de la colonne dans l'Excel
 //   repere    : observations automatiques montrées à côté du critère (js/prof-projet.js) — jamais un niveau
 // Même barème que les autres projets : Rouge 0 · Jaune 1 · Vert clair 2 · Vert foncé 3 ; note /20 = score ÷ 21 × 20.
 // Ceinture (élèves) : le niveau du critère « film » (un film fini, de 30 images au moins, qui raconte l'histoire) —
-// proposition à valider ; Rouge → ceinture blanche, pour ne pas montrer de rouge aux élèves.
+// validé le 01/11/2026 ; Rouge → ceinture blanche, pour ne pas montrer de rouge aux élèves.
 definirCriteres({
   "criteres": [
     { "id": "scenario", "seance": "S1", "libelle": "Invente une histoire en 3 temps (début, milieu, fin)", "entete": "S1 - Histoire\nen 3 temps",
