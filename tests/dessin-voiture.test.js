@@ -140,3 +140,17 @@ test('un calque par couleur de stylo ; sans couleur, le dessin est bleu', () => 
   const { donneesProjet } = donnees('voiture-ballon');
   assert.deepEqual(donneesProjet.stylos.map((s) => s.id), ['bleu', 'rouge', 'marron']);
 });
+
+test('SVG pour la Cricut : découpe, plis, puis un calque par stylo utilisé, à la taille du patron', () => {
+  const { donneesProjet } = donnees('voiture-ballon');
+  const p = D.pieceDroite(piece('toit'));
+  const [cx, cy] = D.centreZone(p.zone);
+  const a = D.ramener({ type: 'tampon', id: 'etoile', x: cx - 25, y: cy, taille: 10, angle: 0, couleur: 'marron' }, p.zone).element;
+  const b = D.ramener({ type: 'texte', texte: '7', x: cx + 25, y: cy, taille: 9, angle: 0, couleur: 'rouge' }, p.zone).element;
+  const svg = D.svgCricut({ pieces: { toit: [a, b] } }, patron, donneesProjet.stylos, 'Léa et Tom <Turbo>');
+  assert.match(svg, new RegExp(`width="${patron.taille[0]}mm" height="${patron.taille[1]}mm"`));
+  const calques = [...svg.matchAll(/<g id="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(calques, ['decoupe', 'plis', 'dessin-rouge', 'dessin-marron'], 'ordre des stylos, couleurs utilisées seulement');
+  assert.match(svg, /Léa et Tom &lt;Turbo&gt;/);
+  assert.doesNotMatch(D.svgCricut({ pieces: {} }, patron, donneesProjet.stylos), /dessin-/, 'sans dessin : le patron seul');
+});

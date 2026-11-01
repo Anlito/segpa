@@ -144,3 +144,10 @@ Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemp
 - [ ] Je fais glisser un dessin à la souris, en le prenant par le milieu ; lâché trop près d'un bord ou dehors, il revient dans la pièce (message ambre) ; Annuler le remet à sa place.
 - [ ] Trois couleurs de stylo (bleu, rouge, marron), toujours avec leur nom : la couleur choisie s'applique aux dessins suivants et au dessin choisi.
 - [ ] Dans le SVG pour la Cricut, les plis sont maintenant en vert (le rouge est un stylo).
+
+## Voiture à ballon — atelier, jalon D3 (outil professeur)
+« Suivre la classe » de la voiture (essai sans élèves : dossier exemples/Voiture-ballon) :
+- [ ] Tuile : « Carrosserie : 3 dessins ✓ » pour une équipe qui a fini.
+- [ ] Fiche → onglet Carrosserie : le patron décoré dans ses couleurs, les stylos utilisés, « Télécharger le patron (SVG pour la Cricut) » → carrosserie-Prenom_Prenom.svg.
+- [ ] Bandeau « Piste » : « Tous les patrons (.zip) » → un SVG par équipe décorée.
+- [ ] Dans Design Space : calques decoupe (noir), plis (vert), dessin-bleu / dessin-rouge / dessin-marron ; la Cricut demande de changer de stylo entre deux couleurs ; taille 207 × 154 mm.

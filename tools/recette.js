@@ -376,6 +376,11 @@ async function scenarioProfesseurVoiture(navigateur, base) {
   assert.match(await tuile('Inès · Noah'), /Matériel pris différent du kit/);
   assert.match(await tuile('Inès · Noah'), /Course : 2e · Finale principale/);
   assert.match(await tuile('Adam · Jade'), /Voiture qui n’avance pas/);
+  assert.match(await page.locator('.pc-piste').textContent(), /Tous les patrons \(\.zip, 2 équipes\)/);
+  assert.match(await tuile('Inès · Noah'), /Carrosserie : 3 dessins ✓/);
+  const [zipDl] = await Promise.all([page.waitForEvent('download'), cliquer(page, '.pc-piste [data-telecharger]')]);
+  assert.equal(zipDl.suggestedFilename(), 'carrosseries-6A.zip');
+  assert.equal(fs.readFileSync(await zipDl.path()).slice(0, 2).toString(), 'PK');
   assert.match(await page.locator('.pc-piste').textContent(), /longueur proposée 1,5 m \(3 voitures sur 3/);
   await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-classe.png'), fullPage: true });
   await page.locator('.pt', { hasText: 'Inès · Noah' }).click();
@@ -386,6 +391,14 @@ async function scenarioProfesseurVoiture(navigateur, base) {
   await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-essais.png'), fullPage: true });
   await cliquer(page, '[data-action="onglet"][data-id="voiture"]');
   assert.match(await page.locator('.pe-contenu').textContent(), /L’air sort du ballon/);
+  // Carrosserie décorée : aperçu, stylos, SVG à télécharger (calques découpe, plis, un par stylo).
+  await cliquer(page, '[data-action="onglet"][data-id="carrosserie"]');
+  assert.match(await page.locator('.pe-contenu').textContent(), /3 dessins · finie/);
+  const [svgDl] = await Promise.all([page.waitForEvent('download'), cliquer(page, '.pe-contenu [data-telecharger]')]);
+  assert.equal(svgDl.suggestedFilename(), 'carrosserie-Ines_Noah.svg');
+  const svgTexte = fs.readFileSync(await svgDl.path(), 'utf8');
+  assert.deepEqual([...svgTexte.matchAll(/<g id="([^"]+)"/g)].map((m) => m[1]), ['decoupe', 'plis', 'dessin-bleu', 'dessin-rouge']);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-carrosserie.png'), fullPage: true });
   await cliquer(page, '[data-action="onglet"][data-id="evaluation"]');
   assert.match(await page.locator('.ev-table').textContent(), /Distances saisies \(pavé en cm\) : 310 cm · 390 cm · 420 cm/);
   for (const c of ['fabrication', 'regles', 'fonctionne', 'essais', 'mesure', 'explique', 'autonomie']) {
@@ -775,10 +788,10 @@ async function scenarioProfesseur(navigateur, base) {
     for (const [nomBase, base] of bases) {
       try {
         await scenarioProfesseurVoiture(navigateur, base);
-        noter(`- OK ${nomBase} 1366×768 · professeur de la voiture : 4 équipes fictives, aide en premier, tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n’avance pas), longueur de piste proposée, onglets Essais (tableau et graphique) et Voiture et course (réponse écrite), évaluation à 7 critères avec repères et ceinture, export Excel.`);
+        noter(`- OK ${nomBase} 1366×768 · professeur de la voiture : 4 équipes fictives, aide en premier, tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n’avance pas), longueur de piste proposée, onglets Essais (tableau et graphique), Voiture et course (réponse écrite) et Carrosserie (aperçu, SVG à 4 calques), « Tous les patrons (.zip) », évaluation à 7 critères avec repères et ceinture, export Excel.`);
       } catch (e) {
         ok = false;
-        noter(`- ÉCHEC ${nomBase} 1366×768 · professeur de la voiture : ${e.message.split('\n')[0]}`);
+        noter(`- ÉCHEC ${nomBase} 1366×768 · professeur de la voiture : ${e.message.split('\n').slice(0, 6).join(' ')}`);
       }
     }
   } finally {

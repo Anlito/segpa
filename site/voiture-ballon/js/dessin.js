@@ -409,9 +409,34 @@
     return parCouleur;
   }
 
+  // Le patron décoré d'une équipe, pour la Cricut : même taille et même repère que le patron (mm), un calque « decoupe »
+  // (noir), un calque « plis » (vert) et un calque « dessin-<couleur> » par stylo utilisé, dans l'ordre des stylos
+  // (donnees/voiture.js). Dans Design Space : dessin (stylo par stylo), puis rainurage, puis découpe.
+  function svgCricut(valeur, patron, stylos, titre) {
+    const echapper = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const [L, H] = patron.taille;
+    const parCouleur = cheminsParCouleur(valeur, patron.pieces);
+    const ordre = (stylos || []).map((x) => x.id).concat(Object.keys(parCouleur)).filter((c, i, t) => parCouleur[c] && t.indexOf(c) === i);
+    const hex = (c) => ((stylos || []).find((x) => x.id === c) || { hex: '#1D4ED8' }).hex;
+    return [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${L}mm" height="${H}mm" viewBox="0 0 ${L} ${H}">`,
+      `<title>${echapper(titre || 'Patron de carrosserie décoré')}</title>`,
+      '<g id="decoupe" fill="none" stroke="#000000" stroke-width="0.25">',
+      ...patron.decoupe.map((d) => `<path d="${d}"/>`),
+      '</g>',
+      '<g id="plis" fill="none" stroke="#16A34A" stroke-width="0.25">',
+      ...patron.plis.map(([a, b, c, d]) => `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}"/>`),
+      '</g>',
+      ...ordre.flatMap((c) => [`<g id="dessin-${c}" fill="none" stroke="${hex(c)}" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round">`, ...parCouleur[c].map((d) => `<path d="${d}"/>`), '</g>']),
+      '</svg>',
+      '',
+    ].join('\n');
+  }
+
   const nombreElements = (valeur) => Object.values((valeur && valeur.pieces) || {}).reduce((n, l) => n + l.length, 0);
 
-  const API = { TAMPONS, TAILLE_MIN, TAILLE_MIN_TEXTE, TAILLE_MAX, TAILLE_DEPART, tampon, texteTracable, traitsTexte, formesElement, traitsCrayon, miroirElements, pieceDroite, dedans, dansZone, contoursElement, ramener, cheminsDessin, cheminsParCouleur, COULEUR_PAR_DEFAUT, deplacerElement, cheminSvg: chemin, nombreElements, centreZone };
+  const API = { TAMPONS, TAILLE_MIN, TAILLE_MIN_TEXTE, TAILLE_MAX, TAILLE_DEPART, tampon, texteTracable, traitsTexte, formesElement, traitsCrayon, miroirElements, pieceDroite, dedans, dansZone, contoursElement, ramener, cheminsDessin, cheminsParCouleur, svgCricut, COULEUR_PAR_DEFAUT, deplacerElement, cheminSvg: chemin, nombreElements, centreZone };
   Object.assign(S, { dessin: API });
   if (enNode) module.exports = S;
 })(typeof window !== 'undefined' ? window : globalThis);

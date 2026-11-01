@@ -2,7 +2,9 @@
 //   tuile   : nom et couleur de la voiture, matériel pris, essais (nombre, meilleure distance, changements), course ;
 //   alertes : matériel pris différent du kit, voiture qui n'avance pas (2 essais à 0 cm) ;
 //   bandeau : longueur de piste proposée d'après les essais de la séance 4, lien vers la course ;
-//   onglets : « Essais » (tableau et graphique) · « Voiture et course » (matériel, carrosserie, résultat, réponse écrite).
+//   onglets : « Essais » (tableau et graphique) · « Voiture et course » (matériel, carrosserie, résultat, réponse écrite)
+//             · « Carrosserie » (le patron décoré par l'équipe, à télécharger en SVG pour la Cricut) ;
+//   bandeau : « Tous les patrons (.zip) », un SVG par équipe qui a décoré sa carrosserie.
 (function (global) {
   'use strict';
 
@@ -17,6 +19,38 @@
     return { nom: (n && n.nom) || '', couleur: (c && c.hex) || '', nomCouleur: (c && c.nom) || '' };
   };
   const essais = (d) => S.valeurEtape(d, 's4', 'essais') || null;
+  // Atelier « Je dessine ma carrosserie » (séance sd) : le patron décoré, en SVG pour la Cricut.
+  const dessin = (d) => S.valeurEtape(d, 'sd', 'dessin') || null;
+  const nbDessins = (d) => (S.dessin ? S.dessin.nombreElements(dessin(d)) : 0);
+  // Nom de fichier sans accent (logiciels de découpe, téléchargement) : carrosserie-Ines_Noah.svg
+  const nomFichier = (d) => `carrosserie-${S.nomEquipe(d.equipe.eleves).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9_-]+/g, '-')}.svg`;
+  function svgEquipe(d) {
+    const v = voiture(d);
+    return S.dessin.svgCricut(dessin(d), P().patron, P().stylos, `Carrosserie de ${d.equipe.eleves.join(' et ')}${v.nom ? ' · ' + v.nom : ''} (${P().patron.version})`);
+  }
+  // Téléchargements : le contenu est préparé à l'affichage, le bouton le donne avec son nom (comme les exports du socle).
+  const aTelecharger = new Map();
+  let numero = 0;
+  function boutonTelecharger(contenu, type, nom, texte, classe) {
+    const id = 't' + ++numero;
+    aTelecharger.set(id, { contenu, type, nom });
+    if (aTelecharger.size > 200) aTelecharger.delete(aTelecharger.keys().next().value);
+    return `<button type="button" class="${classe || 'pb-btn'}" data-telecharger="${id}">${texte}</button>`;
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-telecharger]');
+    const f = b && aTelecharger.get(b.dataset.telecharger);
+    if (!f) return;
+    const url = URL.createObjectURL(new Blob([f.contenu], { type: f.type }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = f.nom;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  });
+  const lienSvg = (contenu, nom, texte, classe) => boutonTelecharger(contenu, 'image/svg+xml', nom, texte, classe);
   const resultat = (d) => (S.valeurEtape(d, 's5', 'resultat') || {}).resultat || null;
 
   // Matériel : [{ nom, pris, prevu }] et les écarts avec le kit.
@@ -47,6 +81,8 @@
       const r = S.resumeEssais(e);
       if (r.nombre) l.push(`Essais : ${r.nombre} · meilleur ${cm(r.meilleure)} · ${r.changements.length} changement${r.changements.length > 1 ? 's' : ''}`);
     }
+    const nd = nbDessins(d);
+    if (nd) l.push(`Carrosserie : ${nd} dessin${nd > 1 ? 's' : ''}${S.etapeFaite(d, 'sd', 'dessin') ? ' ✓' : ' (en cours)'}`);
     const c = resultat(d);
     if (c) l.push(`Course : ${c.arrivee ? S.ordinal(c.rang) : cm(c.distance)} · ${c.course}`);
     else if (S.etapeFaite(d, 's5', 'prete')) l.push('Prête pour la course ✓');
@@ -70,7 +106,40 @@
       lp
         ? `<span>longueur proposée <b>${S.ecrireNombre(lp.longueur / 100)} m</b> (${lp.depassent} voiture${lp.depassent > 1 ? 's' : ''} sur ${lp.sur} l’ont dépassée à leur meilleur essai)</span>`
         : '<span>longueur proposée après les essais de la séance 4 (2 équipes mesurées au moins)</span>'
-    }<a class="pb-btn" href="course.html" target="_blank" rel="noopener">La course (vidéoprojecteur)</a></div>`;
+    }<a class="pb-btn" href="course.html" target="_blank" rel="noopener">La course (vidéoprojecteur)</a>${tousLesPatrons(equipes)}</div>`;
+  }
+
+  // « Tous les patrons (.zip) » : un SVG par équipe qui a décoré sa carrosserie.
+  function tousLesPatrons(equipes) {
+    if (!S.dessin || !P().patron || !S.zip) return '';
+    const avec = equipes.filter((eq) => nbDessins(eq.donnees));
+    if (!avec.length) return '<span>Carrosseries : aucune décorée pour l’instant</span>';
+    const zip = S.zip(avec.map((eq) => ({ nom: nomFichier(eq.donnees), contenu: svgEquipe(eq.donnees) })));
+    return boutonTelecharger(zip, 'application/zip', `carrosseries-${(equipes[0] && equipes[0].donnees.equipe.classe) || 'classe'}.zip`, `Tous les patrons (.zip, ${avec.length} équipe${avec.length > 1 ? 's' : ''})`);
+  }
+
+  // Onglet « Carrosserie » : le patron décoré, comme la Cricut le tracera, et son SVG.
+  function ongletCarrosserie(d) {
+    if (!S.dessin || !P().patron) return '<section class="pp-bloc"><p class="pp-vide">Atelier de dessin indisponible.</p></section>';
+    const n = nbDessins(d);
+    if (!n) return '<section class="pp-bloc"><h3>Carrosserie</h3><p class="pp-vide">Pas encore de dessin sur la carrosserie.</p></section>';
+    const pat = P().patron;
+    const parCouleur = S.dessin.cheminsParCouleur(dessin(d), pat.pieces);
+    const stylos = P().stylos || [];
+    const hex = (c) => (stylos.find((x) => x.id === c) || { hex: '#1D4ED8' }).hex;
+    const nom = (c) => (stylos.find((x) => x.id === c) || { nom: c }).nom;
+    const svg = svgEquipe(d);
+    return `<section class="pp-bloc"><h3>Carrosserie décorée · ${n} dessin${n > 1 ? 's' : ''}${S.etapeFaite(d, 'sd', 'dessin') ? ' · finie' : ' · en cours'}</h3>
+        <div class="pp-patron"><svg viewBox="-2 -2 ${pat.taille[0] + 4} ${pat.taille[1] + 4}" role="img" aria-label="Patron décoré">
+          ${pat.decoupe.map((x) => `<path class="patron-decoupe" fill-rule="evenodd" d="${x}"/>`).join('')}
+          ${pat.plis.map(([a, b, c, e]) => `<line class="patron-pli" x1="${a}" y1="${b}" x2="${c}" y2="${e}"/>`).join('')}
+          ${Object.entries(parCouleur).map(([c, l]) => l.map((x) => `<path class="trait-dessin" style="stroke:${hex(c)}" d="${x}"/>`).join('')).join('')}
+        </svg></div>
+        <p>Stylos : ${Object.keys(parCouleur).map((c) => `<span class="pp-pastille" style="background:${hex(c)}"></span>${ech(nom(c))}`).join(' · ')} · ${ech(pat.version)}, ${pat.taille[0]} × ${pat.taille[1]} mm</p>
+        <p>${lienSvg(svg, nomFichier(d), 'Télécharger le patron (SVG pour la Cricut)', 'pb-btn pp-principal')}</p>
+        <p class="pp-vide">Design Space : importer, vérifier ${pat.taille[0]} × ${pat.taille[1]} mm, Dissocier ; noir en Couper, vert (plis) en Rainurer ou Dessiner,
+          chaque calque « dessin » en Dessiner avec le stylo de sa couleur ; tout sélectionner, Attacher.</p>
+      </section>`;
   }
 
   // Onglet « Essais » : tableau et graphique de la séance 4.
@@ -123,6 +192,7 @@
     onglets: [
       { id: 'essais', titre: 'Essais', html: (d) => ongletEssais(d) },
       { id: 'voiture', titre: 'Voiture et course', html: (d) => ongletVoiture(d) },
+      { id: 'carrosserie', titre: 'Carrosserie', html: (d) => ongletCarrosserie(d) },
     ],
     // Drapeaux de différenciation (proposition à valider) : notes du professeur, visibles sur la tuile.
     drapeaux: [
