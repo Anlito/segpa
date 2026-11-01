@@ -86,7 +86,8 @@ test('un texte posé reste dans la pièce, jamais sous 7 mm de haut ; ses traits
   assert.ok(r.element && r.element.taille >= D.TAILLE_MIN_TEXTE && r.element.taille < 40, 'rapetissé pour tenir');
   assert.ok(D.dansZone(D.contoursElement(r.element).flat(), p.zone));
   const chemins = D.cheminsDessin({ pieces: { 'cote-gauche': [r.element] } }, patron.pieces);
-  assert.ok(chemins.length > 10 && chemins.every((c) => !c.endsWith('Z')), 'des traits, pas des contours');
+  assert.equal(chemins.length, 1, 'un seul objet pour tout le texte');
+  assert.ok((chemins[0].match(/M/g) || []).length > 10 && !/Z/.test(chemins[0]), 'des traits ouverts, pas des contours');
 });
 
 test('crayon libre : coupé là où il sort de la zone, lissé, les petits bouts oubliés', () => {
@@ -153,4 +154,17 @@ test('SVG pour la Cricut : découpe, plis, puis un calque par stylo utilisé, à
   assert.deepEqual(calques, ['decoupe', 'plis', 'dessin-rouge', 'dessin-marron'], 'ordre des stylos, couleurs utilisées seulement');
   assert.match(svg, /Léa et Tom &lt;Turbo&gt;/);
   assert.doesNotMatch(D.svgCricut({ pieces: {} }, patron, donneesProjet.stylos), /dessin-/, 'sans dessin : le patron seul');
+});
+
+test('dans le SVG, un dessin = un seul objet : le « 10 » et le damier ne sont pas en morceaux', () => {
+  const { donneesProjet } = donnees('voiture-ballon');
+  const p = D.pieceDroite(piece('toit'));
+  const [cx, cy] = D.centreZone(p.zone);
+  const dix = D.ramener({ type: 'texte', texte: '10', x: cx - 25, y: cy, taille: 9, angle: 0, couleur: 'rouge' }, p.zone).element;
+  const damier = D.ramener({ type: 'tampon', id: 'damier', x: cx + 25, y: cy, taille: 14, angle: 0, couleur: 'bleu' }, p.zone).element;
+  const svg = D.svgCricut({ pieces: { toit: [dix, damier] } }, patron, donneesProjet.stylos);
+  const calque = (c) => svg.split(`<g id="dessin-${c}"`)[1].split('</g>')[0];
+  assert.equal((calque('rouge').match(/<path /g) || []).length, 1, 'le « 10 » : un seul objet (le 1, sa barre, le 0 et sa barre)');
+  assert.equal((calque('bleu').match(/<path /g) || []).length, 1, 'le damier : un seul objet');
+  assert.ok((calque('bleu').match(/M/g) || []).length === 8, 'ses 8 carrés sont bien tous là');
 });
