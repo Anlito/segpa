@@ -4,8 +4,9 @@
 // essais (js/ecran-essais.js). La course elle-même se fait au vidéoprojecteur (course.html).
 // Séance « Je dessine » (id sd, entre la construction et le montage, décision de Thomas du 01/11/2026) : l'équipe décore
 // le patron (js/ecran-dessin.js) ; le professeur le découpe à la Cricut avant la séance suivante.
-// Séance 3 : carrosserie en carton fixée dans les fentes du châssis, à partir d'un gabarit imprimé (documents/ ; la
-// version gardée, 4 pièces ou patron à plier, sera choisie après les essais de Thomas). Photos : img/carrosserie/.
+// Séance 3 : la carrosserie décorée, découpée à la Cricut sur une feuille cartonnée (patron de documents/) : je colorie,
+// je plie, je colle, je l'installe dans les fentes du châssis ; aileron, protège-roues… fabriqués à la main (décision de
+// Thomas du 01/11/2026). Photos : img/carrosserie/.
 // depannage : bouton « Ma voiture ne roule pas » sur les écrans de la séance ; chaque cause ramène à une étape
 // (« verifier » dans la même séance, « s2/verifier » dans une autre).
 // Photos de fabrication à déposer dans img/fabrication/ (voir img/LISEZ-MOI.txt).
@@ -78,20 +79,20 @@
           "texte": "Ma voiture ne roule pas", "picto": "question",
           "causes": [
             { "picto": "roue", "texte": "Une roue frotte", "etape": "essai-carrosserie" },
-            { "picto": "gabarit", "texte": "La carrosserie ne tient pas", "etape": "monter" },
-            { "picto": "poids", "texte": "Elle est trop lourde", "etape": "decorer" }
+            { "picto": "gabarit", "texte": "La carrosserie ne tient pas", "etape": "installer" },
+            { "picto": "poids", "texte": "Elle est trop lourde", "etape": "elements" }
           ]
         },
         "etapes": [
           COLLE,
           { "id": "regle-ciseaux", "type": "regle", "picto": "ciseaux", "texte": "Je coupe doucement avec les ciseaux.", "detail": "Les doigts loin de la lame." },
-          { "id": "gabarit", "type": "consigne", "picto": "gabarit", "image": "img/carrosserie/1.jpg", "texte": "Je pose le gabarit sur le carton.", "detail": "Je le tiens bien à plat." },
-          { "id": "tracer", "type": "consigne", "picto": "crayon", "image": "img/carrosserie/2.jpg", "texte": "Je trace autour au crayon.", "detail": "Tout le tour, même les languettes." },
-          { "id": "decouper", "type": "consigne", "picto": "ciseaux", "image": "img/carrosserie/3.jpg", "texte": "Je découpe sur le trait.", "detail": "Doucement, en tournant le carton." },
-          { "id": "plier", "type": "consigne", "picto": "pli", "image": "img/carrosserie/4.jpg", "texte": "Je plie sur les pointillés.", "detail": "Je marque le pli avec la règle." },
-          { "id": "monter", "type": "consigne", "picto": "chassis", "image": "img/carrosserie/5.jpg", "texte": "J'enfonce les languettes dans les fentes.", "detail": "Le tube du ballon reste libre." },
+          { "id": "recuperer", "type": "consigne", "picto": "gabarit", "image": "img/carrosserie/1.jpg", "texte": "Je récupère ma carrosserie découpée.", "detail": "Celle avec mon dessin.", "bouton": "Je l'ai" },
+          { "id": "colorier", "type": "consigne", "picto": "palette", "image": "img/carrosserie/2.jpg", "texte": "Je colorie mes dessins.", "detail": "Feutres ou crayons de couleur, avant de plier.", "minuteur": 20 },
+          { "id": "plier", "type": "consigne", "picto": "pli", "image": "img/carrosserie/3.jpg", "texte": "Je plie sur les plis marqués.", "detail": "Je marque le pli avec la règle." },
+          { "id": "coller", "type": "consigne", "picto": "colle", "image": "img/carrosserie/4.jpg", "texte": "Je colle ou j'agrafe les rabats.", "detail": "Un rabat à la fois, je tiens quelques secondes." },
+          { "id": "installer", "type": "consigne", "picto": "chassis", "image": "img/carrosserie/5.jpg", "texte": "J'installe la carrosserie sur ma voiture.", "detail": "Languettes dans les fentes, rabattues et scotchées dessous." },
           { "id": "essai-carrosserie", "type": "consigne", "picto": "roue", "texte": "Je vérifie : les roues tournent.", "detail": "Elles ne touchent pas le carton.", "bouton": "Elles tournent" },
-          { "id": "decorer", "type": "consigne", "picto": "palette", "texte": "Je décore ma carrosserie.", "detail": "Feuilles de couleur, feutres, scotch. Léger !", "minuteur": 20 },
+          { "id": "elements", "type": "consigne", "picto": "palette", "texte": "Je peux ajouter un aileron, des protège-roues.", "detail": "En carton, léger. Les roues restent libres.", "bouton": "C'est fini" },
           { "id": "verification", "type": "cases", "picto": "voiture", "texte": "Je vérifie ma voiture.", "bravo": "La carrosserie est finie",
             "lignes": [
               { "picto": "roue", "texte": "Les roues tournent toujours." },
@@ -114,7 +115,7 @@
           "causes": [
             { "picto": "roue", "texte": "Une roue frotte", "etape": "s2/verifier" },
             { "picto": "ballon", "texte": "Le ballon fuit", "etape": "s2/elastique" },
-            { "picto": "poids", "texte": "Elle est trop lourde", "etape": "s3/decorer" }
+            { "picto": "poids", "texte": "Elle est trop lourde", "etape": "s3/elements" }
           ]
         },
         "etapes": [

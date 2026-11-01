@@ -78,8 +78,9 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
       (photo `img/modele.jpg` quand elle existe), « J'ai pris… » avec − et +, photo des pièces, rangement.
 - [ ] Séance 2 : la fabrication pas à pas (photos `img/fabrication/1.jpg`… quand elles existent), « Ma voiture ne roule pas »
       → la cause ramène à la bonne étape.
-- [ ] Séance 3 (carrosserie) : gabarit, tracé, découpe, pli, languettes dans les fentes, roues qui tournent, décoration,
-      vérification, **photo officielle**, rangement.
+- [ ] Séance « Je fabrique ma carrosserie » : je récupère ma carrosserie découpée (feuille cartonnée), je colorie (20 min),
+      je plie, je colle ou j'agrafe, je l'installe (languettes scotchées dessous), roues qui tournent, aileron et
+      protège-roues à la main si je veux, vérification, **photo officielle**, rangement.
 
 ## Voiture à ballon — jalon V2 (séance 4 et univers Grand prix)
 - [ ] L'univers : bitume, damier en haut, cartes bordées orange et blanc, stands numérotés dans Ma mission ; tout se lit bien
