@@ -761,6 +761,59 @@ async function scenarioProfesseurVoiture(navigateur, base) {
   await contexte.close();
 }
 
+// Outil professeur du stop motion (jalon M4) : 4 équipes fictives (npm run exemples), aide en premier, tuiles (titre,
+// scénario, plaque, film), alertes (pas d'image à mi-séance, plaque pas rangée), bandeau des films et lien cinéma,
+// onglets Scénario et Film (lecteur, toutes les images), évaluation à 7 critères avec repères et ceinture, Excel.
+async function scenarioProfesseurStopMotion(navigateur, base) {
+  require('./exemples-stop-motion.js');
+  const tree = arbre(path.join(RACINE, 'exemples', 'Stop-motion'));
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  await injecterDossier(page, tree);
+  await page.goto(base + 'stop-motion/prof.html');
+  await cliquer(page, '[data-action="ouvrir"]');
+  await page.locator('.pt').first().waitFor();
+  assert.equal(await page.locator('.pt').count(), 4);
+  assert.match(await page.locator('.pt').first().textContent(), /Léa · Tom/, 'aide en premier');
+  const tuile = (noms) => page.locator('.pt', { hasText: noms }).textContent();
+  assert.match(await tuile('Léa · Tom'), /« Le dragon perdu »[\s\S]*Scénario : 7 \/ 7 ✓/);
+  assert.match(await tuile('Léa · Tom'), /Pas encore d’image dans cette séance/);
+  assert.match(await tuile('Emma · Sami'), /Plaque prise, rangement pas fait/);
+  assert.match(await tuile('Adam · Jade'), /Film : 18 \/ 30 images · normal/);
+  assert.match(await tuile('Inès · Noah'), /Film : 35 \/ 30 images ✓ \(1 enlevée\) · lent[\s\S]*Film monté ✓/);
+  assert.match(await page.locator('.pc-piste').textContent(), /1 avec 30 images ou plus · 2 commencés sur 4/);
+  assert.equal(await page.locator('.pc-piste a[href="cinema.html"]').count(), 1);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-sm-classe.png'), fullPage: true });
+  await page.locator('.pt', { hasText: 'Inès · Noah' }).click();
+  await page.locator('.pe-onglets').waitFor();
+  await cliquer(page, '[data-action="onglet"][data-id="scenario"]');
+  assert.match(await page.locator('.pe-contenu').textContent(), /Un robot, en ville, joue au ballon\.[\s\S]*C'est la panne ! Une machine répare tout\./);
+  await cliquer(page, '[data-action="onglet"][data-id="film"]');
+  await page.locator('.pp-lecteur[data-plan="titre"] .lecteur-texte', { hasText: 'Le robot qui danse' }).waitFor();
+  assert.match(await page.locator('.pe-contenu h3').textContent(), /35 images gardées sur 36 · 9 s · vitesse lent/);
+  assert.equal(await page.locator('.pp-pellicule figure').count(), 36);
+  assert.equal(await page.locator('.pp-pellicule figure.enlevee').count(), 1);
+  await page.waitForFunction(() => document.querySelectorAll('.pp-pellicule img[src^="blob:"]').length === 36);
+  await cliquer(page, '[data-pp-lecture]');
+  await page.locator('.pp-lecteur.joue').waitFor();
+  await page.screenshot({ path: path.join(SORTIE, 'prof-sm-film.png'), fullPage: true });
+  await cliquer(page, '[data-action="onglet"][data-id="evaluation"]');
+  assert.match(await page.locator('.ev-table').textContent(), /Images prises : S3 20 · S4 16 · enlevées au montage : 1/);
+  for (const c of ['scenario', 'regles', 'construction', 'methode', 'film', 'montage', 'autonomie']) {
+    const bouton = `.niv-btn[data-eleve="Inès"][data-critere="${c}"][data-n="3"]`;
+    await cliquer(page, bouton);
+    await page.locator(`${bouton}[aria-pressed="true"]`).waitFor();
+  }
+  await page.waitForFunction(() => /Ceinture vert foncé/.test(document.querySelector('.ev-bilans').textContent));
+  await page.screenshot({ path: path.join(SORTIE, 'prof-sm-evaluation.png'), fullPage: true });
+  await page.keyboard.press('Escape');
+  const [d] = await Promise.all([page.waitForEvent('download'), cliquer(page, '[data-action="excel"]')]);
+  assert.match(d.suggestedFilename(), /^stop-motion-6A-\d{4}-\d{2}-\d{2}-evaluation\.xlsx$/);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'pas de défilement horizontal');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
 // La course au vidéoprojecteur (démonstration) : voitures (une absente), 3 couloirs, poules, chaque course au chrono
 // (touches 1 à 3, une voiture qui n'arrive pas), finales par niveau, podiums, « Bravo à tous ».
 async function scenarioCourse(navigateur, base, taille, captures) {
@@ -1186,6 +1239,15 @@ async function scenarioProfesseur(navigateur, base) {
       } catch (e) {
         ok = false;
         noter(`- ÉCHEC ${nomBase} 1366×768 · professeur de la voiture : ${e.message.split('\n').slice(0, 6).join(' ')}`);
+      }
+    }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioProfesseurStopMotion(navigateur, base);
+        noter(`- OK ${nomBase} 1366×768 · professeur du stop motion : 4 équipes fictives, aide en premier, tuiles (titre, scénario, plaque, film), alertes (pas d’image à mi-séance, plaque pas rangée), films prêts et lien vers la séance cinéma, onglets Scénario et Film (lecteur, 36 images dont une enlevée), évaluation à 7 critères avec repères et ceinture, export Excel.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · professeur du stop motion : ${e.message.split('\n').slice(0, 6).join(' ')}`);
       }
     }
   } finally {

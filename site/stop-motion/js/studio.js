@@ -142,6 +142,51 @@
     return { debut: phrase(debut), milieu, fin: phrase(v.fin), objets: String(v.objets || '').trim().replace(/[.!?…]+$/, '') };
   }
 
+  // ---------- Pour le professeur ----------
+
+  // Images prises pendant une séance (d'après leur date et le début de la séance).
+  function imagesDeSeance(d, idSeance) {
+    const s = d && d.seances && d.seances[idSeance];
+    if (!s || !s.debut) return 0;
+    const fin = Object.keys(d.seances)
+      .filter((k) => k !== idSeance && d.seances[k].debut > s.debut)
+      .map((k) => d.seances[k].debut)
+      .sort()[0];
+    return copie(d.film).images.filter((i) => i.date >= s.debut && (!fin || i.date < fin)).length;
+  }
+
+  // Alertes du suivi de classe (plan §5) : séance de tournage commencée depuis plus de « mi » minutes sans image ;
+  // plaque prise mais rangement pas fait en fin de séance 2 (plus de « fin » minutes). → [{ sorte, texte }]
+  function alertesFilm(d, maintenant, o) {
+    const R = Object.assign({ mi: 25, fin: 50 }, o || {});
+    const minutes = (iso) => (maintenant - Date.parse(iso)) / 60000;
+    const a = [];
+    for (const id of ['s3', 's4']) {
+      const s = d.seances && d.seances[id];
+      if (!s || !s.debut || (s.etapes.tournage && s.etapes.tournage.fait)) continue;
+      if (minutes(s.debut) >= R.mi && minutes(s.debut) < 120 && !imagesDeSeance(d, id)) a.push({ sorte: 'film', texte: 'Pas encore d’image dans cette séance' });
+    }
+    const s2 = d.seances && d.seances.s2;
+    if (s2 && s2.etapes.plaque && s2.etapes.plaque.fait && !(s2.etapes.rangement && s2.etapes.rangement.fait) && minutes(s2.debut) >= R.fin)
+      a.push({ sorte: 'plaque', texte: 'Plaque prise, rangement pas fait' });
+    return a;
+  }
+
+  // Le film en quelques nombres (tuile, onglet Film, repères de l'évaluation).
+  function resumeFilm(d, r) {
+    const f = copie(d && d.film);
+    const gardees = visibles(f).length;
+    return {
+      prises: f.images.length,
+      gardees,
+      enlevees: f.images.length - gardees,
+      atteint: gardees >= reglages(r).min,
+      vitesse: f.vitesse,
+      titre: f.titre || '',
+      secondes: Math.round(gardees / imagesParSeconde(f.vitesse, r)),
+    };
+  }
+
   // Le film de l'équipe, gardé à part des séances (d.film) : la séance 4 continue le film commencé en séance 3.
   const filmDe = (d) => copie(d && d.film);
   function noterFilm(d, valeur) {
@@ -150,7 +195,7 @@
     return d.film;
   }
 
-  const API = { PARTIES_HISTOIRE, LONGUEUR_IDEE, histoireDe, noterHistoire, phrasesHistoire, imagesVisibles: visibles, basculerImage, choisirVitesse, noterTitre, LONGUEUR_TITRE, nomsGenerique, sequenceFilm, dureeSequence, filmDe, noterFilm, REGLAGES_FILM: REGLAGES, filmVide, prochainNomFilm: prochainNom, ajouterImageFilm: ajouterImage, enleverImageFilm: enleverImage, compteurFilm: compteur, dernieresImages: dernieres, derniereImage: derniere, imagesParSeconde, dureeFilm: duree, conseilDuMoment: conseil };
+  const API = { imagesDeSeance, alertesFilm, resumeFilm, PARTIES_HISTOIRE, LONGUEUR_IDEE, histoireDe, noterHistoire, phrasesHistoire, imagesVisibles: visibles, basculerImage, choisirVitesse, noterTitre, LONGUEUR_TITRE, nomsGenerique, sequenceFilm, dureeSequence, filmDe, noterFilm, REGLAGES_FILM: REGLAGES, filmVide, prochainNomFilm: prochainNom, ajouterImageFilm: ajouterImage, enleverImageFilm: enleverImage, compteurFilm: compteur, dernieresImages: dernieres, derniereImage: derniere, imagesParSeconde, dureeFilm: duree, conseilDuMoment: conseil };
   Object.assign(S, API);
   if (enNode) module.exports = S;
 })(typeof window !== 'undefined' ? window : globalThis);

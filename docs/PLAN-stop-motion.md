@@ -1,6 +1,6 @@
 # Plan court — Film en stop motion avec des briques (6e SEGPA)
 
-Version 3 · 01/11/2026 · réponses de Thomas reportées (§1 et §7) · **jalons M1, M2 et M3 faits** (§6, §8 à §10). À lire avec `BRIEF-CLAUDE-CODE-stop-motion.md` (proposition d'origine) et
+Version 3 · 01/11/2026 · réponses de Thomas reportées (§1 et §7) · **jalons M1 à M4 faits** (§6, §8 à §11). À lire avec `BRIEF-CLAUDE-CODE-stop-motion.md` (proposition d'origine) et
 `PLAN.md` (organisation du dépôt, socle commun).
 
 ## 1. Décisions déjà prises
@@ -70,7 +70,7 @@ lus directement dans les dossiers.
 | M1 | écran de tournage et sauvegarde des images (calque, grille, pellicule, enlever, voir) — **essai sur un vrai poste** — **fait le 01/11, recette de Thomas à faire** (`RECETTE.md`) |
 | M2 | S5 : lecture, vitesses, enlever des images, titre et générique ; `cinema.html` — **fait le 01/11, recette de Thomas à faire** |
 | M3 | S1 et S2 : histoire en 3 temps, titre, briques, construction — **fait le 01/11, recette de Thomas à faire** |
-| M4 | outil professeur, 7 critères et ceinture (à valider), exports |
+| M4 | outil professeur, 7 critères et ceinture (à valider), exports — **fait le 01/11, critères et recette de Thomas à faire** |
 | M5 | recette automatique (caméra simulée), essai réel, publication |
 
 ## 7. Restant
@@ -113,3 +113,16 @@ lus directement dans les dossiers.
 - `donnees/idees.js` : 6 idées pour chacune des 7 questions, 8 titres, sans « il » ni « elle ».
 - Moteur : `histoireDe`, `noterHistoire`, `phrasesHistoire` (testés) ; l'histoire est gardée dans `d.histoire`.
 - `js/choix-ou-texte.js` : l'écran « une carte-idée ou j'écris mon idée », commun au titre et à l'histoire.
+
+## 11. Fait au jalon M4 (01/11/2026)
+
+- `prof.html` : le socle (suivi en direct, aide, alertes, évaluation, exports Excel / CSV / Carnet de classe, feuilles
+  ceinture) avec ce qui est propre au film (`js/prof-projet.js`) :
+  tuile (titre, scénario 7 / 7, plaque prise / rangée, images gardées / 30, vitesse) · alertes (pas d'image 25 min après
+  le début d'une séance de tournage ; plaque prise mais rangement pas fait en fin de séance 2) · bandeau (films à 30
+  images, lien vers `cinema.html`) · onglets Scénario et Film (lecteur, toutes les images, images prises par séance).
+- `donnees/criteres.js` : **7 critères proposés, à valider** (histoire en 3 temps · règles du matériel · décor solide ·
+  image par image · film fini · montage · autonomie) ; ceinture d'après « Son film est fini ».
+- Différenciation (proposée) : scénario dicté à l'adulte · rôles photographe / animateur · film plus court accepté ·
+  élève rapide tuteur.
+- Moteur : `imagesDeSeance`, `alertesFilm`, `resumeFilm` (testés). Équipes fictives : `tools/exemples-stop-motion.js`.

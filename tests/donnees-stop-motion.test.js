@@ -87,3 +87,13 @@ test('séance 2 : la plaque, puis décor, héros et objets (une photo après cha
   for (let i = 0; i < types.length; i++) if (types[i] === 'construire') assert.equal(types[i + 1], 'photo', s2.etapes[i].id);
   assert.deepEqual(s2.etapes.filter((e) => e.type === 'construire').map((e) => e.partie), ['lieu', 'heros', 'objets']);
 });
+
+test('évaluation : 7 critères (proposition à valider), repères connus, ceinture sur un critère existant', () => {
+  const { criteres } = donnees('stop-motion');
+  assert.equal(criteres.criteres.length, 7);
+  const ids = criteres.criteres.map((c) => c.id);
+  assert.equal(new Set(ids).size, 7);
+  assert.ok(ids.includes(criteres.critereCeinture));
+  assert.equal(criteres.ceintures.length, 4);
+  for (const c of criteres.criteres) assert.ok(c.libelle && c.entete && c.competence && c.domaine && c.repere === c.id, c.id);
+});

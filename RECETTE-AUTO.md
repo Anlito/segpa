@@ -1,4 +1,4 @@
-# Recette automatique — 01/11/2026 15:38:31
+# Recette automatique — 01/11/2026 17:23:49
 
 Navigateur : Chromium (Playwright) 153.0.8010.12 · caméra simulée
 
@@ -39,5 +39,7 @@ Navigateur : Chromium (Playwright) 153.0.8010.12 · caméra simulée
 - OK serveur 1366×768 · professeur : 5 équipes fictives, aide en premier avec son étape, alertes (inactivité, pièces dehors, mesure), dernière photo, « J’y vais » écrit dans professeur.json, onglets Bilan, Évaluation (niveaux, note, ceinture), Album, Pièces et réponses, Séance 2, Historique, Différenciation ; exports Excel, CSV, Carnet de classe ; feuilles ceinture.
 - OK file:// 1366×768 · professeur de la voiture : 4 équipes fictives, aide en premier, tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n’avance pas), longueur de piste proposée, onglets Essais (tableau et graphique), Voiture et course (réponse écrite) et Carrosserie (aperçu, SVG à 4 calques), « Tous les patrons (.zip) », évaluation à 7 critères avec repères et ceinture, export Excel.
 - OK serveur 1366×768 · professeur de la voiture : 4 équipes fictives, aide en premier, tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n’avance pas), longueur de piste proposée, onglets Essais (tableau et graphique), Voiture et course (réponse écrite) et Carrosserie (aperçu, SVG à 4 calques), « Tous les patrons (.zip) », évaluation à 7 critères avec repères et ceinture, export Excel.
+- OK file:// 1366×768 · professeur du stop motion : 4 équipes fictives, aide en premier, tuiles (titre, scénario, plaque, film), alertes (pas d’image à mi-séance, plaque pas rangée), films prêts et lien vers la séance cinéma, onglets Scénario et Film (lecteur, 36 images dont une enlevée), évaluation à 7 critères avec repères et ceinture, export Excel.
+- OK serveur 1366×768 · professeur du stop motion : 4 équipes fictives, aide en premier, tuiles (titre, scénario, plaque, film), alertes (pas d’image à mi-séance, plaque pas rangée), films prêts et lien vers la séance cinéma, onglets Scénario et Film (lecteur, 36 images dont une enlevée), évaluation à 7 critères avec repères et ceinture, export Excel.
 
 À faire à la main sur un poste du collège (voir RECETTE.md) : vraie webcam, voix française, dossier réseau.

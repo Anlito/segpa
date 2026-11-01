@@ -196,3 +196,12 @@ Séance 1 (`site/stop-motion/index.html`) — le scénario (retours de Thomas du
 Séance 2 :
 - [ ] « Je prends ma plaque » ; décor, héros, objets : chaque consigne rappelle l'histoire (« Mon lieu : sur la Lune », « Mes objets : une maison, un arbre ») et est suivie d'une photo.
 - [ ] « Je secoue doucement la table » ; rangement : briques par couleur, décor sur la plaque, nom sur la plaque.
+
+## Film en stop motion — jalon M4 (outil professeur)
+Essai sans élèves : `npm run exemples`, puis `site/stop-motion/prof.html` → « Ouvrir le dossier de la classe » → `exemples/Stop-motion`.
+- [ ] Tuiles : titre du film, « Scénario : 7 / 7 ✓ », « Plaque : prise ✓ · rangée ✓ », « Film : 18 / 30 images · normal ».
+- [ ] Alertes (ambre) : « Pas encore d'image dans cette séance » (séance 3 ou 4 commencée depuis 25 min) ; « Plaque prise, rangement pas fait » (fin de séance 2).
+- [ ] Bandeau « Films » : nombre de films à 30 images, lien vers la séance cinéma.
+- [ ] Fiche d'une équipe → « Scénario » : début, milieu, fin et les 7 réponses ; « Film » : le film avec titre et générique, toutes les images (les enlevées grisées), images prises par séance.
+- [ ] « Évaluation » : les 7 critères proposés (à valider ou à changer dans `donnees/criteres.js`), repères à côté, ceinture d'après le critère « Son film est fini » ; exports Excel, CSV, Carnet de classe, feuilles ceinture.
+- [ ] Les 4 aides de différenciation proposées vous conviennent-elles ? (scénario dicté à l'adulte · rôles photographe / animateur · film plus court accepté · élève rapide tuteur)

@@ -124,3 +124,25 @@ test('l’histoire en 3 temps : gardée à part, en 3 phrases, avec les objets �
   assert.deepEqual(S.phrasesHistoire({ heros: 'mon chat.', probleme: 'La nuit tombe' }), { debut: 'Mon chat.', milieu: 'La nuit tombe.', fin: '', objets: '' });
   assert.equal(S.noterHistoire(d, 'heros', 'x'.repeat(80)).heros.length, S.LONGUEUR_IDEE);
 });
+
+test('professeur : images par séance, alertes (pas d’image à mi-séance, plaque pas rangée), résumé du film', () => {
+  const t = (min) => new Date(Date.parse('2026-11-20T10:00:00.000Z') + min * 60000).toISOString();
+  const maintenant = (min) => Date.parse(t(min));
+  const d = { seances: { s2: { debut: t(-200), etapes: { plaque: { fait: t(-195) } } }, s3: { debut: t(0), etapes: {} } }, photos: [] };
+  assert.deepEqual(S.alertesFilm(d, maintenant(10)).map((a) => a.sorte), ['plaque'], 'en séance 3 depuis 10 min : pas encore d’alerte image');
+  assert.deepEqual(S.alertesFilm(d, maintenant(30)).map((a) => a.sorte), ['film', 'plaque']);
+  d.seances.s2.etapes.rangement = { fait: t(-150) };
+  let f = S.filmVide();
+  f = S.ajouterImageFilm(f, 'photos/film/0001.jpg', t(5)).valeur;
+  S.noterFilm(d, f);
+  assert.equal(S.imagesDeSeance(d, 's3'), 1);
+  assert.deepEqual(S.alertesFilm(d, maintenant(30)), []);
+  d.seances.s4 = { debut: t(60 * 24 * 7), etapes: {} };
+  assert.equal(S.imagesDeSeance(d, 's4'), 0);
+  assert.deepEqual(S.alertesFilm(d, maintenant(60 * 24 * 7 + 26)).map((a) => a.sorte), ['film']);
+  assert.deepEqual(S.alertesFilm(d, maintenant(60 * 24 * 8)), [], 'séance d’il y a longtemps : plus d’alerte');
+  for (let i = 2; i <= 36; i++) f = S.ajouterImageFilm(f, S.prochainNomFilm(f), t(10)).valeur;
+  f = S.basculerImage(S.noterTitre(f, 'Le dragon perdu'), 3);
+  S.noterFilm(d, f);
+  assert.deepEqual(S.resumeFilm(d), { prises: 36, gardees: 35, enlevees: 1, atteint: true, vitesse: 'normal', titre: 'Le dragon perdu', secondes: 6 });
+});
