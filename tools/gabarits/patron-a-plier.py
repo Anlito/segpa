@@ -146,7 +146,7 @@ cricut = [f'<?xml version="1.0" encoding="UTF-8"?>',
   f'<svg xmlns="http://www.w3.org/2000/svg" width="{LARG:.2f}mm" height="{HAUT:.2f}mm" viewBox="0 0 {LARG:.2f} {HAUT:.2f}">',
   '<title>Patron de carrosserie, voiture à ballon (châssis v8) : découpe et plis</title>',
   '<g id="decoupe" fill="none" stroke="#000000" stroke-width="0.25">'] + [f'<path d="{c}"/>' for c in contours] + ['</g>',
-  '<g id="plis" fill="none" stroke="#E11D48" stroke-width="0.25">'] + [f'<line x1="{a[0]+dx:.3f}" y1="{a[1]+dy:.3f}" x2="{b[0]+dx:.3f}" y2="{b[1]+dy:.3f}"/>' for a, b in plis] + ['</g>', '</svg>']
+  '<g id="plis" fill="none" stroke="#16A34A" stroke-width="0.25">'] + [f'<line x1="{a[0]+dx:.3f}" y1="{a[1]+dy:.3f}" x2="{b[0]+dx:.3f}" y2="{b[1]+dy:.3f}"/>' for a, b in plis] + ['</g>', '</svg>']
 open('patron-carrosserie-cricut.svg', 'w').write('\n'.join(cricut) + '\n')
 print('cricut', round(LARG, 1), '×', round(HAUT, 1), 'mm,', len(contours), 'contours,', len(plis), 'plis,', len(net.exterior.coords), 'points')
 

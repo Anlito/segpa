@@ -6,6 +6,8 @@
 //              autres essais fait proposer « Mesure encore une fois ? » (à régler après les essais de châssis de Thomas).
 //   roues    : diamètres imprimés (mm) ; changements : les cartes « je change une chose » (une seule à la fois) ;
 //   directions : « ma voiture roule comment ? ».
+//   stylos   : les stylos gel de Thomas (0,8 mm) pour l'atelier « Je dessine ma carrosserie » : un calque par couleur
+//              dans le SVG, la Cricut demande de changer de stylo entre deux couleurs. Le premier est la couleur par défaut.
 definirDonneesProjet({
   "materiel": [
     { "id": "chassis", "nom": "Châssis", "picto": "chassis", "prevu": 1 },
@@ -35,6 +37,11 @@ definirDonneesProjet({
       { "id": "enleve", "nom": "J'enlève du poids" },
       { "id": "ajoute", "nom": "J'ajoute du poids" }
     ] }
+  ],
+  "stylos": [
+    { "id": "bleu", "nom": "Bleu", "hex": "#1D4ED8" },
+    { "id": "rouge", "nom": "Rouge", "hex": "#DC2626" },
+    { "id": "marron", "nom": "Marron", "hex": "#7C4A1E" }
   ],
   "directions": [
     { "id": "droit", "nom": "Tout droit", "picto": "fleche-haut" },

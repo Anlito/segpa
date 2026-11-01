@@ -1,7 +1,8 @@
 // Écran « Je dessine ma carrosserie » (séance à part, entre la construction et le montage) : l'équipe décore chaque
 // pièce du patron, que la Cricut tracera au stylo avant de la découper. Trois temps :
 //   1. je choisis une pièce (5 cartes, une coche sur celles déjà décorées) ;
-//   2. je dessine sur la pièce, montrée à l'endroit : tampons, le nom de la voiture, un numéro, un texte, le crayon ;
+//   2. je dessine sur la pièce, montrée à l'endroit : tampons, le nom de la voiture, un numéro, un texte, le crayon,
+//      en bleu, rouge ou marron (les stylos de la Cricut) ; je fais glisser un dessin à la souris ;
 //      Agrandir, Rapetisser, Tourner, J'efface, Annuler ; sur un côté, « Pareil de l'autre côté » ;
 //      l'ordinateur garde tout dans la zone de dessin (« Je l'ai remis dans la pièce. », en ambre) ;
 //   3. je regarde toute ma voiture (le patron entier avec le dessin), puis « C'est fini ».
@@ -16,6 +17,8 @@
   const TAILLE_TEXTE = { nom: 9, numero: 14, texte: 9 };
 
   const cheminForme = (f) => D().cheminSvg(f.points, !f.ferme);
+  const STYLOS = () => (S.donneesProjet || {}).stylos || [{ id: 'bleu', nom: 'Bleu', hex: '#1D4ED8' }];
+  const teinte = (id) => (STYLOS().find((x) => x.id === (id || D().COULEUR_PAR_DEFAUT)) || STYLOS()[0]).hex;
   const piecesDroites = () => PAT().pieces.map((p) => D().pieceDroite(p));
 
   // Dessin d'une pièce à l'endroit (contour, zone, éléments), en mm.
@@ -24,8 +27,14 @@
     const m = o.marge === undefined ? 2 : o.marge;
     const els = elements
       .map((el, i) => {
-        const d = D().formesElement(el).map(cheminForme).join(' ');
-        return `<g class="element${i === o.choisi ? ' choisi' : ''}" data-i="${i}">${o.zone ? `<path class="zone-clic" d="${d}"/>` : ''}<path class="trait-dessin" d="${d}"/></g>`;
+        const formes = D().formesElement(el);
+        const d = formes.map(cheminForme).join(' ');
+        // zone de prise : tout le rectangle du dessin (on peut le saisir par le milieu, pas seulement par le trait)
+        const pts = formes.flatMap((f) => f.points);
+        const [x0, y0] = [Math.min(...pts.map((q) => q[0])) - 1.5, Math.min(...pts.map((q) => q[1])) - 1.5];
+        const [x1, y1] = [Math.max(...pts.map((q) => q[0])) + 1.5, Math.max(...pts.map((q) => q[1])) + 1.5];
+        const prise = o.zone ? `<rect class="zone-prise" x="${x0.toFixed(2)}" y="${y0.toFixed(2)}" width="${(x1 - x0).toFixed(2)}" height="${(y1 - y0).toFixed(2)}" rx="1.5"/><path class="zone-clic" d="${d}"/>` : '';
+        return `<g class="element${i === o.choisi ? ' choisi' : ''}" data-i="${i}">${prise}<path class="trait-dessin" style="stroke:${teinte(el.couleur)}" d="${d}"/></g>`;
       })
       .join('');
     return `<svg class="${o.classe || 'piece-svg'}" viewBox="${-m} ${-m} ${(p.largeur + 2 * m).toFixed(2)} ${(p.hauteur + 2 * m).toFixed(2)}" role="img" aria-label="${S.echapper(p.nom)}">
@@ -41,7 +50,7 @@
     return `<svg class="patron-svg" viewBox="-2 -2 ${P.taille[0] + 4} ${P.taille[1] + 4}" role="img" aria-label="Toute ma carrosserie">
       ${P.decoupe.map((d) => `<path class="patron-decoupe" fill-rule="evenodd" d="${d}"/>`).join('')}
       ${P.plis.map(([a, b, c, d]) => `<line class="patron-pli" x1="${a}" y1="${b}" x2="${c}" y2="${d}"/>`).join('')}
-      ${D().cheminsDessin(valeur, P.pieces).map((d) => `<path class="trait-dessin" d="${d}"/>`).join('')}
+      ${Object.entries(D().cheminsParCouleur(valeur, P.pieces)).map(([c, liste]) => liste.map((d) => `<path class="trait-dessin" style="stroke:${teinte(c)}" d="${d}"/>`).join('')).join('')}
     </svg>`;
   }
 
@@ -131,6 +140,10 @@
       O.rafraichir();
     };
     const voiture = S.voitureDe ? S.voitureDe(O.D()) : { nom: '' };
+    const couleur = STYLOS().some((x) => x.id === valeur.couleur) ? valeur.couleur : STYLOS()[0].id;
+    const pastillesStylos = `<div class="stylos" role="group" aria-label="Couleur du stylo">${STYLOS()
+      .map((x) => `<button type="button" class="stylo" data-action="stylo" data-id="${x.id}" aria-pressed="${x.id === couleur}"><span class="point-stylo" style="background:${x.hex}"></span>${O.ech(x.nom)}</button>`)
+      .join('')}</div>`;
 
     // Ce qui s'affiche en haut de l'atelier : la consigne, ou la saisie d'un texte, ou une question.
     let haut;
@@ -145,10 +158,11 @@
           <button type="button" class="btn btn-principal btn-petit" data-action="miroir-oui">Oui</button>
           <button type="button" class="btn btn-second btn-petit" data-action="miroir-non">Non</button>`;
     } else {
-      const consigne = sous.outil === 'crayon' ? 'Je dessine sur la pièce, bouton appuyé.' : sous.outil ? 'Je clique sur la pièce pour le poser.' : choisi !== null ? (estTrait ? 'Je peux l’effacer.' : 'Je peux l’agrandir, le tourner ou l’effacer.') : 'Je choisis un dessin, en bas.';
-      haut = `<span class="pastille">${O.ech(p.nom)}</span><p class="consigne-atelier">${consigne}</p>
-          ${O.boutonVoix('Je choisis un dessin en bas, puis je clique sur la pièce pour le poser. Je peux aussi écrire le nom de ma voiture, un numéro, un texte, ou dessiner au crayon.')}
-          ${sous.alerte ? `<div class="msg msg-ambre msg-dessin" role="status">${O.pic('main-stop')}Je l’ai remis dans la pièce.</div>` : ''}`;
+      const consigne = sous.outil === 'crayon' ? 'Je dessine, bouton appuyé.' : sous.outil ? 'Je clique sur la pièce pour le poser.' : choisi !== null ? (estTrait ? 'Je le fais glisser, ou je l’efface.' : 'Je le fais glisser, l’agrandis, le tourne…') : 'Je choisis un dessin, en bas.';
+      haut = `<span class="pastille">${O.ech(p.nom)}</span>
+          ${sous.alerte ? `<div class="msg msg-ambre msg-dessin" role="status">${O.pic('main-stop')}Je l’ai remis dans la pièce.</div>` : `<p class="consigne-atelier">${consigne}</p>`}
+          ${O.boutonVoix('Je choisis un dessin en bas, puis je clique sur la pièce pour le poser. Je peux le faire glisser avec la souris. Je choisis aussi la couleur du stylo.')}
+          ${pastillesStylos}`;
     }
     sous.alerte = false;
 
@@ -249,6 +263,15 @@
           }
           copierMiroir();
         },
+        stylo: (b) => {
+          valeur.couleur = b.dataset.id;
+          if (choisi !== null) {
+            memoriser();
+            els[choisi] = Object.assign({}, els[choisi], { couleur: b.dataset.id });
+          }
+          garder();
+          O.rafraichir();
+        },
         'miroir-oui': copierMiroir,
         'miroir-non': () => {
           sous.confirmerMiroir = false;
@@ -300,7 +323,7 @@
             trace = null;
             if (!elements.length) return vue.remove();
             memoriser();
-            els.push(...elements);
+            els.push(...elements.map((x) => Object.assign(x, { couleur })));
             if (coupe) sous.alerte = true;
             garder();
             O.rafraichir();
@@ -309,17 +332,53 @@
           svg.addEventListener('pointercancel', fin);
           return;
         }
+        // Sans outil : un clic choisit un dessin ; bouton appuyé, on le fait glisser (il suit la souris, puis il est posé
+        // là où on le lâche, ou ramené à la place libre la plus proche).
+        if (!sous.outil) {
+          let glisse = null;
+          svg.addEventListener('pointerdown', (e) => {
+            const g = e.target.closest('.element');
+            if (!g) return;
+            e.preventDefault();
+            svg.setPointerCapture(e.pointerId);
+            glisse = { i: Number(g.dataset.i), g, depart: versMm(e), dx: 0, dy: 0 };
+          });
+          svg.addEventListener('pointermove', (e) => {
+            if (!glisse) return;
+            const [x, y] = versMm(e);
+            glisse.dx = x - glisse.depart[0];
+            glisse.dy = y - glisse.depart[1];
+            glisse.g.setAttribute('transform', `translate(${glisse.dx.toFixed(2)} ${glisse.dy.toFixed(2)})`);
+          });
+          const lache = (e) => {
+            if (!glisse) {
+              if (e.type === 'pointerup' && !e.target.closest('.element') && choisi !== null) {
+                sous.choisi = null;
+                O.rafraichir();
+              }
+              return;
+            }
+            const { i, dx, dy } = glisse;
+            glisse = null;
+            sous.choisi = i;
+            if (Math.hypot(dx, dy) < 0.8) return O.rafraichir();
+            const r = D().deplacerElement(els[i], dx, dy, p.zone);
+            memoriser();
+            els[i] = r.element;
+            if (r.deplace) sous.alerte = true;
+            garder();
+            O.rafraichir();
+          };
+          svg.addEventListener('pointerup', lache);
+          svg.addEventListener('pointercancel', lache);
+          return;
+        }
         svg.addEventListener('click', (e) => {
-          const g = e.target.closest('.element');
-          if (!sous.outil) {
-            sous.choisi = g ? Number(g.dataset.i) : null;
-            return O.rafraichir();
-          }
           const [x, y] = versMm(e);
           const el =
             sous.outil === 'texte' && sous.aPoser
-              ? { type: 'texte', texte: sous.aPoser.texte, x, y, taille: TAILLE_TEXTE[sous.aPoser.sorte] || 9, angle: 0 }
-              : { type: 'tampon', id: sous.outil, x, y, taille: D().TAILLE_DEPART, angle: 0, miroir: false };
+              ? { type: 'texte', texte: sous.aPoser.texte, x, y, taille: TAILLE_TEXTE[sous.aPoser.sorte] || 9, angle: 0, couleur }
+              : { type: 'tampon', id: sous.outil, x, y, taille: D().TAILLE_DEPART, angle: 0, miroir: false, couleur };
           const r = D().ramener(el, p.zone);
           if (!r.element) return O.message(el.type === 'texte' ? 'Ce texte est trop long pour cette pièce.' : 'Il n’y a plus de place ici.', 3000);
           memoriser();

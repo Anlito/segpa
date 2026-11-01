@@ -113,3 +113,30 @@ test('« Pareil de l’autre côté » : en miroir, le texte reste lisible', () 
   assert.equal(copies[1].miroir, false, 'le nom n’est jamais écrit à l’envers');
   for (const c of copies) assert.ok(D.dansZone(D.contoursElement(c).flat(), d.zone));
 });
+
+test('déplacer un dessin : posé là où on le lâche, ou à la place libre la plus proche ; les traits aussi', () => {
+  const p = D.pieceDroite(piece('cote-gauche'));
+  const [cx, cy] = D.centreZone(p.zone);
+  const etoile = D.ramener({ type: 'tampon', id: 'etoile', x: cx, y: cy, taille: 10, angle: 0 }, p.zone).element;
+  const r = D.deplacerElement(etoile, 5, 0, p.zone);
+  assert.equal(r.deplace, false);
+  assert.ok(Math.abs(r.element.x - (etoile.x + 5)) < 1e-9);
+  const loin = D.deplacerElement(etoile, 500, 0, p.zone);
+  assert.ok(loin.deplace && D.dansZone(D.contoursElement(loin.element).flat(), p.zone), 'lâché dehors : ramené dans la pièce');
+  const trait = { type: 'trait', couleur: 'rouge', points: [[cx - 5, cy], [cx + 5, cy]] };
+  const t = D.deplacerElement(trait, 0, 300, p.zone);
+  assert.ok(t.deplace && D.dansZone(t.element.points, p.zone));
+  assert.equal(t.element.couleur, 'rouge', 'la couleur suit le dessin');
+});
+
+test('un calque par couleur de stylo ; sans couleur, le dessin est bleu', () => {
+  const p = D.pieceDroite(piece('capot'));
+  const [cx, cy] = D.centreZone(p.zone);
+  const a = D.ramener({ type: 'tampon', id: 'cercle', x: cx, y: cy, taille: 10, angle: 0, couleur: 'rouge' }, p.zone).element;
+  const b = D.ramener({ type: 'tampon', id: 'etoile', x: cx, y: cy - 8, taille: 10, angle: 0 }, p.zone).element;
+  const c = D.cheminsParCouleur({ pieces: { capot: [a, b] } }, patron.pieces);
+  assert.deepEqual(Object.keys(c).sort(), ['bleu', 'rouge']);
+  assert.equal(c.rouge.length, 1);
+  const { donneesProjet } = donnees('voiture-ballon');
+  assert.deepEqual(donneesProjet.stylos.map((s) => s.id), ['bleu', 'rouge', 'marron']);
+});

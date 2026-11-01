@@ -2,6 +2,7 @@
 // Les pièces viennent de donnees/patron.js (produit par tools/gabarits/patron-a-plier.py), en mm, dans le repère du SVG
 // pour la Cricut. L'élève dessine sur une pièce montrée à l'endroit ; ses éléments sont gardés en mm dans ce repère
 // « à l'endroit », puis ramenés sur le patron pour l'export (calque « dessin », tracé au stylo par la Cricut).
+// Chaque élément a aussi une couleur de stylo (couleur : 'bleu' | 'rouge' | 'marron', donnees/voiture.js).
 // Un élément : { type: 'tampon', id: 'flamme', x, y (centre), taille (largeur en mm), angle (degrés), miroir }
 //            { type: 'texte', texte: 'TURBO', x, y, taille (hauteur des lettres en mm), angle } · { type: 'trait', points }.
 // Tracé au stylo gel de 0,8 mm : les éléments ne descendent pas sous 8 mm, pour rester nets et laisser de quoi colorier.
@@ -336,7 +337,7 @@
     const copies = [];
     for (const el of elements) {
       let c;
-      if (el.type === 'trait') c = { type: 'trait', points: el.points.map(([x, y]) => [largeur - x, y]) };
+      if (el.type === 'trait') c = Object.assign({}, el, { points: el.points.map(([x, y]) => [largeur - x, y]) });
       else c = Object.assign({}, el, { x: largeur - el.x, angle: (360 - (el.angle || 0)) % 360, miroir: el.type === 'texte' ? false : !el.miroir });
       if (c.type === 'trait') {
         if (dansZone(c.points, zone)) copies.push(c);
@@ -346,6 +347,37 @@
       }
     }
     return copies;
+  }
+
+  // ---------- Déplacer un dessin ----------
+  // Un dessin glissé à la souris : posé là où on le lâche s'il tient dans la zone, sinon à la place libre la plus proche.
+  function decaler(el, dx, dy) {
+    if (el.type === 'trait') return Object.assign({}, el, { points: el.points.map(([x, y]) => [x + dx, y + dy]) });
+    return Object.assign({}, el, { x: el.x + dx, y: el.y + dy });
+  }
+  function deplacerElement(el, dx, dy, zone) {
+    if (el.type !== 'trait') {
+      // lâché hors du cadre de la pièce : on part du bord le plus proche, puis on cherche une place libre
+      const xs = zone.contour.map((p) => p[0]);
+      const ys = zone.contour.map((p) => p[1]);
+      const e = decaler(el, dx, dy);
+      e.x = Math.min(Math.max(...xs), Math.max(Math.min(...xs), e.x));
+      e.y = Math.min(Math.max(...ys), Math.max(Math.min(...ys), e.y));
+      const r = ramener(e, zone);
+      return r.element ? { element: r.element, deplace: r.deplace || e.x !== el.x + dx || e.y !== el.y + dy } : { element: el, deplace: true };
+    }
+    const ok = (e) => dansZone(e.points, zone);
+    const voulu = decaler(el, dx, dy);
+    if (ok(voulu)) return { element: voulu, deplace: false };
+    for (let r = 1; r <= 60; r += 1) {
+      const n = Math.max(8, Math.round(r * 1.5));
+      for (let i = 0; i < n; i++) {
+        const t = (i / n) * 2 * Math.PI;
+        const e = decaler(el, dx + r * Math.cos(t), dy + r * Math.sin(t));
+        if (ok(e)) return { element: e, deplace: true };
+      }
+    }
+    return { element: el, deplace: true };
   }
 
   // ---------- Export vers le patron (calque « dessin ») ----------
@@ -362,9 +394,24 @@
     return d;
   }
 
+  // Les chemins du dessin rangés par couleur de stylo (un calque par couleur dans le SVG, la Cricut demande de changer
+  // de stylo entre deux) : { bleu: [...], rouge: [...] } ; un dessin sans couleur est bleu (ancienne sauvegarde).
+  const COULEUR_PAR_DEFAUT = 'bleu';
+  function cheminsParCouleur(valeur, pieces) {
+    const parCouleur = {};
+    for (const piece of pieces) {
+      const p = pieceDroite(piece);
+      for (const el of ((valeur && valeur.pieces) || {})[piece.id] || []) {
+        const c = el.couleur || COULEUR_PAR_DEFAUT;
+        for (const f of formesElement(el)) (parCouleur[c] = parCouleur[c] || []).push(chemin(f.points.map(p.versPatron), !f.ferme));
+      }
+    }
+    return parCouleur;
+  }
+
   const nombreElements = (valeur) => Object.values((valeur && valeur.pieces) || {}).reduce((n, l) => n + l.length, 0);
 
-  const API = { TAMPONS, TAILLE_MIN, TAILLE_MIN_TEXTE, TAILLE_MAX, TAILLE_DEPART, tampon, texteTracable, traitsTexte, formesElement, traitsCrayon, miroirElements, pieceDroite, dedans, dansZone, contoursElement, ramener, cheminsDessin, cheminSvg: chemin, nombreElements, centreZone };
+  const API = { TAMPONS, TAILLE_MIN, TAILLE_MIN_TEXTE, TAILLE_MAX, TAILLE_DEPART, tampon, texteTracable, traitsTexte, formesElement, traitsCrayon, miroirElements, pieceDroite, dedans, dansZone, contoursElement, ramener, cheminsDessin, cheminsParCouleur, COULEUR_PAR_DEFAUT, deplacerElement, cheminSvg: chemin, nombreElements, centreZone };
   Object.assign(S, { dessin: API });
   if (enNode) module.exports = S;
 })(typeof window !== 'undefined' ? window : globalThis);

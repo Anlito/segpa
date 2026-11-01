@@ -139,10 +139,18 @@ async function faireEcran(page, nom, captures, demo) {
     if (await visible(page, '.carte-piece-dessin.decoree')) await cliquer(page, '[data-action="voir-voiture"]');
     else await cliquer(page, '[data-action="choisir-piece"]');
   } else if (await visible(page, '.palette-tampons')) {
+    await cliquer(page, '[data-action="stylo"][data-id="rouge"]');
     await cliquer(page, '[data-action="outil"][data-id="etoile"]');
     const b = await page.locator('.plan-de-travail svg').boundingBox();
     await page.mouse.click(b.x + b.width * 0.98, b.y + b.height * 0.5);
     await page.locator('.plan-de-travail .element').first().waitFor();
+    // On fait glisser l'étoile (prise par le milieu) : elle reste dans la pièce.
+    const e = await page.locator('.plan-de-travail .element').first().boundingBox();
+    await page.mouse.move(e.x + e.width / 2, e.y + e.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(e.x + e.width / 2 - 120, e.y + e.height / 2, { steps: 6 });
+    await page.mouse.up();
+    await page.locator('.plan-de-travail .element.choisi').waitFor();
     await cliquer(page, '[data-action="agrandir"]');
     // Le nom de la voiture (police à un trait), un trait au crayon, puis « Pareil à droite ».
     await cliquer(page, '[data-action="outil-nom"]');
@@ -308,6 +316,7 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   assert.equal(await page.locator('.carte-seance.fait').count(), 4);
   const dessin = await page.evaluate(() => Segpa.dessin.nombreElements(Segpa.valeurEtape(Segpa.app.etat.session.donnees, 'sd', 'dessin')));
   assert.ok(dessin >= 4, `étoile, nom, crayon et leur copie de l'autre côté (${dessin})`);
+  assert.ok(await page.evaluate(() => Segpa.valeurEtape(Segpa.app.etat.session.donnees, 'sd', 'dessin').pieces['cote-gauche'].every((e) => e.couleur === 'rouge')), 'tout est au stylo rouge');
   assert.ok(await page.evaluate(() => (Segpa.valeurEtape(Segpa.app.etat.session.donnees, 'sd', 'dessin').pieces['cote-droit'] || []).some((e) => e.type === 'texte')), 'le nom copié sur le côté droit');
   const d = await page.evaluate(() => Segpa.voitureDe(Segpa.app.etat.session.donnees));
   assert.equal(d.nom, 'Turbo Ballon');

@@ -111,6 +111,7 @@ l'unité · explique pourquoi sa voiture avance (**à l'écrit**) · autonomie /
 |---|---|
 | D1 ✓ 01/11 | 6 séances ; `donnees/patron.js` produit par le générateur du patron (pièces, zones de dessin, rotation à l'endroit) ; `js/dessin.js` (testé) ; écran : choix de la pièce, tampons (flamme, éclair, étoile, bande, damier, cercle, cœur, flèche, nuage, goutte), Agrandir, Rapetisser, Tourner, J'efface, Annuler, « Je l'ai remis dans la pièce », aperçu du patron entier |
 | D2 ✓ 01/11 | police à un trait (majuscules, chiffres, accents ; nom de la voiture, numéro de 3 chiffres, texte libre de 12 caractères ; lettres de 7 mm au moins), crayon libre (coupé hors de la zone, lissé), « Pareil à droite / à gauche » (miroir, texte jamais à l'envers) ; socle : un champ de saisie garde la main au clavier |
+| retours 01/11 ✓ | déplacer un dessin à la souris (pris par le milieu, ramené dans la pièce) ; 3 couleurs de stylo (bleu, rouge, marron : `stylos` dans `donnees/voiture.js`, un calque par couleur) ; plis du SVG en vert |
 | D3 | export `carrosserie-Prenom_Prenom.svg` (calques decoupe, plis, dessin) dans le dossier de l'équipe ; outil professeur (aperçu, téléchargement, tous les patrons) ; encart Design Space ; publication |
 
 ## 7. Réglé et restant

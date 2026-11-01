@@ -139,3 +139,8 @@ Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemp
 - [ ] « Crayon » : je dessine bouton appuyé ; le tracé est lissé, et coupé là où il sort de la pièce (message ambre).
 - [ ] Sur un côté, « Pareil à droite » (ou « à gauche ») reproduit le dessin en miroir ; le texte reste lisible ; si l'autre côté a déjà des dessins, on me demande avant de les remplacer.
 - [ ] Les lettres sont-elles assez grandes et nettes au stylo gel de 0,8 mm ?
+
+## Voiture à ballon — atelier, retours de Thomas (déplacer, couleurs)
+- [ ] Je fais glisser un dessin à la souris, en le prenant par le milieu ; lâché trop près d'un bord ou dehors, il revient dans la pièce (message ambre) ; Annuler le remet à sa place.
+- [ ] Trois couleurs de stylo (bleu, rouge, marron), toujours avec leur nom : la couleur choisie s'applique aux dessins suivants et au dessin choisi.
+- [ ] Dans le SVG pour la Cricut, les plis sont maintenant en vert (le rouge est un stylo).
