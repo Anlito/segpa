@@ -78,8 +78,9 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
       (photo `img/modele.jpg` quand elle existe), « J'ai pris… » avec − et +, photo des pièces, rangement.
 - [ ] Séance 2 : la fabrication pas à pas (photos `img/fabrication/1.jpg`… quand elles existent), « Ma voiture ne roule pas »
       → la cause ramène à la bonne étape.
-- [ ] Séance 3 (carrosserie) : gabarit, tracé, découpe, pli, languettes dans les fentes, roues qui tournent, décoration,
-      vérification, **photo officielle**, rangement.
+- [ ] Séance « Je fabrique ma carrosserie » : je récupère ma carrosserie découpée (feuille cartonnée), je colorie (20 min),
+      je plie, je colle ou j'agrafe, je l'installe (languettes scotchées dessous), roues qui tournent, aileron et
+      protège-roues à la main si je veux, vérification, **photo officielle**, rangement.
 
 ## Voiture à ballon — jalon V2 (séance 4 et univers Grand prix)
 - [ ] L'univers : bitume, damier en haut, cartes bordées orange et blanc, stands numérotés dans Ma mission ; tout se lit bien
@@ -123,3 +124,31 @@ Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemp
 - [ ] Évaluation : les 7 critères (à valider), repères automatiques à côté, note /20, ceinture ; exports Excel, CSV, Carnet,
       feuilles ceinture.
 - [ ] Patron pour la Cricut (SVG) : s'importe à la bonne taille (207 × 154 mm), découpe et plis sur deux calques.
+
+## Voiture à ballon — atelier « Je dessine ma carrosserie », jalon D1
+Écrans élèves (démonstration) → Ma mission (6 séances) → Séance 3 « Je dessine » :
+- [ ] Ma mission : les 6 séances tiennent sans défilement.
+- [ ] Je choisis une pièce : côté gauche, côté droit, capot, toit, arrière, chacune à l'endroit ; une coche verte sur les pièces décorées.
+- [ ] Sur une pièce : toucher un dessin en bas, puis cliquer sur la pièce le pose ; Agrandir, Rapetisser, Tourner, J'efface, Annuler.
+- [ ] Un dessin posé trop près d'un bord, d'un pli ou de la fente du toit est remis dans la pièce (« Je l'ai remis dans la pièce. », en ambre).
+- [ ] Toute ma voiture : le patron entier avec les dessins, aux bons endroits ; « C'est fini ».
+- [ ] Les dessins sont-ils assez gros et assez simples pour le stylo gel de 0,8 mm et le coloriage ?
+
+## Voiture à ballon — atelier « Je dessine ma carrosserie », jalon D2
+- [ ] « Nom » : le nom choisi en séance 1 s'écrit en majuscules à un trait, là où je clique ; trop long pour une pièce, il rapetisse (7 mm au moins).
+- [ ] « Numéro » : 3 chiffres au plus, tapés au clavier ; « Texte » : 12 caractères au plus (lettres, chiffres, accents).
+- [ ] « Crayon » : je dessine bouton appuyé ; le tracé est lissé, et coupé là où il sort de la pièce (message ambre).
+- [ ] Sur un côté, « Pareil à droite » (ou « à gauche ») reproduit le dessin en miroir ; le texte reste lisible ; si l'autre côté a déjà des dessins, on me demande avant de les remplacer.
+- [ ] Les lettres sont-elles assez grandes et nettes au stylo gel de 0,8 mm ?
+
+## Voiture à ballon — atelier, retours de Thomas (déplacer, couleurs)
+- [ ] Je fais glisser un dessin à la souris, en le prenant par le milieu ; lâché trop près d'un bord ou dehors, il revient dans la pièce (message ambre) ; Annuler le remet à sa place.
+- [ ] Trois couleurs de stylo (bleu, rouge, marron), toujours avec leur nom : la couleur choisie s'applique aux dessins suivants et au dessin choisi.
+- [ ] Dans le SVG pour la Cricut, les plis sont maintenant en vert (le rouge est un stylo).
+
+## Voiture à ballon — atelier, jalon D3 (outil professeur)
+« Suivre la classe » de la voiture (essai sans élèves : dossier exemples/Voiture-ballon) :
+- [ ] Tuile : « Carrosserie : 3 dessins ✓ » pour une équipe qui a fini.
+- [ ] Fiche → onglet Carrosserie : le patron décoré dans ses couleurs, les stylos utilisés, « Télécharger le patron (SVG pour la Cricut) » → carrosserie-Prenom_Prenom.svg.
+- [ ] Bandeau « Piste » : « Tous les patrons (.zip) » → un SVG par équipe décorée.
+- [ ] Dans Design Space : calques decoupe (noir), plis (vert), dessin-bleu / dessin-rouge / dessin-marron ; la Cricut demande de changer de stylo entre deux couleurs ; taille 207 × 154 mm.

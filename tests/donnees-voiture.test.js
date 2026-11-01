@@ -6,7 +6,7 @@ const { moteur, donnees, pictos } = require('./outils.js');
 const S = moteur();
 const { projet, etapes, reglages, donneesProjet } = donnees('voiture-ballon');
 const PICTOS = new Set(pictos());
-const TYPES = ['regle', 'consigne', 'photo', 'cases', 'bilan', 'nom-voiture', 'couleur', 'materiel', 'essais', 'resultat-course', 'question-ecrite'];
+const TYPES = ['regle', 'consigne', 'photo', 'cases', 'bilan', 'nom-voiture', 'couleur', 'materiel', 'essais', 'resultat-course', 'question-ecrite', 'dessin-carrosserie'];
 
 test('identité, classe et dossier du projet', () => {
   assert.equal(projet.id, 'voiture-ballon');
@@ -14,8 +14,8 @@ test('identité, classe et dossier du projet', () => {
   assert.deepEqual(reglages.cheminProjet, ['Voiture-ballon']);
 });
 
-test('5 séances, identifiants uniques, types connus, pictogrammes dessinés, consignes de 8 mots au plus', () => {
-  assert.deepEqual(etapes.seances.map((s) => s.id), ['s1', 's2', 's3', 's4', 's5']);
+test('6 séances, identifiants uniques, types connus, pictogrammes dessinés, consignes de 8 mots au plus', () => {
+  assert.deepEqual(etapes.seances.map((s) => s.id), ['s1', 's2', 'sd', 's3', 's4', 's5']);
   for (const s of etapes.seances) {
     assert.ok(PICTOS.has(s.picto), s.id);
     const ids = s.etapes.map((e) => e.id);

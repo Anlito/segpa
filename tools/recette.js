@@ -134,6 +134,38 @@ async function faireEcran(page, nom, captures, demo) {
   } else if (await visible(page, 'input.champ-libre')) {
     await page.locator('input.champ-libre').fill('Ressort');
     await cliquer(page, '[data-action="nomme"]');
+  } else if (await visible(page, '[data-action="choisir-piece"]')) {
+    // Atelier « Je dessine ma carrosserie » : une pièce décorée, puis toute la voiture.
+    if (await visible(page, '.carte-piece-dessin.decoree')) await cliquer(page, '[data-action="voir-voiture"]');
+    else await cliquer(page, '[data-action="choisir-piece"]');
+  } else if (await visible(page, '.palette-tampons')) {
+    await cliquer(page, '[data-action="stylo"][data-id="rouge"]');
+    await cliquer(page, '[data-action="outil"][data-id="etoile"]');
+    const b = await page.locator('.plan-de-travail svg').boundingBox();
+    await page.mouse.click(b.x + b.width * 0.98, b.y + b.height * 0.5);
+    await page.locator('.plan-de-travail .element').first().waitFor();
+    // On fait glisser l'étoile (prise par le milieu) : elle reste dans la pièce.
+    const e = await page.locator('.plan-de-travail .element').first().boundingBox();
+    await page.mouse.move(e.x + e.width / 2, e.y + e.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(e.x + e.width / 2 - 120, e.y + e.height / 2, { steps: 6 });
+    await page.mouse.up();
+    await page.locator('.plan-de-travail .element.choisi').waitFor();
+    await cliquer(page, '[data-action="agrandir"]');
+    // Le nom de la voiture (police à un trait), un trait au crayon, puis « Pareil à droite ».
+    await cliquer(page, '[data-action="outil-nom"]');
+    await page.mouse.click(b.x + b.width * 0.55, b.y + b.height * 0.5);
+    await cliquer(page, '[data-action="outil-crayon"]');
+    const c = await page.locator('.plan-de-travail svg').boundingBox();
+    await page.mouse.move(c.x + c.width * 0.3, c.y + c.height * 0.75);
+    await page.mouse.down();
+    for (let i = 0; i <= 20; i++) await page.mouse.move(c.x + c.width * (0.3 + i * 0.02), c.y + c.height * (0.75 + 0.05 * Math.sin(i / 2)));
+    await page.mouse.up();
+    await page.waitForTimeout(150);
+    if (await visible(page, '[data-action="miroir"]:not([disabled])')) await cliquer(page, '[data-action="miroir"]');
+    await sansDefilement(page, nom + '-atelier');
+    if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '-atelier.png') });
+    await cliquer(page, '[data-action="piece-finie"]');
   } else if (await visible(page, '[data-action="choisir-roues"]')) {
     // Essais de la voiture (séance 4) : un écran par geste.
     await cliquer(page, '[data-action="choisir-roues"]');
@@ -173,7 +205,7 @@ async function faireEcran(page, nom, captures, demo) {
     await page.locator('textarea.champ-libre').fill('Elle fait tourner la lame.');
     await cliquer(page, '[data-action="question-suivante"]');
   } else {
-    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'fleche-faite', 'remise', 'fait', 'essai-place', 'essai-parti', 'essais-finis', 'resultat-suivant'];
+    const suite = ['suivant-page', 'devissee', 'rangee', 'sortie', 'mesure-suivant', 'dessinee', 'fleche-faite', 'remise', 'fait', 'essai-place', 'essai-parti', 'essais-finis', 'resultat-suivant', 'dessin-fini'];
     for (const a of suite)
       if (await visible(page, `[data-action="${a}"]`)) {
         await cliquer(page, `[data-action="${a}"]`);
@@ -264,11 +296,11 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   await cliquer(page, '[data-prenom="Léa"]');
   await cliquer(page, '[data-prenom="Tom"]');
   await cliquer(page, '[data-action="valider"]');
-  assert.equal(await page.locator('.carte-seance').count(), 5);
+  assert.equal(await page.locator('.carte-seance').count(), 6);
   await sansDefilement(page, 'voiture-mission');
   if (captures) await page.screenshot({ path: path.join(SORTIE, 'voiture-mission.png') });
   const ecrans = [];
-  for (const s of ['s1', 's2', 's3']) {
+  for (const s of ['s1', 's2', 'sd', 's3']) {
     await cliquer(page, '[data-action="continuer"]');
     ecrans.push(await faireSeance(page, 'voiture-' + s, captures));
     if (s === 's1') {
@@ -281,7 +313,11 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
     await cliquer(page, '[data-action="fini"]');
     await page.locator('.carte-seance').first().waitFor();
   }
-  assert.equal(await page.locator('.carte-seance.fait').count(), 3);
+  assert.equal(await page.locator('.carte-seance.fait').count(), 4);
+  const dessin = await page.evaluate(() => Segpa.dessin.nombreElements(Segpa.valeurEtape(Segpa.app.etat.session.donnees, 'sd', 'dessin')));
+  assert.ok(dessin >= 4, `étoile, nom, crayon et leur copie de l'autre côté (${dessin})`);
+  assert.ok(await page.evaluate(() => Segpa.valeurEtape(Segpa.app.etat.session.donnees, 'sd', 'dessin').pieces['cote-gauche'].every((e) => e.couleur === 'rouge')), 'tout est au stylo rouge');
+  assert.ok(await page.evaluate(() => (Segpa.valeurEtape(Segpa.app.etat.session.donnees, 'sd', 'dessin').pieces['cote-droit'] || []).some((e) => e.type === 'texte')), 'le nom copié sur le côté droit');
   const d = await page.evaluate(() => Segpa.voitureDe(Segpa.app.etat.session.donnees));
   assert.equal(d.nom, 'Turbo Ballon');
   assert.equal(d.nomCouleur, 'Bleu');
@@ -302,7 +338,7 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   ecrans.push(await faireSeance(page, 'voiture-s4', captures));
   await cliquer(page, '[data-action="fini"]');
   await page.locator('.carte-seance').first().waitFor();
-  assert.equal(await page.locator('.carte-seance.fait').count(), 4);
+  assert.equal(await page.locator('.carte-seance.fait').count(), 5);
   const r = await page.evaluate(() => Segpa.resumeEssais(Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's4', 'essais')));
   assert.equal(r.nombre, 3);
   assert.equal(r.changements.length, 2);
@@ -311,7 +347,7 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   ecrans.push(await faireSeance(page, 'voiture-s5', captures));
   await cliquer(page, '[data-action="fini"]');
   await page.locator('.carte-seance').first().waitFor();
-  assert.equal(await page.locator('.carte-seance.fait').count(), 5);
+  assert.equal(await page.locator('.carte-seance.fait').count(), 6);
   const s5 = await page.evaluate(() => ({ r: Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's5', 'resultat'), q: Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's5', 'pourquoi') }));
   assert.equal(s5.r.resultat.course, 'Finale secondaire');
   assert.ok(s5.q.texte.length > 0, 'réponse écrite gardée');
@@ -340,6 +376,11 @@ async function scenarioProfesseurVoiture(navigateur, base) {
   assert.match(await tuile('Inès · Noah'), /Matériel pris différent du kit/);
   assert.match(await tuile('Inès · Noah'), /Course : 2e · Finale principale/);
   assert.match(await tuile('Adam · Jade'), /Voiture qui n’avance pas/);
+  assert.match(await page.locator('.pc-piste').textContent(), /Tous les patrons \(\.zip, 2 équipes\)/);
+  assert.match(await tuile('Inès · Noah'), /Carrosserie : 3 dessins ✓/);
+  const [zipDl] = await Promise.all([page.waitForEvent('download'), cliquer(page, '.pc-piste [data-telecharger]')]);
+  assert.equal(zipDl.suggestedFilename(), 'carrosseries-6A.zip');
+  assert.equal(fs.readFileSync(await zipDl.path()).slice(0, 2).toString(), 'PK');
   assert.match(await page.locator('.pc-piste').textContent(), /longueur proposée 1,5 m \(3 voitures sur 3/);
   await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-classe.png'), fullPage: true });
   await page.locator('.pt', { hasText: 'Inès · Noah' }).click();
@@ -350,6 +391,14 @@ async function scenarioProfesseurVoiture(navigateur, base) {
   await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-essais.png'), fullPage: true });
   await cliquer(page, '[data-action="onglet"][data-id="voiture"]');
   assert.match(await page.locator('.pe-contenu').textContent(), /L’air sort du ballon/);
+  // Carrosserie décorée : aperçu, stylos, SVG à télécharger (calques découpe, plis, un par stylo).
+  await cliquer(page, '[data-action="onglet"][data-id="carrosserie"]');
+  assert.match(await page.locator('.pe-contenu').textContent(), /3 dessins · finie/);
+  const [svgDl] = await Promise.all([page.waitForEvent('download'), cliquer(page, '.pe-contenu [data-telecharger]')]);
+  assert.equal(svgDl.suggestedFilename(), 'carrosserie-Ines_Noah.svg');
+  const svgTexte = fs.readFileSync(await svgDl.path(), 'utf8');
+  assert.deepEqual([...svgTexte.matchAll(/<g id="([^"]+)"/g)].map((m) => m[1]), ['decoupe', 'plis', 'dessin-bleu', 'dessin-rouge']);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-voiture-carrosserie.png'), fullPage: true });
   await cliquer(page, '[data-action="onglet"][data-id="evaluation"]');
   assert.match(await page.locator('.ev-table').textContent(), /Distances saisies \(pavé en cm\) : 310 cm · 390 cm · 420 cm/);
   for (const c of ['fabrication', 'regles', 'fonctionne', 'essais', 'mesure', 'explique', 'autonomie']) {
@@ -699,7 +748,7 @@ async function scenarioProfesseur(navigateur, base) {
         const t = `${taille.width}×${taille.height}`;
         try {
           const ecrans = await scenarioVoiture(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
-          noter(`- OK ${nomBase} ${t} · voiture à ballon : séances 1 à 5 de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, carrosserie, photo officielle, 3 essais avec un changement à la fois et graphique, résultat de la course, réponse écrite), Ma mission à 5 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
+          noter(`- OK ${nomBase} ${t} · voiture à ballon : 6 séances de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, atelier de dessin de la carrosserie, carrosserie, photo officielle, 3 essais avec un changement à la fois et graphique, résultat de la course, réponse écrite), Ma mission à 6 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
         } catch (e) {
           ok = false;
           noter(`- ÉCHEC ${nomBase} ${t} · voiture à ballon : ${e.message.split('\n')[0]}`);
@@ -739,10 +788,10 @@ async function scenarioProfesseur(navigateur, base) {
     for (const [nomBase, base] of bases) {
       try {
         await scenarioProfesseurVoiture(navigateur, base);
-        noter(`- OK ${nomBase} 1366×768 · professeur de la voiture : 4 équipes fictives, aide en premier, tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n’avance pas), longueur de piste proposée, onglets Essais (tableau et graphique) et Voiture et course (réponse écrite), évaluation à 7 critères avec repères et ceinture, export Excel.`);
+        noter(`- OK ${nomBase} 1366×768 · professeur de la voiture : 4 équipes fictives, aide en premier, tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n’avance pas), longueur de piste proposée, onglets Essais (tableau et graphique), Voiture et course (réponse écrite) et Carrosserie (aperçu, SVG à 4 calques), « Tous les patrons (.zip) », évaluation à 7 critères avec repères et ceinture, export Excel.`);
       } catch (e) {
         ok = false;
-        noter(`- ÉCHEC ${nomBase} 1366×768 · professeur de la voiture : ${e.message.split('\n')[0]}`);
+        noter(`- ÉCHEC ${nomBase} 1366×768 · professeur de la voiture : ${e.message.split('\n').slice(0, 6).join(' ')}`);
       }
     }
   } finally {

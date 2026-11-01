@@ -9,7 +9,8 @@ const PHOTO = require('./photo-fictive.js');
 
 const S = moteur();
 require('../site/voiture-ballon/js/essais.js');
-const { etapes } = donnees('voiture-ballon');
+require('../site/voiture-ballon/js/dessin.js');
+const { etapes, donneesProjet } = donnees('voiture-ballon');
 const DOSSIER = path.join(__dirname, '..', 'exemples', 'Voiture-ballon');
 const maintenant = Date.now();
 const ilYa = (min) => new Date(maintenant - min * 60000).toISOString();
@@ -55,6 +56,24 @@ function equipe(eleves, options) {
   for (const f of photos) fs.writeFileSync(path.join(dossier, f), PHOTO);
 }
 
+// Carrosserie décorée (atelier « Je dessine ») : quelques tampons et le nom, en deux couleurs.
+function carrosserie(nom) {
+  const D = S.dessin;
+  const pose = (idPiece, el) => {
+    const p = D.pieceDroite(donneesProjet.patron.pieces.find((x) => x.id === idPiece));
+    const [cx, cy] = D.centreZone(p.zone);
+    return D.ramener(Object.assign({ x: cx, y: cy, angle: 0 }, el), p.zone).element;
+  };
+  return {
+    couleur: 'rouge',
+    pieces: {
+      'cote-gauche': [pose('cote-gauche', { type: 'texte', texte: D.texteTracable(nom), taille: 8, couleur: 'bleu' })],
+      'cote-droit': [pose('cote-droit', { type: 'tampon', id: 'flamme', taille: 16, angle: 270, couleur: 'rouge' })],
+      toit: [pose('toit', { type: 'tampon', id: 'etoile', taille: 12, couleur: 'rouge', x: 70 })],
+    },
+  };
+}
+
 const KIT = { chassis: 1, piques: 2, roues: 4, elastique: 1, ballons: 2 };
 const s1 = (nom, couleur, hex, pris) => ({ nom: { nom, ecrit: false }, couleur: { nom: couleur, hex }, materiel: { pris: pris || KIT } });
 
@@ -66,6 +85,7 @@ fs.writeFileSync(path.join(DOSSIER, 'classe.json'), JSON.stringify({ classe: '6A
 equipe(['Léa', 'Tom'], { debut: 300, derniere: 2, aide: 2, aide_seance: 's4', aide_etape: 'essais', faire: ({ faire, d }) => {
   faire('s1', null, s1('Turbo Ballon', 'Bleu', '#1D4ED8'));
   faire('s2');
+  faire('sd', null, { dessin: carrosserie('Turbo Ballon') });
   faire('s3');
   faire('s4', 'essais');
   S.noterBrouillon(d, 's4', 'essais', serieEssais('30', '30', [[10, 210, 'droit'], [10, 280, 'gauche', { type: 'roues', cote: 'arriere', choix: '40' }]]));
@@ -74,6 +94,7 @@ equipe(['Léa', 'Tom'], { debut: 300, derniere: 2, aide: 2, aide_seance: 's4', a
 equipe(['Inès', 'Noah'], { debut: 500, derniere: 4, faire: ({ faire }) => {
   faire('s1', null, s1('Comète', 'Rose', '#DB2777', Object.assign({}, KIT, { piques: 1 })));
   faire('s2');
+  faire('sd', null, { dessin: carrosserie('Comète') });
   faire('s3');
   faire('s4', null, { essais: serieEssais('40', '40', [[12, 310, 'droit'], [15, 390, 'droit', { type: 'ballon', choix: 'plus' }], [15, 420, 'droite', { type: 'poids', choix: 'enleve' }]], true) });
   faire('s5', null, { resultat: { resultat: { course: 'Finale principale', finale: true, rang: 2, nombre: 3, arrivee: true, temps: 3.9, distance: null, record: false } }, pourquoi: { texte: 'L’air sort du ballon vers l’arrière et pousse la voiture vers l’avant.' } });
@@ -82,6 +103,7 @@ equipe(['Inès', 'Noah'], { debut: 500, derniere: 4, faire: ({ faire }) => {
 equipe(['Adam', 'Jade'], { debut: 280, derniere: 1, faire: ({ faire, d }) => {
   faire('s1', null, s1('Bolide', 'Orange', '#EA580C'));
   faire('s2');
+  faire('sd');
   faire('s3');
   faire('s4', 'essais');
   S.noterBrouillon(d, 's4', 'essais', serieEssais('20', '20', [[8, 0, 'gauche'], [12, 0, 'gauche', { type: 'ballon', choix: 'plus' }], [12, 150, 'droit', { type: 'roues', cote: 'avant', choix: '40' }]]));

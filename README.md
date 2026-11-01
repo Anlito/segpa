@@ -6,7 +6,7 @@ Un dossier, plusieurs projets, **le même squelette** : l'élève retrouve les m
 | Projet | Séances | État |
 |---|---|---|
 | Je démonte un objet technique (taille-crayon à manivelle) | 3 | jalons 1 à 4 faits (écrans élèves, outil professeur, évaluation et exports), recette avec Thomas |
-| Course de voitures à ballon | 5 | jalons V1 à V4 faits (écrans élèves, essais, course au vidéoprojecteur, outil professeur), en ligne ; essais réels et critères à valider avec Thomas |
+| Course de voitures à ballon | 6 | jalons V1 à V4 faits (écrans élèves, essais, course au vidéoprojecteur, outil professeur), en ligne ; essais réels et critères à valider avec Thomas |
 | Film en stop motion avec des briques | 5 | à venir |
 
 Documents : `docs/CAHIER-DES-CHARGES-outils-6e-segpa.md` (socle commun), un brief par projet, `docs/PLAN.md`,

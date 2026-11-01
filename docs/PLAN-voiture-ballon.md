@@ -22,6 +22,7 @@ Version 2 · 29/10/2026 · **validé par Thomas** (avec ses retours : 5 séances
 | Photos | webcam à chaque moment clé, dont une **photo officielle** de la voiture décorée (page de course, podium, diplôme) |
 | Course | **poules** (selon le nombre de couloirs du jour), puis **finales par niveau** : principale, secondaire, tertiaire ; personne n'est éliminé, chaque voiture court au moins deux fois |
 | Univers graphique (29/10) | **A · Grand prix** (maquette https://claude.ai/artifact/A4HWMn9pWPbUaaCAnS7igQ) : bitume, damier, bordures orange et blanches, stands numérotés ; `css/univers.css`, le socle n'est pas touché |
+| Atelier de dessin (01/11) | séance à part **« Je dessine ma carrosserie »** (id `sd`, entre la construction et le montage : 6 séances) : l'équipe décore chaque pièce du patron à l'écran (souris) ; tampons, nom et numéro, texte libre, crayon libre, miroir ; zone sûre à 3 mm des plis et des bords ; export SVG à 3 calques (découpe, plis, dessin) que Thomas trace au **stylo gel 0,8 mm** puis découpe à la Cricut (ordre : dessin, rainurage, découpe) |
 | Carrosserie (29/10, châssis v8 le 30/10) | séance 3 : **carrosserie en carton** fixée dans les **fentes** du châssis (7 fentes 20 × 2 mm, carton 1,6 mm) ; châssis **v8** : tuyère Ø 7 sur un tube incliné, d'où une fente de 51 × 23 mm dans le toit et une arche arrière de 20 mm ; à partir d'un **gabarit imprimé** : 4 pièces ou patron à plier (`documents/`, sources `tools/gabarits/`), version choisie après les essais de Thomas |
 
 ## 2. Dans le dépôt
@@ -103,6 +104,16 @@ l'unité · explique pourquoi sa voiture avance (**à l'écrit**) · autonomie /
 | V3 ✓ 29/10 | S5 et `course.html` (poules, finales, chrono, podiums, `course.json`, résultat côté élève) : `js/course.js` (testé), `js/course-page.js` ; résultat écrit dans le dossier de chaque équipe (`course.json`), lu par « Mon résultat » ; CSV ; diplômes N&B |
 | V4 ✓ 30/10 | outil professeur (`prof.html`, `js/prof-projet.js`) : tuiles (voiture, matériel, essais, course), alertes (matériel, voiture qui n'avance pas), longueur de piste proposée, onglets Essais et Voiture et course, évaluation à 7 critères (`donnees/criteres.js`, **proposition à valider** : libellés, compétences, ceinture sur « voiture terminée et qui fonctionne », drapeaux de différenciation) et exports du socle ; patron en SVG pour la Cricut |
 | V5 | recette automatique ✓ ; publication pour tous le 30/10 (décision de Thomas, avant la fin de ses essais) ; restent : essai réel (piste, mètre ruban, vraies voitures), validation des critères, photos |
+
+## 6 bis. Atelier « Je dessine ma carrosserie » (jalons D)
+
+| Jalon | Contenu |
+|---|---|
+| D1 ✓ 01/11 | 6 séances ; `donnees/patron.js` produit par le générateur du patron (pièces, zones de dessin, rotation à l'endroit) ; `js/dessin.js` (testé) ; écran : choix de la pièce, tampons (flamme, éclair, étoile, bande, damier, cercle, cœur, flèche, nuage, goutte), Agrandir, Rapetisser, Tourner, J'efface, Annuler, « Je l'ai remis dans la pièce », aperçu du patron entier |
+| D2 ✓ 01/11 | police à un trait (majuscules, chiffres, accents ; nom de la voiture, numéro de 3 chiffres, texte libre de 12 caractères ; lettres de 7 mm au moins), crayon libre (coupé hors de la zone, lissé), « Pareil à droite / à gauche » (miroir, texte jamais à l'envers) ; socle : un champ de saisie garde la main au clavier |
+| retours 01/11 ✓ | déplacer un dessin à la souris (pris par le milieu, ramené dans la pièce) ; 3 couleurs de stylo (bleu, rouge, marron : `stylos` dans `donnees/voiture.js`, un calque par couleur) ; plis du SVG en vert |
+| retours 01/11 ✓ | séance « Je fabrique » refaite pour la feuille cartonnée découpée à la Cricut : je récupère, je colorie (20 min), je plie, je colle ou j'agrafe, je l'installe, roues libres, aileron et protège-roues fabriqués à la main |
+| D3 ✓ 01/11 (publication en attente) | SVG par équipe fabriqué par l'outil professeur à partir de la sauvegarde (`carrosserie-Ines_Noah.svg`, sans accent : calques decoupe, plis vert, un calque dessin par stylo utilisé) ; onglet Carrosserie (aperçu, stylos, téléchargement) ; « Tous les patrons (.zip) » dans le bandeau ; ligne Carrosserie sur la tuile ; encart Design Space |
 
 ## 7. Réglé et restant
 
