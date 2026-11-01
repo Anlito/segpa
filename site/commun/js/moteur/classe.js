@@ -97,14 +97,14 @@
   // ---------- professeur.json (dans le dossier du projet) ----------
 
   function professeurVide(projet) {
-    return { application: S.APPLICATION, projet, type: 'professeur', formatVersion: 1, aidesVues: {}, drapeaux: {}, modifieLe: null };
+    return { application: S.APPLICATION, projet, type: 'professeur', formatVersion: 1, aidesVues: {}, drapeaux: {}, notes: {}, modifieLe: null };
   }
 
   function lireProfesseur(texte, projet) {
     try {
       const p = JSON.parse(texte);
       if (!p || p.application !== S.APPLICATION || p.type !== 'professeur' || p.projet !== projet) return professeurVide(projet);
-      return Object.assign(professeurVide(projet), p, { aidesVues: p.aidesVues || {}, drapeaux: p.drapeaux || {} });
+      return Object.assign(professeurVide(projet), p, { aidesVues: p.aidesVues || {}, drapeaux: p.drapeaux || {}, notes: p.notes || {} });
     } catch {
       return professeurVide(projet);
     }

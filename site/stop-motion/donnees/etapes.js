@@ -13,7 +13,8 @@
     { "id": "regle-compter", "type": "regle", "picto": "brique", "texte": "Je compte mes briques.", "detail": "Rien ne se perd." },
     { "id": "regle-ranger", "type": "regle", "picto": "balai", "texte": "Je range les briques par couleur." }
   ];
-  // Au début des séances 3 et 4 : je relis mon scénario (écrit en séance 1) avant de filmer.
+  // Au début des séances 2, 3 et 4 : je relis mon scénario (écrit en séance 1), avec l'avis du professeur s'il en a
+  // donné un (« Validé » ou « À revoir » : l'équipe peut alors changer une réponse).
   const RELIRE = { "id": "relire", "type": "histoire-resume", "relire": true, "texte": "Je relis mon histoire.", "bouton": "J'ai relu" };
   const RAPPELS_TOURNAGE = [
     { "id": "rappel-camera", "type": "regle", "picto": "camera", "texte": "La caméra ne bouge pas.", "detail": "Elle reste sur son support." },
@@ -48,7 +49,7 @@
       {
         "id": "s2", "titre": "Je construis", "sousTitre": "mon décor", "picto": "brique",
         "etapes": [
-          REGLES_MATERIEL[1], REGLES_MATERIEL[2],
+          RELIRE, REGLES_MATERIEL[1], REGLES_MATERIEL[2],
           { "id": "plaque", "type": "consigne", "picto": "brique", "texte": "Je prends ma plaque.", "detail": "Une plaque par équipe.", "bouton": "J'ai pris ma plaque" },
           { "id": "construire-decor", "type": "construire", "partie": "lieu", "picto": "brique", "texte": "Je construis le décor.", "detail": "Sur la plaque. Je regarde mon storyboard.", "bouton": "Le décor est fini" },
           { "id": "decor", "type": "photo", "picto": "brique", "texte": "Je photographie mon décor.", "legende": "Mon décor" },

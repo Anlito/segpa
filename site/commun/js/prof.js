@@ -74,12 +74,16 @@
 
   // ---------- Lecture des fichiers ----------
 
+  // Fichiers écrits par le professeur dans le dossier d'une équipe (résultat de la course, avis sur le scénario) :
+  // ce ne sont pas des sauvegardes, on ne les lit pas comme telles.
+  const FICHIERS_PROFESSEUR = ['course.json', 'avis-professeur.json'];
+
   async function lireDossier(dossier) {
     const fichiers = [];
     for await (const h of dossier.values()) {
       if (h.kind !== 'directory') continue;
       for await (const f of h.values()) {
-        if (f.kind !== 'file' || !/\.json$/i.test(f.name)) continue;
+        if (f.kind !== 'file' || !/\.json$/i.test(f.name) || FICHIERS_PROFESSEUR.includes(f.name)) continue;
         try {
           fichiers.push({ nom: `${h.name}/${f.name}`, texte: await (await f.getFile()).text(), dossier: h });
         } catch {
@@ -96,13 +100,16 @@
     return { fichiers, professeur };
   }
 
+  // Notes du professeur propres au projet, par équipe (ex. avis sur le scénario) : dans professeur.json.
+  const notesDe = (nom) => (etat.professeur.notes && etat.professeur.notes[nom]) || {};
+
   function preparer(fichiers) {
     const { equipes, invalides } = S.fusionner(fichiers, S.projet.id);
     const t = Date.now();
     etat.equipes = equipes.map((eq) => {
       const resume = S.resumer(eq.donnees, S.etapes.seances, t);
       const vue = etat.professeur.aidesVues[eq.nom] || null;
-      return Object.assign(eq, { resume, alertes: S.alertes(resume, vue, P().alertes(eq.donnees)), lignes: P().lignes(eq.donnees) });
+      return Object.assign(eq, { resume, alertes: S.alertes(resume, vue, P().alertes(eq.donnees)), lignes: P().lignes(eq.donnees, notesDe(eq.nom)) });
     });
     etat.invalides = invalides;
     etat.lecture = new Date();
@@ -462,7 +469,31 @@
     else if (o.id === 'album') contenu = await ongletAlbum(eq);
     else if (o.id === 'historique') contenu = ongletHistorique(eq);
     else if (o.id === 'differenciation') contenu = ongletDifferenciation(eq);
-    else contenu = await o.html(eq.donnees, (f) => urlPhoto(eq, f));
+    // Outils donnés aux onglets du projet : lire et poser une note du professeur (professeur.json), et déposer un
+    // fichier dans le dossier de l'équipe (lu par les écrans des élèves).
+    const outils = {
+      notes: notesDe(eq.nom),
+      peutEcrire: !!etat.dossier,
+      poserNote: async (cle, valeur, fichierEquipe) => {
+        etat.professeur.notes = etat.professeur.notes || {};
+        etat.professeur.notes[eq.nom] = Object.assign({}, etat.professeur.notes[eq.nom], { [cle]: valeur });
+        let ok = await ecrireProfesseur();
+        if (ok && fichierEquipe && eq.dossier) {
+          try {
+            const h = await eq.dossier.getFileHandle(fichierEquipe.nom, { create: true });
+            const flux = await h.createWritable();
+            await flux.write(JSON.stringify(fichierEquipe.contenu, null, 1));
+            await flux.close();
+          } catch {
+            ok = false;
+          }
+        }
+        eq.lignes = P().lignes(eq.donnees, notesDe(eq.nom));
+        await ecranEquipe();
+        return ok;
+      },
+    };
+    if (!['bilan', 'evaluation', 'album', 'historique', 'differenciation'].includes(o.id)) contenu = await o.html(eq.donnees, (f) => urlPhoto(eq, f), outils);
     afficher(
       `<section class="pe">
         <div class="pe-tete">
@@ -510,6 +541,7 @@
           for (const p of e.lie ? eq.donnees.equipe.eleves : [t.dataset.eleve]) e.eleves[p].commentaire = t.value.trim();
           await ecrireProfesseur();
         },
+        ...(o.actions ? o.actions(eq.donnees, outils) : {}),
         'imprimer-album': () => ecranAlbumImprime(eq),
         drapeau: async (c) => {
           const set = new Set(etat.professeur.drapeaux[eq.nom] || []);

@@ -146,3 +146,26 @@ test('professeur : images par séance, alertes (pas d’image à mi-séance, pla
   S.noterFilm(d, f);
   assert.deepEqual(S.resumeFilm(d), { prises: 36, gardees: 35, enlevees: 1, atteint: true, vitesse: 'normal', titre: 'Le dragon perdu', secondes: 6 });
 });
+
+test('avis du professeur sur le scénario : lu dans le dossier, montré une fois, état pour le professeur', () => {
+  const fichier = { application: 'segpa', projet: 'stop-motion', type: 'avis', equipe: 'Léa_Tom', scenario: { avis: 'revoir', mot: 'Il manque la fin.', date: '2020-01-20T10:00:00.000Z' } };
+  const avis = S.lireAvis(JSON.stringify(fichier), 'stop-motion');
+  assert.deepEqual(avis, { avis: 'revoir', mot: 'Il manque la fin.', date: '2020-01-20T10:00:00.000Z' });
+  assert.equal(S.lireAvis(JSON.stringify(fichier), 'voiture-ballon'), null, 'autre projet');
+  assert.equal(S.lireAvis('pas du json'), null);
+  assert.equal(S.lireAvis({ type: 'avis', scenario: { avis: 'bof', date: 'x' } }), null, 'avis inconnu');
+  const d = { equipe: { eleves: ['Léa', 'Tom'] }, seances: {}, photos: [] };
+  assert.equal(S.avisAMontrer(avis, d), true);
+  S.noterAvisVu(d, avis);
+  assert.equal(S.avisAMontrer(avis, d), false, 'déjà vu');
+  assert.equal(S.avisAMontrer(Object.assign({}, avis, { date: '2020-01-21T10:00:00.000Z' }), d), true, 'nouvel avis');
+  assert.equal(S.avisAMontrer(null, d), false);
+  assert.equal(S.etatAvis(d, null, false), null);
+  assert.equal(S.etatAvis(d, null, true), 'a-donner');
+  assert.equal(S.etatAvis(d, avis, true), 'revoir');
+  d.histoireModifieeLe = '2020-01-20T09:00:00.000Z';
+  assert.equal(S.etatAvis(d, avis, true), 'revoir', 'changée avant l’avis');
+  S.noterHistoire(d, 'fin', 'C’est la fête !');
+  assert.equal(S.etatAvis(d, avis, true), 'corrige', 'changée après « À revoir »');
+  assert.equal(S.etatAvis(d, Object.assign({}, avis, { avis: 'valide' }), true), 'valide');
+});
