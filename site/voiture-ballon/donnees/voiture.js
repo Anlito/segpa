@@ -2,7 +2,8 @@
 //   materiel : une ligne par pièce du kit ; prevu = quantité prévue par binôme (le professeur voit l'écart avec « J'ai pris »).
 //   noms     : cartes proposées pour le nom de la voiture (l'équipe peut aussi écrire le sien).
 //   couleurs : couleur d'équipe (la voiture la garde sur la piste et le podium) ; toujours affichée avec son nom.
-//   essais   : séance 4 — de min à max essais ; ecart : une mesure « ecart fois » plus grande (ou plus petite) que les
+//   essais   : séance « Je teste » — de min à max essais (2 au moins : on a changé une chose et comparé, décision de
+//              Thomas du 01/11/2026 ; après, « Ma voiture est prête » ou un essai de plus) ; ecart : une mesure « ecart fois » plus grande (ou plus petite) que les
 //              autres essais fait proposer « Mesure encore une fois ? » (à régler après les essais de châssis de Thomas).
 //   roues    : diamètres imprimés (mm) ; changements : les cartes « je change une chose » (une seule à la fois) ;
 //   directions : « ma voiture roule comment ? ».
@@ -25,7 +26,7 @@ definirDonneesProjet({
     { "nom": "Rose", "hex": "#DB2777" },
     { "nom": "Jaune", "hex": "#CA8A04" }
   ],
-  "essais": { "min": 3, "max": 5, "ecart": 10, "unite": "cm" },
+  "essais": { "min": 2, "max": 5, "ecart": 10, "unite": "cm" },
   "roues": ["20", "30", "40", "50"],
   "changements": [
     { "id": "roues", "nom": "Les roues", "picto": "roue", "choix": "roues" },

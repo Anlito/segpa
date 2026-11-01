@@ -5,14 +5,15 @@
 //                ou { type: 'roues', cote: 'avant' | 'arriere', choix: '40' } (les roues avant et arrière peuvent différer).
 //   Ancien format (une seule taille, roues: '30') : lu comme les mêmes roues devant et derrière.
 // Chaque essai se fait en 5 écrans (je pose · je gonfle · je lâche · je mesure · ma voiture roule comment ?), puis on
-// change UNE chose avant l'essai suivant. Après le minimum d'essais, l'équipe choisit « encore un essai » ou son graphique.
+// change UNE chose avant l'essai suivant. Après le minimum d'essais (2), l'équipe choisit « encore un essai » ou « ma
+// voiture est prête » (son graphique, puis la fin de la séance).
 (function (global) {
   'use strict';
 
   const enNode = typeof module === 'object' && module.exports;
   const S = enNode ? require('../../commun/js/outils.js') : global.Segpa;
 
-  const REGLES = { min: 3, max: 5, ecart: 10 };
+  const REGLES = { min: 2, max: 5, ecart: 10 };
   const regles = (r) => Object.assign({}, REGLES, r || {});
 
   function vide() {

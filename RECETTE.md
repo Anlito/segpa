@@ -91,7 +91,7 @@ caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifi
       mesure encore » et « C'est juste ».
 - [ ] Je change une seule chose : deux cartes touchées → « Choisis un seul changement » (ambre) ; roues, ballon (plus ou moins
       gonflé), poids (j'enlève, j'ajoute) ; pour les roues : roues avant **ou** roues arrière, puis le diamètre.
-- [ ] Après 3 essais : « Encore un essai ? » ou « Mon graphique » ; au 5e essai, le graphique directement ; « Retour » défait
+- [ ] Après 2 essais : « Encore un essai ? » ou « Ma voiture est prête » ; au 5e essai, le graphique directement ; « Retour » défait
       le dernier geste sans rien perdre.
 - [ ] Mon graphique : une barre par essai, la distance écrite, le changement dessous, « Le plus loin » sous le meilleur.
 - [ ] La bande orange et blanche ne cache jamais le bas d'un bouton ou d'un texte ; les prénoms se lisent sur la page Bravo.

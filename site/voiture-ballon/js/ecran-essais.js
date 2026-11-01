@@ -1,6 +1,6 @@
 // Écran « Mes essais » de la séance 4 (plan : docs/PLAN-voiture-ballon.md §3). Un écran par geste :
 //   roues avant puis roues arrière (une fois) · je pose · je gonfle (coups de pompe) · je lâche · je mesure (pavé, en cm) · ma voiture roule
-//   comment ? · je change UNE chose (ou, après 3 essais : encore un essai / mon graphique) · mon graphique.
+//   comment ? · je change UNE chose (ou, après 2 essais : encore un essai / ma voiture est prête) · mon graphique.
 // La suite logique est dans js/essais.js (testée) ; ici, seulement l'affichage. Tout est gardé au fur et à mesure dans
 // la rubrique de l'étape : l'équipe reprend là où elle en était.
 (function (global) {
@@ -199,10 +199,10 @@
     if (ecran === 'suite')
       return vue({
         milieu: `<div class="colonne" style="gap:2rem;align-items:center">
-            ${titre('Encore un essai ?', 'Encore un essai ? Je change une chose, ou je regarde mon graphique.')}
+            ${titre('Encore un essai ?', 'Encore un essai ? Je change une chose, ou ma voiture est prête.')}
             <div style="display:flex;gap:3rem">
               <button type="button" class="choix" data-action="encore"><span class="rond plein">${O.pic('remonter')}</span>Je change une chose</button>
-              <button type="button" class="choix" data-action="voir-graphique"><span class="rond">${O.pic('graphique')}</span>Mon graphique</button>
+              <button type="button" class="choix" data-action="voir-graphique"><span class="rond">${O.pic('drapeau')}</span>Ma voiture est prête</button>
             </div>
           </div>`,
         principal: '',
