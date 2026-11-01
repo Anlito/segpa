@@ -204,8 +204,8 @@ body::after { content: ''; position: fixed; left: 0; right: 0; bottom: 0; height
 /* ==========================================================================
    Séance 5 : titre, vitesse, images ratées, film fini (js/ecrans-montage.js) et lecteur (js/lecteur.js)
    ========================================================================== */
-.montage-titre { font-size: 2.5rem !important; }
-.montage-colonne { gap: 1.5rem; flex: 0 1 auto; max-width: 40rem; }
+.montage-titre { font-size: 2.375rem !important; }
+.montage-colonne { gap: 1.25rem; flex: 0 1 auto; max-width: 48rem; }
 [data-ecran="etape"]:has(.montage-colonne, .montage-tri, .montage-final) .milieu { gap: 2.5rem; padding: 0 2rem; }
 
 /* Le lecteur : un écran de cinéma ; la carte-titre et le générique en jaune sur noir. */
@@ -234,8 +234,8 @@ body::after { content: ''; position: fixed; left: 0; right: 0; bottom: 0; height
 }
 
 /* Le titre : des cartes-idées, ou le clavier, avec la carte-titre telle qu'elle passera au début du film. */
-.cartes-titres { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.875rem; width: 46rem; }
-.carte-titre { min-height: 4.5rem; border-radius: 0.75rem; border: 0.1875rem solid var(--trait); background: var(--surface); color: var(--encre);
+.cartes-titres { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; width: 46rem; }
+.carte-titre { min-height: 4.125rem; border-radius: 0.75rem; border: 0.1875rem solid var(--trait); background: var(--surface); color: var(--encre);
   font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 0 1rem; box-shadow: 0 0.3125rem 0 var(--noir-brique); }
 .carte-titre[aria-pressed="true"] { background: var(--jaune); color: var(--jaune-encre); border-color: var(--noir-brique); }
 .carte-titre.ecrire { border-style: dashed; color: var(--jaune); }
@@ -292,3 +292,7 @@ body::after { content: ''; position: fixed; left: 0; right: 0; bottom: 0; height
 .temps-numero { position: absolute; right: 0.875rem; top: 0.75rem; width: 2.25rem; height: 2.25rem; border-radius: 50%; background: var(--jaune); color: var(--jaune-encre);
   display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; }
 .montage-colonne > .pastille { align-self: flex-start; }
+.titre-recap, .objets-recap { margin: 0; display: flex; align-items: center; gap: 0.75rem; font-weight: 800; }
+.titre-recap { font-size: 1.875rem; color: var(--jaune); }
+.objets-recap { font-size: 1.5rem; color: var(--encre); margin-top: 0.5rem; }
+.titre-recap .picto, .objets-recap .picto { width: 2rem; height: 2rem; color: var(--jaune); }

@@ -33,7 +33,7 @@ site/stop-motion/
 
 ## 3. Les séances (une chose par écran)
 
-**S1 — J'invente mon histoire** : règles du matériel (« Je ne touche pas l'objectif de la caméra. » · « Je compte mes briques. » ·
+**S1 — J'invente mon histoire** (mis à jour au §10) : règles du matériel (« Je ne touche pas l'objectif de la caméra. » · « Je compte mes briques. » ·
 « Je range les briques par couleur. ») · **Début · Milieu · Fin** : une carte-idée par temps (lieux, héros, problèmes, dans
 `donnees/idees.js`) ou « mon idée » · le **titre** (cartes ou « J'écris un titre ») · 📷 le storyboard dessiné sur papier (3 cases).
 
@@ -104,10 +104,12 @@ lus directement dans les dossiers.
 
 ## 10. Fait au jalon M3 (01/11/2026)
 
-- Séance 1 : règles · `idee-histoire` pour le héros et le lieu (Début), le problème (Milieu), la fin · `histoire-resume`
-  (3 briques Début · Milieu · Fin, lues à voix haute) · le titre · la photo du storyboard.
+- Séance 1 (retours de Thomas du 01/11 : pas de photo du storyboard, 3 questions en plus, un récap) : règles ·
+  `idee-histoire` pour le héros, le lieu, ce que fait le héros (Début), le problème, comment il est réglé (Milieu), la
+  fin, les objets à construire (3 cartes au plus) · le titre · le récap `histoire-resume` (titre, 3 briques, objets, lus
+  à voix haute). Le même récap ouvre les séances 3 et 4 (« Je relis mon histoire »).
 - Séance 2 : 2 règles · « J'ai pris ma plaque » · `construire` le décor, le héros, les objets (rappel de l'histoire en
   pastille), une photo après chacun · « Je secoue doucement la table » · rangement (le décor reste sur la plaque).
-- `donnees/idees.js` : 6 héros, 6 lieux, 6 problèmes, 6 fins, 8 titres, sans « il » ni « elle ».
+- `donnees/idees.js` : 6 idées pour chacune des 7 questions, 8 titres, sans « il » ni « elle ».
 - Moteur : `histoireDe`, `noterHistoire`, `phrasesHistoire` (testés) ; l'histoire est gardée dans `d.histoire`.
 - `js/choix-ou-texte.js` : l'écran « une carte-idée ou j'écris mon idée », commun au titre et à l'histoire.

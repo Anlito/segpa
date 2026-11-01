@@ -1,7 +1,8 @@
 // Les séances du film en stop motion (plan : docs/PLAN-stop-motion.md §3).
 // Jalon M1 : les séances 3 et 4 (« Je filme ») et l'écran de tournage (js/ecran-tournage.js).
 // Jalon M2 : la séance 5 (titre, vitesse, images ratées, film avec titre et générique ; js/ecrans-montage.js).
-// Jalon M3 : la séance 1 (héros, lieu, problème, fin, l'histoire en 3 temps, le titre, le storyboard) et la séance 2
+// Jalon M3 : la séance 1 (le scénario : héros, lieu, ce que fait le héros, problème, solution, fin, objets à construire,
+// le titre, puis le récap ; pas de photo du storyboard, retour de Thomas du 01/11) et la séance 2
 // (la plaque, le décor, le héros, les objets, avec le rappel de l'histoire ; js/ecrans-histoire.js).
 // Le titre choisi en séance 1 est repris en séance 5 (on peut le changer).
 // Types d'écran du socle : regle · consigne · photo · cases · bilan. Écrans propres : tournage · titre-film ·
@@ -12,6 +13,8 @@
     { "id": "regle-compter", "type": "regle", "picto": "brique", "texte": "Je compte mes briques.", "detail": "Rien ne se perd." },
     { "id": "regle-ranger", "type": "regle", "picto": "balai", "texte": "Je range les briques par couleur." }
   ];
+  // Au début des séances 3 et 4 : je relis mon scénario (écrit en séance 1) avant de filmer.
+  const RELIRE = { "id": "relire", "type": "histoire-resume", "relire": true, "texte": "Je relis mon histoire.", "bouton": "J'ai relu" };
   const RAPPELS_TOURNAGE = [
     { "id": "rappel-camera", "type": "regle", "picto": "camera", "texte": "La caméra ne bouge pas.", "detail": "Elle reste sur son support." },
     { "id": "rappel-bouger", "type": "regle", "picto": "brique", "texte": "Je bouge un tout petit peu.", "detail": "Un personnage, un objet, un tout petit pas." },
@@ -33,11 +36,13 @@
         "etapes": REGLES_MATERIEL.concat([
           { "id": "heros", "type": "idee-histoire", "partie": "heros", "texte": "Qui est mon héros ?", "texteEcrire": "J'écris mon héros." },
           { "id": "lieu", "type": "idee-histoire", "partie": "lieu", "texte": "Où se passe mon histoire ?", "texteEcrire": "J'écris le lieu." },
+          { "id": "action", "type": "idee-histoire", "partie": "action", "texte": "Que fait mon héros au début ?", "texteEcrire": "J'écris ce que fait mon héros." },
           { "id": "probleme", "type": "idee-histoire", "partie": "probleme", "texte": "Quel problème arrive ?", "texteEcrire": "J'écris le problème." },
+          { "id": "solution", "type": "idee-histoire", "partie": "solution", "texte": "Comment le problème est réglé ?", "texteEcrire": "J'écris comment c'est réglé." },
           { "id": "fin", "type": "idee-histoire", "partie": "fin", "texte": "Comment finit mon histoire ?", "texteEcrire": "J'écris la fin." },
-          { "id": "histoire", "type": "histoire-resume", "texte": "Mon histoire en 3 temps.", "detail": "Je dessine ces 3 cases sur mon storyboard.", "bravo": "L'histoire est inventée" },
+          { "id": "objets", "type": "idee-histoire", "partie": "objets", "texte": "Quels objets je dois construire ?", "texteEcrire": "J'écris les objets à construire." },
           { "id": "titre", "type": "titre-film", "texte": "Je choisis le titre de mon film." },
-          { "id": "storyboard", "type": "photo", "picto": "crayon", "texte": "Je photographie mon storyboard.", "detail": "Les 3 cases : début, milieu, fin.", "legende": "Mon storyboard" }
+          { "id": "histoire", "type": "histoire-resume", "texte": "Mon histoire en 3 temps.", "bravo": "Le scénario est écrit" }
         ])
       },
       {
@@ -64,14 +69,14 @@
       },
       {
         "id": "s3", "titre": "Je filme", "sousTitre": "mon histoire", "picto": "camera",
-        "etapes": RAPPELS_TOURNAGE.concat([
+        "etapes": [RELIRE].concat(RAPPELS_TOURNAGE, [
           { "id": "tournage", "type": "tournage", "fin": "J'arrête pour aujourd'hui", "bravo": "Le film est commencé" },
           RANGEMENT("Le matériel est rangé")
         ])
       },
       {
         "id": "s4", "titre": "Je filme", "sousTitre": "encore", "picto": "camera",
-        "etapes": RAPPELS_TOURNAGE.concat([
+        "etapes": [RELIRE].concat(RAPPELS_TOURNAGE, [
           { "id": "tournage", "type": "tournage", "fin": "Mon film est fini", "bravo": "Le film est tourné" },
           RANGEMENT("Le matériel est rangé")
         ])

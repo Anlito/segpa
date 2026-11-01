@@ -117,17 +117,19 @@
   const dureeSequence = (plans) => plans.reduce((t, p) => t + p.duree, 0);
 
   // ---------- L'histoire en 3 temps (séance 1) ----------
-  // Gardée à part (d.histoire) : { heros, lieu, probleme, fin } — une carte-idée de donnees/idees.js ou « mon idée ».
-  const PARTIES_HISTOIRE = ['heros', 'lieu', 'probleme', 'fin'];
-  const LONGUEUR_IDEE = 40;
-  const histoireDe = (d) => Object.assign({ heros: '', lieu: '', probleme: '', fin: '' }, (d && d.histoire) || {});
+  // Gardée à part (d.histoire) : { heros, lieu, action, probleme, solution, fin, objets } — une carte-idée de
+  // donnees/idees.js ou « mon idée » (objets : plusieurs cartes, « une maison, un arbre »).
+  const PARTIES_HISTOIRE = ['heros', 'lieu', 'action', 'probleme', 'solution', 'fin', 'objets'];
+  const LONGUEUR_IDEE = 60;
+  const histoireDe = (d) => Object.assign({ heros: '', lieu: '', action: '', probleme: '', solution: '', fin: '', objets: '' }, (d && d.histoire) || {});
   function noterHistoire(d, partie, texte) {
     if (!PARTIES_HISTOIRE.includes(partie)) return histoireDe(d);
     d.histoire = Object.assign(histoireDe(d), { [partie]: String(texte || '').replace(/\s+/g, ' ').trim().slice(0, LONGUEUR_IDEE).trim() });
     d.modifieLe = S.maintenant();
     return d.histoire;
   }
-  // Les 3 phrases de l'histoire : « Un dragon, dans la forêt. » · « Une tempête arrive. » · « C'est la fête ! »
+  // Le scénario en 3 temps : « Un dragon, dans la forêt, dort tranquillement. » · « Une tempête arrive. Un ami vient
+  // aider. » · « C'est la fête ! », et les objets à construire (« une maison, un arbre »).
   const phrase = (t) => {
     const x = String(t || '').trim();
     if (!x) return '';
@@ -135,8 +137,9 @@
   };
   function phrasesHistoire(h) {
     const v = Object.assign({}, h);
-    const debut = [v.heros, v.lieu].map((x) => String(x || '').trim().replace(/[.!?…]+$/, '')).filter(Boolean).join(', ');
-    return { debut: phrase(debut), milieu: phrase(v.probleme), fin: phrase(v.fin) };
+    const debut = [v.heros, v.lieu, v.action].map((x) => String(x || '').trim().replace(/[.!?…]+$/, '')).filter(Boolean).join(', ');
+    const milieu = [phrase(v.probleme), phrase(v.solution)].filter(Boolean).join(' ');
+    return { debut: phrase(debut), milieu, fin: phrase(v.fin), objets: String(v.objets || '').trim().replace(/[.!?…]+$/, '') };
   }
 
   // Le film de l'équipe, gardé à part des séances (d.film) : la séance 4 continue le film commencé en séance 3.

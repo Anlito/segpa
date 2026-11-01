@@ -5,6 +5,7 @@
 //   valeur         ce qui est déjà choisi                                  longueur     caractères au plus
 //   libelleEcrire  « J'écris un titre »   libelleGarder « C'est mon titre »   nomChamp  pour le lecteur d'écran
 //   apercu(t)      HTML montré sous le champ (la carte-titre…), facultatif
+//   plusieurs      on peut toucher plusieurs cartes (3 au plus) : « une maison, un arbre »
 //   garder(t)      l'élève a choisi : on enregistre et on passe à la suite
 // L'état de l'écran (choix en cours, mode clavier) est dans O.sous() : il ne se perd pas si l'écran se redessine.
 (function (global) {
@@ -15,9 +16,12 @@
   function vueChoixOuTexte(O, o) {
     const { ech, pic, racine } = O;
     const sous = O.sous();
-    if (sous.choix === undefined) sous.choix = o.valeur || '';
     const idees = (o.idees || []).slice(0, 6);
-    const clavier = sous.ecrire || (sous.choix && !idees.includes(sous.choix));
+    const MAX = 3;
+    const morceaux = (t) => String(t || '').split(',').map((x) => x.trim()).filter(Boolean);
+    if (sous.choix === undefined) sous.choix = o.valeur || '';
+    const choisies = () => (o.plusieurs ? morceaux(sous.choix) : [sous.choix]);
+    const clavier = sous.ecrire || (sous.choix && !choisies().every((t) => idees.includes(t)));
     const pastille = o.pastille ? `<span class="pastille">${ech(o.pastille)}</span>` : '';
     const consigne = (t) => `<div class="consigne-ligne" style="align-items:center"><p class="consigne-texte montage-titre">${ech(t)}</p>${O.boutonVoix(t)}</div>`;
     const garder = () => {
@@ -60,8 +64,9 @@
     return {
       milieu: `<div class="colonne montage-colonne">
           ${pastille}${consigne(o.texte)}
+          ${o.plusieurs ? `<p class="consigne-detail">${ech(`Je peux en toucher ${MAX}.`)}</p>` : ''}
           <div class="cartes-titres">${idees
-            .map((t) => `<button type="button" class="carte-titre" data-action="choisir" data-titre="${ech(t)}" aria-pressed="${sous.choix === t}">${ech(t)}</button>`)
+            .map((t) => `<button type="button" class="carte-titre" data-action="choisir" data-titre="${ech(t)}" aria-pressed="${choisies().includes(t)}">${ech(t)}</button>`)
             .join('')}
             <button type="button" class="carte-titre ecrire" data-action="ecrire">${pic('crayon')}${ech(o.libelleEcrire || 'J’écris mon idée')}</button>
           </div>
@@ -69,9 +74,16 @@
       principal: O.boutonPrincipal('garder', o.libelleGarder || 'C’est mon idée', 'coche', !sous.choix),
       actions: {
         choisir: (b) => {
-          sous.choix = b.dataset.titre;
-          for (const x of racine.querySelectorAll('[data-action="choisir"]')) x.setAttribute('aria-pressed', String(x === b));
-          racine.querySelector('[data-action="garder"]').disabled = false;
+          const t = b.dataset.titre;
+          if (o.plusieurs) {
+            let liste = morceaux(sous.choix);
+            if (liste.includes(t)) liste = liste.filter((x) => x !== t);
+            else if (liste.length < MAX) liste.push(t);
+            else return O.message(`${MAX} cartes au plus : j’en enlève une d’abord.`);
+            sous.choix = liste.join(', ');
+          } else sous.choix = t;
+          for (const x of racine.querySelectorAll('[data-action="choisir"]')) x.setAttribute('aria-pressed', String(choisies().includes(x.dataset.titre)));
+          racine.querySelector('[data-action="garder"]').disabled = !sous.choix;
         },
         ecrire: () => {
           sous.ecrire = true;

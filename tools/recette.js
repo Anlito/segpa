@@ -387,6 +387,9 @@ async function scenarioStopMotion(navigateur, base, taille, captures) {
   await sansDefilement(page, 'sm-mission');
   if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm-mission.png') });
   await cliquer(page, '[data-action="seance"][data-id="s3"]');
+  await page.locator('.trois-temps').waitFor();
+  await sansDefilement(page, 'sm-s3-relire');
+  await cliquer(page, '[data-action="fait"]');
   for (let i = 0; i < 3; i++) {
     await sansDefilement(page, 'sm-s3-rappel-' + (i + 1));
     if (captures && !i) await page.screenshot({ path: path.join(SORTIE, 'sm-s3-rappel.png') });
@@ -436,7 +439,7 @@ async function scenarioStopMotion(navigateur, base, taille, captures) {
   await cliquer(page, '[data-action="fini"]');
   // Séance 4 : le même film continue.
   await cliquer(page, '[data-action="seance"][data-id="s4"]');
-  for (let i = 0; i < 3; i++) await cliquer(page, '[data-action="fait"]');
+  for (let i = 0; i < 4; i++) await cliquer(page, '[data-action="fait"]');
   await page.locator('.compteur-film strong', { hasText: 'Image 4 / 30' }).waitFor();
   await tourner(page, 'sm-s4-tournage', false, 2);
   const film = await page.evaluate(() => Segpa.filmDe(Segpa.app.etat.session.donnees).images.map((i) => i.fichier));
@@ -466,7 +469,7 @@ async function scenarioStopMotionDossier(navigateur, base) {
   await cliquer(page, '[data-prenom="Noah"]');
   await cliquer(page, '[data-action="valider"]');
   await cliquer(page, '[data-action="seance"][data-id="s3"]');
-  for (let i = 0; i < 3; i++) await cliquer(page, '[data-action="fait"]');
+  for (let i = 0; i < 4; i++) await cliquer(page, '[data-action="fait"]');
   await tourner(page, 'sm-dossier', false, 3);
   await cliquer(page, '[data-action="enlever"]');
   await cliquer(page, '[data-action="oui-enlever"]');
@@ -498,7 +501,7 @@ async function scenarioStopMotionMontage(navigateur, base, taille, captures) {
   await cliquer(page, '[data-prenom="Tom"]');
   await cliquer(page, '[data-action="valider"]');
   await cliquer(page, '[data-action="seance"][data-id="s3"]');
-  for (let i = 0; i < 3; i++) await cliquer(page, '[data-action="fait"]');
+  for (let i = 0; i < 4; i++) await cliquer(page, '[data-action="fait"]');
   await tourner(page, 'sm5-tournage', false, 16);
   await cliquer(page, '[data-action="mission"]');
   await cliquer(page, '[data-action="seance"][data-id="s5"]');
@@ -614,7 +617,7 @@ async function scenarioCinema(navigateur, base, captures) {
 }
 
 // Stop motion, séances 1 et 2 (jalon M3) : règles, héros (carte), lieu (carte), problème écrit au clavier, fin (carte),
-// l'histoire en 3 temps, le titre, la photo du storyboard ; puis la plaque, le décor, le héros et les objets (avec le
+// le scénario en 7 questions (héros, lieu, action, problème, solution, fin, objets), le titre, le récap ; puis la plaque, le décor, le héros et les objets (avec le
 // rappel de l'histoire et une photo chacun), « Je secoue la table », le rangement. Le titre est repris en séance 5.
 async function scenarioStopMotionHistoire(navigateur, base, taille, captures) {
   const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
@@ -637,19 +640,33 @@ async function scenarioStopMotionHistoire(navigateur, base, taille, captures) {
   };
   await carte('sm1-heros', 0);
   await carte('sm1-lieu', 1);
+  await carte('sm1-action', 0);
   await page.locator('[data-action="choisir"]').first().waitFor();
   await cliquer(page, '[data-action="ecrire"]');
   await page.keyboard.type('Un volcan se réveille');
   await sansDefilement(page, 'sm1-probleme-ecrit');
   await page.keyboard.press('Enter');
+  await carte('sm1-solution', 0);
   await carte('sm1-fin', 0);
-  await page.locator('.trois-temps').waitFor();
-  assert.deepEqual(await page.locator('.temps p').allTextContents(), ['Un dragon, sur la Lune.', 'Un volcan se réveille.', 'C\'est la fête !']);
-  await sansDefilement(page, 'sm1-histoire');
-  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm1-histoire.png') });
-  await cliquer(page, '[data-action="fait"]');
+  // Les objets : plusieurs cartes (3 au plus), une touchée deux fois est enlevée.
+  await page.locator('[data-action="choisir"]').first().waitFor();
+  await sansDefilement(page, 'sm1-objets');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm1-objets.png') });
+  for (const n of [0, 1, 2, 1, 3]) await page.locator('[data-action="choisir"]').nth(n).click();
+  assert.equal(await page.locator('[data-action="choisir"][aria-pressed="true"]').count(), 3);
+  await page.locator('[data-action="choisir"]').nth(4).click();
+  assert.equal(await page.locator('[data-action="choisir"][aria-pressed="true"]').count(), 3, '3 cartes au plus');
+  await cliquer(page, '[data-action="garder"]');
   await carte('sm1-titre', 0);
-  await faireSeance(page, 'sm1-fin-seance', false);
+  // Le récap : le titre, les 3 temps, les objets.
+  await page.locator('.trois-temps').waitFor();
+  assert.equal(await page.locator('.titre-recap').textContent(), 'Le dragon perdu');
+  assert.deepEqual(await page.locator('.temps p').allTextContents(), ['Un dragon, sur la Lune, dort tranquillement.', 'Un volcan se réveille. Un ami vient aider.', 'C\'est la fête !']);
+  assert.equal(await page.locator('.objets-recap').textContent(), 'Mes objets : une maison, une voiture, une fusée');
+  await sansDefilement(page, 'sm1-recap');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm1-recap.png') });
+  await cliquer(page, '[data-action="fait"]');
+  await page.locator('[data-action="fini"]').waitFor();
   await cliquer(page, '[data-action="fini"]');
   // Séance 2.
   await cliquer(page, '[data-action="continuer"]');
@@ -673,10 +690,10 @@ async function scenarioStopMotionHistoire(navigateur, base, taille, captures) {
       await cliquer(page, '[data-action="fait"]');
     }
   }
-  assert.ok(rappels.includes('Mon lieu : sur la Lune') && rappels.includes('Mon héros : Un dragon') && rappels.includes('Mon problème : Un volcan se réveille'), JSON.stringify(rappels));
+  assert.ok(rappels.includes('Mon lieu : sur la Lune') && rappels.includes('Mon héros : Un dragon') && rappels.includes('Mes objets : une maison, une voiture, une fusée'), JSON.stringify(rappels));
   const d = await page.evaluate(() => Segpa.app.etat.session.donnees);
   assert.equal(d.film.titre, 'Le dragon perdu');
-  assert.deepEqual(d.photos.map((p) => p.legende), ['Mon storyboard', 'Mon décor', 'Mon héros', 'Mes objets']);
+  assert.deepEqual(d.photos.map((p) => p.legende), ['Mon décor', 'Mon héros', 'Mes objets']);
   assert.ok(d.seances.s2.etapes.plaque.fait, 'plaque prise');
   assert.deepEqual(erreurs, []);
   assert.deepEqual(horsSite, []);
@@ -1096,7 +1113,7 @@ async function scenarioProfesseur(navigateur, base) {
         const t = `${taille.width}×${taille.height}`;
         try {
           await scenarioStopMotion(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
-          noter(`- OK ${nomBase} ${t} · stop motion (jalon M1) : Ma mission à 5 séances, 3 rappels, écran de tournage (5 images au bouton et à la barre d’espace, pellicule, compteur, calque, grille, « Enlever la dernière » avec confirmation, « Voir », pause café), séance 4 qui reprend le même film, rien ne dépasse, aucune erreur.`);
+          noter(`- OK ${nomBase} ${t} · stop motion (jalon M1) : Ma mission à 5 séances, « Je relis mon histoire », 3 rappels, écran de tournage (5 images au bouton et à la barre d’espace, pellicule, compteur, calque, grille, « Enlever la dernière » avec confirmation, « Voir », pause café), séance 4 qui reprend le même film, rien ne dépasse, aucune erreur.`);
         } catch (e) {
           ok = false;
           noter(`- ÉCHEC ${nomBase} ${t} · stop motion : ${e.message.split('\n').slice(0, 4).join(' ')}`);
@@ -1116,7 +1133,7 @@ async function scenarioProfesseur(navigateur, base) {
         const t = `${taille.width}×${taille.height}`;
         try {
           await scenarioStopMotionHistoire(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
-          noter(`- OK ${nomBase} ${t} · stop motion, séances 1 et 2 (jalon M3) : 3 règles, héros, lieu et fin en cartes-idées, problème écrit au clavier, l’histoire en 3 temps, le titre, la photo du storyboard ; la plaque, décor, héros et objets avec le rappel de l’histoire et une photo chacun, la table secouée, le rangement, rien ne dépasse, aucune erreur.`);
+          noter(`- OK ${nomBase} ${t} · stop motion, séances 1 et 2 (jalon M3) : 3 règles, le scénario en 7 questions (cartes-idées, problème écrit au clavier, 3 objets au plus), le titre, le récap (titre, 3 temps, objets) ; la plaque, décor, héros et objets avec le rappel de l’histoire et une photo chacun, la table secouée, le rangement, rien ne dépasse, aucune erreur.`);
         } catch (e) {
           ok = false;
           noter(`- ÉCHEC ${nomBase} ${t} · stop motion, séances 1 et 2 : ${e.message.split('\n').slice(0, 4).join(' ')}`);

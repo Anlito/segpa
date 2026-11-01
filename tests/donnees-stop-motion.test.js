@@ -36,11 +36,12 @@ test('les 3 règles du matériel validées par Thomas, en séance 1', () => {
   assert.deepEqual(textes, ['Je ne touche pas l\'objectif de la caméra.', 'Je compte mes briques.', 'Je range les briques par couleur.']);
 });
 
-test('séances 3 et 4 : 3 rappels puis l’écran de tournage', () => {
+test('séances 3 et 4 : je relis mon histoire, 3 rappels, puis l’écran de tournage', () => {
   for (const id of ['s3', 's4']) {
     const s = etapes.seances.find((x) => x.id === id);
     const types = s.etapes.map((e) => e.type);
-    assert.deepEqual(types.slice(0, 4), ['regle', 'regle', 'regle', 'tournage'], id);
+    assert.deepEqual(types.slice(0, 5), ['histoire-resume', 'regle', 'regle', 'regle', 'tournage'], id);
+    assert.ok(s.etapes[0].relire, id);
   }
 });
 
@@ -64,11 +65,12 @@ test('séance 5 : titre, vitesse, images ratées, film fini, cinéma, bilan ; id
   for (const t of titres) assert.ok(t.length <= 40 && S.nombreDeMots(t) <= 5, t);
 });
 
-test('séance 1 : héros, lieu, problème, fin, l’histoire, le titre, le storyboard ; idées pour chaque partie', () => {
+test('séance 1 : le scénario en 7 questions, le titre, puis le récap (pas de photo du storyboard) ; idées pour chaque partie', () => {
   const s1 = etapes.seances.find((x) => x.id === 's1');
-  assert.deepEqual(s1.etapes.filter((e) => e.type === 'idee-histoire').map((e) => e.partie), ['heros', 'lieu', 'probleme', 'fin']);
-  assert.deepEqual(s1.etapes.slice(-3).map((e) => e.type), ['histoire-resume', 'titre-film', 'photo']);
-  for (const partie of ['heros', 'lieu', 'probleme', 'fin']) {
+  assert.deepEqual(s1.etapes.filter((e) => e.type === 'idee-histoire').map((e) => e.partie), ['heros', 'lieu', 'action', 'probleme', 'solution', 'fin', 'objets']);
+  assert.deepEqual(s1.etapes.slice(-2).map((e) => e.type), ['titre-film', 'histoire-resume']);
+  assert.ok(!s1.etapes.some((e) => e.type === 'photo'), 'pas de photo du storyboard (retour de Thomas)');
+  for (const partie of ['heros', 'lieu', 'action', 'probleme', 'solution', 'fin', 'objets']) {
     const liste = donneesProjet.idees[partie];
     assert.ok(liste.length >= 4 && liste.length <= 6, partie);
     for (const t of liste) {

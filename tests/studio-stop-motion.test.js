@@ -102,17 +102,25 @@ test('vitesse, titre, générique et séquence de projection', () => {
   assert.equal(S.sequenceFilm(S.filmVide(), {})[0].texte, 'Mon film');
 });
 
-test('l’histoire en 3 temps : gardée à part, en 3 phrases', () => {
+test('l’histoire en 3 temps : gardée à part, en 3 phrases, avec les objets à construire', () => {
   const d = { equipe: { eleves: ['Léa', 'Tom'] }, seances: {}, photos: [] };
-  assert.deepEqual(S.histoireDe(d), { heros: '', lieu: '', probleme: '', fin: '' });
+  assert.deepEqual(S.histoireDe(d), { heros: '', lieu: '', action: '', probleme: '', solution: '', fin: '', objets: '' });
   S.noterHistoire(d, 'heros', 'Un dragon');
   S.noterHistoire(d, 'lieu', '  dans   la forêt ');
+  S.noterHistoire(d, 'action', 'dort tranquillement');
   S.noterHistoire(d, 'probleme', 'Une tempête arrive.');
+  S.noterHistoire(d, 'solution', 'un ami vient aider');
   S.noterHistoire(d, 'fin', 'c’est la fête !');
+  S.noterHistoire(d, 'objets', 'une maison, un arbre');
   S.noterHistoire(d, 'autre', 'rien');
-  assert.deepEqual(Object.keys(d.histoire), ['heros', 'lieu', 'probleme', 'fin']);
+  assert.deepEqual(Object.keys(d.histoire), ['heros', 'lieu', 'action', 'probleme', 'solution', 'fin', 'objets']);
   assert.ok(d.modifieLe);
-  assert.deepEqual(S.phrasesHistoire(d.histoire), { debut: 'Un dragon, dans la forêt.', milieu: 'Une tempête arrive.', fin: 'C’est la fête !' });
-  assert.deepEqual(S.phrasesHistoire({ heros: 'mon chat.' }), { debut: 'Mon chat.', milieu: '', fin: '' });
+  assert.deepEqual(S.phrasesHistoire(d.histoire), {
+    debut: 'Un dragon, dans la forêt, dort tranquillement.',
+    milieu: 'Une tempête arrive. Un ami vient aider.',
+    fin: 'C’est la fête !',
+    objets: 'une maison, un arbre',
+  });
+  assert.deepEqual(S.phrasesHistoire({ heros: 'mon chat.', probleme: 'La nuit tombe' }), { debut: 'Mon chat.', milieu: 'La nuit tombe.', fin: '', objets: '' });
   assert.equal(S.noterHistoire(d, 'heros', 'x'.repeat(80)).heros.length, S.LONGUEUR_IDEE);
 });
