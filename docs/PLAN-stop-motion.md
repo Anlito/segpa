@@ -71,11 +71,11 @@ lus directement dans les dossiers.
 | M2 | S5 : lecture, vitesses, enlever des images, titre et générique ; `cinema.html` — **fait le 01/11, recette de Thomas à faire** |
 | M3 | S1 et S2 : histoire en 3 temps, titre, briques, construction — **fait le 01/11, recette de Thomas à faire** |
 | M4 | outil professeur, 7 critères et ceinture (à valider), exports — **fait le 01/11, critères et recette de Thomas à faire** |
-| M5 | recette automatique (caméra simulée), essai réel, publication |
+| M5 | recette automatique (caméra simulée), essai réel, publication — **fait le 01/11 : essai validé par Thomas, publié** |
 
 ## 7. Restant
 
-- Dimensions de la webcam (ou photo avec une règle) pour dessiner le support 3D.
+- Support 3D de la webcam : fait par Thomas (01/11).
 - Bandes-son : après la première version (sons écrits dans le dépôt ou fichiers libres de droits, rien en ligne).
 
 ## 8. Fait au jalon M1 (01/11/2026)

@@ -56,6 +56,21 @@ Même fonctionnement que le taille-crayon, dossier `… › 6A › COMMUN › TE
   Design Space sont rappelés sur la page professeur (encart « Découper la carrosserie à la Cricut »).
 - Les 7 critères d'évaluation de la voiture sont une **proposition à valider** (`donnees/criteres.js`).
 
+## Film en stop motion (« Mon film en briques »)
+Même fonctionnement, dossier `… › 6A › COMMUN › TECHNOLOGIE › Stop-motion` (avec `classe.json`). Une webcam par binôme,
+sur son support ; les images du film vont dans `Prénom_Prénom/photos/film/0001.jpg`, `0002.jpg`… (jamais dans le .json).
+- **Élèves** (`site/stop-motion/index.html`) : S1 le scénario (7 questions, cartes-idées de `donnees/idees.js` ou idée
+  écrite, titre, récap) · S2 la plaque, le décor, le héros, les objets · S3 et S4 l'écran de tournage (calque, grille,
+  barre d'espace, enlever la dernière, voir, pause café ; 30 images au moins, 120 au plus) · S5 le titre, la vitesse,
+  les images ratées, le film avec son générique, le bilan.
+- **Suivre la classe** : `site/stop-motion/prof.html`. Tuiles : titre, scénario, plaque, images ; alertes « pas encore
+  d'image » (25 min après le début d'une séance de tournage) et « plaque prise, rangement pas fait » ; onglets
+  **Scénario** et **Film** (le film tel qu'il sera projeté, toutes les images). 7 critères validés ; ceinture d'après
+  « Son film est fini ».
+- **La séance cinéma** : `site/stop-motion/cinema.html`, au vidéoprojecteur. Ouvrir le dossier Stop-motion (ou
+  « Essayer avec 2 films d'exemple »), choisir le programme, « On lance la séance » : chaque film en plein écran avec
+  son titre et « Un film de … », applaudissements, film suivant. Pupitre et clavier (Espace, ←, →, R). Rien n'est écrit.
+
 ## Évaluer
 Fiche d'une équipe → onglet **Évaluation** : les 7 critères de votre Excel, une colonne par élève, 4 boutons par case
 (✗ R Rouge · ~ J Jaune · ✓ V Vert clair · ★ VV Vert foncé ; toucher encore le même bouton efface). « Même niveau pour
