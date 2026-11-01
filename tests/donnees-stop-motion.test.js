@@ -6,7 +6,7 @@ const { moteur, donnees, pictos } = require('./outils.js');
 const S = moteur();
 const { projet, etapes, reglages, donneesProjet } = donnees('stop-motion');
 const PICTOS = new Set(pictos());
-const TYPES = ['regle', 'consigne', 'photo', 'cases', 'bilan', 'tournage'];
+const TYPES = ['regle', 'consigne', 'photo', 'cases', 'bilan', 'tournage', 'titre-film', 'projection', 'trier-images'];
 
 test('identité, classe et dossier du projet', () => {
   assert.equal(projet.id, 'stop-motion');
@@ -25,6 +25,8 @@ test('5 séances, identifiants uniques, types connus, pictogrammes dessinés, co
       for (const p of [e.picto, ...(e.lignes || []).map((l) => l.picto)].filter(Boolean)) assert.ok(PICTOS.has(p), `${s.id}/${e.id} : picto ${p}`);
       for (const t of [e.texte, e.fin, ...(e.lignes || []).map((l) => l.texte)].filter(Boolean)) assert.ok(S.nombreDeMots(t) <= 8, `${s.id}/${e.id} : « ${t} »`);
       if (e.type === 'photo') assert.ok(e.legende, `${s.id}/${e.id} : légende`);
+      if (e.type === 'projection') assert.ok(['vitesse', 'final'].includes(e.mode), `${s.id}/${e.id} : mode`);
+      for (const ph of e.phrases || []) assert.ok(S.nombreDeMots(ph) <= 8, `${s.id}/${e.id} : « ${ph} »`);
     }
   }
 });
@@ -52,4 +54,12 @@ test('réglages du film et conseils', () => {
     assert.ok(PICTOS.has(c.picto), c.picto);
     assert.ok(S.nombreDeMots(c.texte) <= 8, c.texte);
   }
+});
+
+test('séance 5 : titre, vitesse, images ratées, film fini, cinéma, bilan ; idées de titres', () => {
+  const s5 = etapes.seances.find((x) => x.id === 's5');
+  assert.deepEqual(s5.etapes.map((e) => e.type), ['titre-film', 'projection', 'trier-images', 'projection', 'consigne', 'bilan']);
+  const titres = donneesProjet.idees.titres;
+  assert.ok(titres.length >= 6);
+  for (const t of titres) assert.ok(t.length <= 40 && S.nombreDeMots(t) <= 5, t);
 });

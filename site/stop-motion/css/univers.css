@@ -200,3 +200,76 @@ body::after { content: ''; position: fixed; left: 0; right: 0; bottom: 0; height
 .pause-cafe p { margin: 0; font-size: 2rem; font-weight: 700; color: var(--encre-douce); }
 .pause-cafe p.grand { font-size: 3.5rem; font-weight: 800; color: var(--encre); }
 .pause-cafe .btn { margin-top: 1.5rem; }
+
+/* ==========================================================================
+   Séance 5 : titre, vitesse, images ratées, film fini (js/ecrans-montage.js) et lecteur (js/lecteur.js)
+   ========================================================================== */
+.montage-titre { font-size: 2.5rem !important; }
+.montage-colonne { gap: 1.5rem; flex: 0 1 auto; max-width: 40rem; }
+[data-ecran="etape"]:has(.montage-colonne, .montage-tri, .montage-final) .milieu { gap: 2.5rem; padding: 0 2rem; }
+
+/* Le lecteur : un écran de cinéma ; la carte-titre et le générique en jaune sur noir. */
+.lecteur { position: relative; }
+.lecteur-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.lecteur-carte { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 2rem; text-align: center; background: #000; }
+.lecteur-carte .lecteur-texte { font-size: 2.75rem; font-weight: 800; line-height: 1.15; color: var(--jaune); }
+.lecteur-carte.generique .lecteur-texte { font-size: 2.125rem; color: var(--encre); }
+.ecran-cinema.grand .lecteur-carte .lecteur-texte { font-size: 3.5rem; }
+.ecran-cinema.grand .lecteur-carte.generique .lecteur-texte { font-size: 2.5rem; }
+.lecteur-attente { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 600; color: var(--encre-douce); }
+.ecran-cinema.grand { height: 25rem; }
+.montage-final { align-items: center; gap: 1rem; flex: 0 1 auto; }
+.ligne-lecture { display: flex; align-items: center; gap: 1.25rem; }
+.ligne-lecture .btn { min-height: 4rem; font-size: 1.375rem; }
+.infos-film { font-size: 1.375rem; font-weight: 600; color: var(--encre-douce); white-space: nowrap; }
+
+/* Les 3 vitesses : 3 briques côte à côte, la vitesse choisie en jaune. */
+.vitesses { display: flex; gap: 1rem; margin-top: 0.75rem; }
+.carte-vitesse { flex-direction: column; gap: 0.25rem; width: 9rem; min-height: 6.5rem; font-size: 1.5rem; font-weight: 800;
+  background: var(--brique); color: var(--encre); box-shadow: 0 0.375rem 0 var(--noir-brique); }
+.carte-vitesse .picto { width: 2.75rem; height: 2.75rem; }
+.carte-vitesse::before, .carte-vitesse::after {
+  content: ''; position: absolute; top: -0.875rem; width: 1.625rem; height: 0.75rem; border-radius: 0.4375rem 0.4375rem 0 0;
+  background: inherit; border: 0.1875rem solid var(--noir-brique); border-bottom: none;
+}
+
+/* Le titre : des cartes-idées, ou le clavier, avec la carte-titre telle qu'elle passera au début du film. */
+.cartes-titres { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.875rem; width: 46rem; }
+.carte-titre { min-height: 4.5rem; border-radius: 0.75rem; border: 0.1875rem solid var(--trait); background: var(--surface); color: var(--encre);
+  font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 0 1rem; box-shadow: 0 0.3125rem 0 var(--noir-brique); }
+.carte-titre[aria-pressed="true"] { background: var(--jaune); color: var(--jaune-encre); border-color: var(--noir-brique); }
+.carte-titre.ecrire { border-style: dashed; color: var(--jaune); }
+.carte-titre.ecrire .picto { width: 2rem; height: 2rem; }
+.carte-titre:focus-visible { outline: 0.25rem solid var(--jaune); outline-offset: 0.25rem; }
+.champ-titre { width: 40rem; height: 5rem; border-radius: 0.875rem; border: 0.1875rem solid var(--trait); background: var(--surface); color: var(--encre);
+  font: 700 2rem 'Lexend', system-ui, sans-serif; padding: 0 1.25rem; }
+.champ-titre:focus { outline: none; border-color: var(--jaune); }
+.carte-titre-apercu { width: 40rem; aspect-ratio: 16 / 5; background: #000; border: 0.5rem solid var(--noir-brique); box-shadow: 0 0 0 0.1875rem var(--jaune);
+  border-radius: 0.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem; padding: 0 1.5rem; text-align: center; }
+.carte-titre-apercu small { font-size: 1.125rem; font-weight: 600; color: var(--encre-douce); }
+.carte-titre-apercu strong { font-size: 2.5rem; font-weight: 800; color: var(--jaune); line-height: 1.15; overflow-wrap: anywhere; }
+
+/* Les images ratées : une grille de vignettes ; une image enlevée est grisée, marquée « Enlevée » (pas de rouge). */
+.montage-tri { gap: 1rem; flex: 1; align-items: center; }
+.ligne-tri { display: flex; align-items: center; gap: 1.5rem; }
+.ligne-tri .consigne-detail { font-size: 1.5rem; }
+.grille-tri { display: grid; grid-template-columns: repeat(5, 10.5rem); gap: 0.75rem; }
+.vignette-tri { position: relative; width: 10.5rem; aspect-ratio: 16 / 9; padding: 0; border-radius: 0.375rem; border: 0.1875rem solid var(--noir-brique); background: #2A2740; overflow: hidden; }
+.vignette-tri img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vignette-tri small { position: absolute; left: 0.25rem; top: 0.25rem; font-size: 0.875rem; font-weight: 800; color: #fff; background: rgba(0, 0, 0, 0.65); border-radius: 0.25rem; padding: 0 0.3rem; }
+.vignette-tri .marque-enlevee { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; gap: 0.375rem; background: rgba(21, 19, 31, 0.78);
+  color: var(--encre); font-size: 1.125rem; font-weight: 800; }
+.vignette-tri .marque-enlevee .picto { width: 1.5rem; height: 1.5rem; }
+.vignette-tri[aria-pressed="true"] { border-color: var(--trait); }
+.vignette-tri[aria-pressed="true"] img { filter: grayscale(1); }
+.vignette-tri[aria-pressed="true"] .marque-enlevee { display: flex; }
+.vignette-tri:focus-visible { outline: 0.25rem solid var(--jaune); outline-offset: 0.125rem; }
+.pages { display: flex; align-items: center; gap: 0.75rem; font-size: 1.375rem; font-weight: 700; color: var(--encre); }
+.compte-tri { white-space: nowrap; }
+
+/* Bilan (smileys) : un peu plus compact, pour que 3 phrases tiennent à l'écran. */
+.questions-bilan { gap: 0.875rem; }
+.question-bilan { padding: 0.5rem 1.25rem; }
+.question-bilan p { font-size: 1.875rem; }
+.visage { width: 7.5rem; height: 7.5rem; }
+.visage .picto { width: 4rem; height: 4rem; }

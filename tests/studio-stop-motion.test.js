@@ -65,3 +65,39 @@ test('le film est gardé à part des séances : la séance 4 reprend le film de 
   const sans = S.enleverImageFilm(S.filmDe(d));
   assert.equal(S.prochainNomFilm(sans, ['photos/film/0004.jpg']), 'photos/film/0005.jpg');
 });
+
+test('montage : une image ratée s’enlève et se remet ; le compteur, le calque et la durée ne la comptent pas', () => {
+  let v = film(5);
+  v = S.basculerImage(v, 1);
+  assert.equal(v.images.length, 5, 'l’image reste dans la liste');
+  assert.equal(S.compteurFilm(v).n, 4);
+  assert.deepEqual(S.imagesVisibles(v).map((i) => i.fichier.slice(-8)), ['0001.jpg', '0003.jpg', '0004.jpg', '0005.jpg']);
+  v = S.basculerImage(v, 4);
+  assert.equal(S.derniereImage(v).fichier, 'photos/film/0004.jpg', 'le calque montre la dernière image gardée');
+  assert.equal(S.enleverImageFilm(v).images.length, 4, 'au tournage, « Enlever la dernière » enlève la dernière gardée');
+  assert.ok(S.enleverImageFilm(v).images.every((i) => i.fichier !== 'photos/film/0004.jpg'));
+  v = S.basculerImage(S.basculerImage(v, 1), 4);
+  assert.equal(S.compteurFilm(v).n, 5, 'remises');
+  assert.equal(S.prochainNomFilm(S.basculerImage(v, 4)), 'photos/film/0006.jpg', 'une image enlevée garde son numéro');
+});
+
+test('vitesse, titre, générique et séquence de projection', () => {
+  let v = film(12);
+  assert.equal(S.choisirVitesse(v, 'lent').vitesse, 'lent');
+  assert.equal(S.choisirVitesse(v, 'turbo').vitesse, 'normal', 'vitesse inconnue : rien ne change');
+  assert.equal(S.noterTitre(v, '  Le   dragon perdu ').titre, 'Le dragon perdu');
+  assert.equal(S.noterTitre(v, 'x'.repeat(60)).titre.length, S.LONGUEUR_TITRE);
+  assert.equal(S.nomsGenerique(['Léa', 'Tom']), 'Léa et Tom');
+  assert.equal(S.nomsGenerique(['Léa', 'Tom', 'Inès']), 'Léa, Tom et Inès');
+  assert.equal(S.nomsGenerique(['Léa']), 'Léa');
+  v = S.basculerImage(S.noterTitre(S.choisirVitesse(v, 'rapide'), 'Le dragon perdu'), 0);
+  const plans = S.sequenceFilm(v, { eleves: ['Léa', 'Tom'] });
+  assert.deepEqual(plans[0], { type: 'titre', texte: 'Le dragon perdu', duree: 2.5 });
+  assert.equal(plans.filter((p) => p.type === 'image').length, 11);
+  assert.equal(plans[1].fichier, 'photos/film/0002.jpg');
+  assert.equal(plans[1].duree, 0.1, 'rapide : 10 images par seconde');
+  assert.deepEqual(plans[plans.length - 1], { type: 'generique', texte: 'Un film de Léa et Tom', duree: 3 });
+  assert.equal(Math.round(S.dureeSequence(plans) * 10) / 10, 6.6);
+  assert.equal(S.sequenceFilm(film(1), { vitesse: 'lent' })[1].duree, 0.25, 'la vitesse peut être choisie à la projection');
+  assert.equal(S.sequenceFilm(S.filmVide(), {})[0].texte, 'Mon film');
+});

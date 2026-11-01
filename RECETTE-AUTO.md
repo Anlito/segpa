@@ -1,4 +1,4 @@
-# Recette automatique — 01/11/2026 14:37:41
+# Recette automatique — 01/11/2026 14:57:51
 
 Navigateur : Chromium (Playwright) 153.0.8010.12 · caméra simulée
 
@@ -24,6 +24,12 @@ Navigateur : Chromium (Playwright) 153.0.8010.12 · caméra simulée
 - OK serveur 1920×1080 · stop motion (jalon M1) : Ma mission à 5 séances, 3 rappels, écran de tournage (5 images au bouton et à la barre d’espace, pellicule, compteur, calque, grille, « Enlever la dernière » avec confirmation, « Voir », pause café), séance 4 qui reprend le même film, rien ne dépasse, aucune erreur.
 - OK file:// 1366×768 · stop motion avec dossier : images JPEG écrites dans Ines_Noah/photos/film/ (0001.jpg…), l’image enlevée reste dans le dossier, aucune image dans le .json.
 - OK serveur 1366×768 · stop motion avec dossier : images JPEG écrites dans Ines_Noah/photos/film/ (0001.jpg…), l’image enlevée reste dans le dossier, aucune image dans le .json.
+- OK file:// 1366×768 · stop motion, séance 5 (jalon M2) : titre (carte-idée puis écrit au clavier), vitesse « Lent » gardée, 2 images ratées enlevées (une autre enlevée puis remise), le film avec sa carte-titre et « Un film de Léa et Tom », cinéma, bilan, rien ne dépasse, aucune erreur.
+- OK file:// 1920×1080 · stop motion, séance 5 (jalon M2) : titre (carte-idée puis écrit au clavier), vitesse « Lent » gardée, 2 images ratées enlevées (une autre enlevée puis remise), le film avec sa carte-titre et « Un film de Léa et Tom », cinéma, bilan, rien ne dépasse, aucune erreur.
+- OK serveur 1366×768 · stop motion, séance 5 (jalon M2) : titre (carte-idée puis écrit au clavier), vitesse « Lent » gardée, 2 images ratées enlevées (une autre enlevée puis remise), le film avec sa carte-titre et « Un film de Léa et Tom », cinéma, bilan, rien ne dépasse, aucune erreur.
+- OK serveur 1920×1080 · stop motion, séance 5 (jalon M2) : titre (carte-idée puis écrit au clavier), vitesse « Lent » gardée, 2 images ratées enlevées (une autre enlevée puis remise), le film avec sa carte-titre et « Un film de Léa et Tom », cinéma, bilan, rien ne dépasse, aucune erreur.
+- OK file:// 1366×768 · séance cinéma : dossier Stop-motion avec 2 films et une équipe sans image (pas au programme), projection en grand (carte-titre, images lues dans les dossiers, générique, applaudissements), vitesse de l’équipe, pause à la barre d’espace, film suivant, « Bravo à tous les réalisateurs », aucune erreur.
+- OK serveur 1366×768 · séance cinéma : dossier Stop-motion avec 2 films et une équipe sans image (pas au programme), projection en grand (carte-titre, images lues dans les dossiers, générique, applaudissements), vitesse de l’équipe, pause à la barre d’espace, film suivant, « Bravo à tous les réalisateurs », aucune erreur.
 - OK serveur 1366×768 · dossier : prénoms lus dans classe.json, dossier Ines_Noah créé, sauvegarde et photo JPEG écrites (pas d’image dans le .json), page rechargée et équipe retrouvée en séance 2, « Je commence » avec les mêmes prénoms reprend la sauvegarde.
 - OK file:// 1366×768 · professeur : 5 équipes fictives, aide en premier avec son étape, alertes (inactivité, pièces dehors, mesure), dernière photo, « J’y vais » écrit dans professeur.json, onglets Bilan, Évaluation (niveaux, note, ceinture), Album, Pièces et réponses, Séance 2, Historique, Différenciation ; exports Excel, CSV, Carnet de classe ; feuilles ceinture.
 - OK serveur 1366×768 · professeur : 5 équipes fictives, aide en premier avec son étape, alertes (inactivité, pièces dehors, mesure), dernière photo, « J’y vais » écrit dans professeur.json, onglets Bilan, Évaluation (niveaux, note, ceinture), Album, Pièces et réponses, Séance 2, Historique, Différenciation ; exports Excel, CSV, Carnet de classe ; feuilles ceinture.

@@ -1,6 +1,6 @@
 # Plan court — Film en stop motion avec des briques (6e SEGPA)
 
-Version 3 · 01/11/2026 · réponses de Thomas reportées (§1 et §7) · **jalon M1 fait** (§6, §8). À lire avec `BRIEF-CLAUDE-CODE-stop-motion.md` (proposition d'origine) et
+Version 3 · 01/11/2026 · réponses de Thomas reportées (§1 et §7) · **jalons M1 et M2 faits** (§6, §8, §9). À lire avec `BRIEF-CLAUDE-CODE-stop-motion.md` (proposition d'origine) et
 `PLAN.md` (organisation du dépôt, socle commun).
 
 ## 1. Décisions déjà prises
@@ -68,7 +68,7 @@ lus directement dans les dossiers.
 |---|---|
 | M0 | maquette de l'univers graphique (deux directions au choix) — **fait : direction C « Cinéma en briques » choisie le 01/11** |
 | M1 | écran de tournage et sauvegarde des images (calque, grille, pellicule, enlever, voir) — **essai sur un vrai poste** — **fait le 01/11, recette de Thomas à faire** (`RECETTE.md`) |
-| M2 | S5 : lecture, vitesses, enlever des images, titre et générique ; `cinema.html` |
+| M2 | S5 : lecture, vitesses, enlever des images, titre et générique ; `cinema.html` — **fait le 01/11, recette de Thomas à faire** |
 | M3 | S1 et S2 : histoire en 3 temps, titre, briques, construction |
 | M4 | outil professeur, 7 critères et ceinture (à valider), exports |
 | M5 | recette automatique (caméra simulée), essai réel, publication |
@@ -88,3 +88,16 @@ lus directement dans les dossiers.
 - Socle : `session.ecrireImage` (image écrite sans entrée dans l'album, jamais par-dessus un fichier), `O.ecrireImage`,
   `O.nettoyer` (écouteurs et minuteurs d'un écran propre), pictogrammes film, brique, calque, grille, café, annuler, stop.
 - Séances 1, 2 et 5 : seulement leurs règles et photos en attendant M2 et M3. Le portail garde « bientôt » jusqu'à M5.
+
+## 9. Fait au jalon M2 (01/11/2026)
+
+- Séance 5 : `titre-film` (cartes-idées de `donnees/idees.js` ou titre écrit, 40 caractères au plus) · `projection`
+  mode `vitesse` (le film en boucle, Lent / Normal / Rapide) · `trier-images` (toucher une image ratée l'enlève, la
+  toucher encore la remet : rien n'est effacé) · `projection` mode `final` (carte-titre, images, « Un film de … ») ·
+  séance cinéma · bilan. Écrans dans `js/ecrans-montage.js`, lecteur commun dans `js/lecteur.js`.
+- Moteur (`js/studio.js`, testé) : `basculerImage`, `imagesVisibles`, `choisirVitesse`, `noterTitre`, `nomsGenerique`,
+  `sequenceFilm` (les plans de la projection). Le film garde son titre et sa vitesse dans `d.film`.
+- `cinema.html` (`js/cinema-page.js`, `css/cinema.css`) : dossier Stop-motion ou 2 films d'exemple, programme,
+  projection plein écran avec pupitre (et clavier), applaudissements, film suivant, « Bravo à tous les réalisateurs ».
+  La page ne fait que lire les dossiers.
+- Le titre se choisira en séance 1 au jalon M3 ; en séance 5, il est repris et peut être changé.

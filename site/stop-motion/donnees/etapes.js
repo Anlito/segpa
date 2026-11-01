@@ -1,8 +1,10 @@
 // Les séances du film en stop motion (plan : docs/PLAN-stop-motion.md §3).
-// Jalon M1 : les séances 3 et 4 (« Je filme ») et l'écran de tournage (js/ecran-tournage.js). Les écrans propres des
-// séances 1, 2 et 5 (histoire en 3 temps, titre, construction, montage) arrivent aux jalons M2 et M3 : en attendant,
-// ces séances n'ont que leurs règles et leurs photos.
-// Types d'écran du socle : regle · consigne · photo · cases · bilan. Écran propre : tournage.
+// Jalon M1 : les séances 3 et 4 (« Je filme ») et l'écran de tournage (js/ecran-tournage.js).
+// Jalon M2 : la séance 5 (titre, vitesse, images ratées, film avec titre et générique ; js/ecrans-montage.js).
+// Les écrans propres des séances 1 et 2 (histoire en 3 temps, construction) arrivent au jalon M3 : en attendant, elles
+// n'ont que leurs règles et leurs photos. Le titre se choisira en séance 1 ; en séance 5, il est repris (on peut le changer).
+// Types d'écran du socle : regle · consigne · photo · cases · bilan. Écrans propres : tournage · titre-film ·
+// projection (mode 'vitesse' ou 'final') · trier-images.
 (function () {
   const REGLES_MATERIEL = [
     { "id": "regle-objectif", "type": "regle", "picto": "camera", "texte": "Je ne touche pas l'objectif de la caméra.", "detail": "Sinon, l'image devient floue." },
@@ -58,7 +60,12 @@
       {
         "id": "s5", "titre": "Je projette", "sousTitre": "mon film", "picto": "film",
         "etapes": [
-          { "id": "bientot", "type": "consigne", "picto": "film", "texte": "Le montage arrive bientôt.", "detail": "Le professeur prépare la séance cinéma.", "bouton": "D'accord" }
+          { "id": "titre", "type": "titre-film", "texte": "Je choisis le titre de mon film." },
+          { "id": "regarder", "type": "projection", "mode": "vitesse", "texte": "Je regarde mon film." },
+          { "id": "trier", "type": "trier-images", "texte": "J'enlève les images ratées.", "detail": "Floue, une main ? Je la touche." },
+          { "id": "mon-film", "type": "projection", "mode": "final", "texte": "Voici mon film !", "bravo": "Le film est prêt" },
+          { "id": "cinema", "type": "consigne", "picto": "film", "texte": "On regarde tous les films ensemble.", "detail": "Le professeur lance la séance cinéma.", "bouton": "On a regardé" },
+          { "id": "bilan", "type": "bilan", "phrases": ["Mon film raconte une histoire.", "Les briques bougent un tout petit peu.", "J'ai bien travaillé avec mon binôme."] }
         ]
       }
     ]

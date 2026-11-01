@@ -169,3 +169,19 @@ Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemp
 - [ ] Dans le dossier de l'équipe : `photos/film/0001.jpg`, `0002.jpg`… ; 10 images prises vite : le poste ne ralentit pas.
 - [ ] « J'arrête pour aujourd'hui », rangement, Bravo ; en séance 4, le film reprend là où il en était (« Image 12 / 30 »).
 - [ ] Les briques bougées entre deux images se voient-elles bien avec la webcam du collège (lumière, netteté) ?
+
+## Film en stop motion — jalon M2 (séance 5 et séance cinéma)
+Élèves (`site/stop-motion/index.html`, après avoir tourné quelques images en séance 3) :
+- [ ] « Je choisis le titre de mon film » : 6 cartes-idées (`donnees/idees.js`) ou « J'écris un titre » (40 caractères au plus) ; la carte-titre s'affiche comme au début du film.
+- [ ] « Je regarde mon film » : le film tourne en boucle ; Lent, Normal, Rapide (4, 6, 10 images par seconde) changent la vitesse tout de suite ; la vitesse choisie est gardée.
+- [ ] « J'enlève les images ratées » : toucher une image la grise (« Enlevée »), la toucher encore la remet ; « 14 images gardées » ; plusieurs pages si le film est long.
+- [ ] « Voici mon film ! » : la carte-titre, les images gardées, « Un film de Léa et Tom » ; « Revoir ».
+- [ ] Séance cinéma, puis le bilan (3 phrases, smileys).
+
+Professeur (`site/stop-motion/cinema.html`, au vidéoprojecteur) :
+- [ ] « Essayer avec 2 films d'exemple » marche sans dossier.
+- [ ] « Ouvrir le dossier Stop-motion » : une carte par équipe (titre, prénoms, images, durée) ; une équipe sans image n'est pas au programme ; toucher une carte l'enlève du programme ou l'y remet.
+- [ ] « On lance la séance » : plein écran ; chaque film avec son titre et son générique, à la vitesse choisie par l'équipe ; « Applaudissements ! » puis le film suivant au bout de 5 secondes.
+- [ ] Pupitre : Précédent, Pause, Recommencer, Lent / Normal / Rapide (pour ce film), Suivant, Programme ; clavier : Espace, ←, →, R.
+- [ ] « Bravo à tous les réalisateurs ! » avec tous les titres ; « Tout revoir ».
+- [ ] Au vidéoprojecteur de la salle : les images sont-elles assez nettes, le texte assez grand ?

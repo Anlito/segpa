@@ -1,6 +1,7 @@
 // Moteur du studio de tournage (stop motion) : utilisable dans le navigateur et dans Node (tests).
 // Un film, gardé dans la sauvegarde de l'équipe (les images sont des fichiers à part, jamais dans le .json) :
-//   { images: [{ fichier: 'photos/film/0001.jpg', date }], vitesse: 'lent' | 'normal' | 'rapide' }
+//   { images: [{ fichier: 'photos/film/0001.jpg', date, enlevee? }], vitesse: 'lent' | 'normal' | 'rapide', titre? }
+//   enlevee : image ratée enlevée au montage (le fichier reste, on peut la remettre).
 // Le film se tourne sur deux séances : la séance 4 reprend le film de la séance 3, là où il en était.
 (function (global) {
   'use strict';
@@ -40,10 +41,11 @@
     return { valeur: v, plein: false };
   }
 
-  // Enlever une image (la dernière par défaut). Le fichier reste dans le dossier (rien n'est jamais effacé).
+  // Enlever une image pendant le tournage (la dernière gardée par défaut). Le fichier reste dans le dossier (rien n'est jamais effacé).
   function enleverImage(valeur, i) {
     const v = copie(valeur);
-    const k = i === undefined ? v.images.length - 1 : i;
+    let k = i;
+    if (k === undefined) for (k = v.images.length - 1; k >= 0 && v.images[k].enlevee; k--);
     if (k >= 0 && k < v.images.length) v.images.splice(k, 1);
     return v;
   }
@@ -51,19 +53,68 @@
   // Ce que montre le compteur : « Image 12 / 30 ».
   function compteur(valeur, r) {
     const R = reglages(r);
-    const n = copie(valeur).images.length;
+    const n = visibles(valeur).length;
     return { n, min: R.min, max: R.max, atteint: n >= R.min, plein: n >= R.max, part: Math.min(1, n / R.min) };
   }
 
-  const dernieres = (valeur, k) => copie(valeur).images.slice(-(k || REGLAGES.pellicule));
-  const derniere = (valeur) => copie(valeur).images.slice(-1)[0] || null;
+  // Les images gardées (au montage, une image ratée est « enlevée » : elle reste dans la liste, on peut la remettre).
+  const visibles = (valeur) => copie(valeur).images.filter((i) => !i.enlevee);
+  const dernieres = (valeur, k) => visibles(valeur).slice(-(k || REGLAGES.pellicule));
+  const derniere = (valeur) => visibles(valeur).slice(-1)[0] || null;
 
   // Images par seconde pour la vitesse choisie, et durée du film en secondes.
   const imagesParSeconde = (vitesse, r) => reglages(r).vitesses[vitesse] || reglages(r).vitesses.normal;
-  const duree = (valeur, r) => copie(valeur).images.length / imagesParSeconde(copie(valeur).vitesse, r);
+  const duree = (valeur, r) => visibles(valeur).length / imagesParSeconde(copie(valeur).vitesse, r);
 
   // Le conseil affiché : il change toutes les « periode » secondes, dans l'ordre de la liste.
   const conseil = (liste, secondes, periode) => (liste && liste.length ? liste[Math.floor(Math.max(0, secondes) / (periode || 40)) % liste.length] : null);
+
+  // ---------- Montage (séance 5) ----------
+
+  // Au montage, toucher une image l'enlève du film, la toucher encore la remet (i : rang dans toutes les images).
+  function basculerImage(valeur, i) {
+    const v = copie(valeur);
+    const im = v.images[i];
+    if (!im) return v;
+    if (im.enlevee) delete im.enlevee;
+    else im.enlevee = true;
+    return v;
+  }
+
+  function choisirVitesse(valeur, vitesse, r) {
+    const v = copie(valeur);
+    if (reglages(r).vitesses[vitesse]) v.vitesse = vitesse;
+    return v;
+  }
+
+  // Le titre du film : sans espaces en trop, 40 caractères au plus.
+  const LONGUEUR_TITRE = 40;
+  function noterTitre(valeur, titre) {
+    const v = copie(valeur);
+    v.titre = String(titre || '').replace(/\s+/g, ' ').trim().slice(0, LONGUEUR_TITRE).trim();
+    return v;
+  }
+
+  // « Léa et Tom », « Léa, Tom et Inès ».
+  function nomsGenerique(eleves) {
+    const e = (eleves || []).filter(Boolean);
+    return e.length > 1 ? e.slice(0, -1).join(', ') + ' et ' + e[e.length - 1] : e[0] || '';
+  }
+
+  // Le film tel qu'on le projette : la carte-titre, les images gardées à la vitesse choisie, puis le générique.
+  // → [{ type: 'titre' | 'image' | 'generique', texte?, fichier?, duree (secondes) }]
+  const DUREE_TITRE = 2.5;
+  const DUREE_GENERIQUE = 3;
+  function sequenceFilm(valeur, o, r) {
+    const v = copie(valeur);
+    const titre = v.titre || (o && o.titre) || 'Mon film';
+    const ips = imagesParSeconde((o && o.vitesse) || v.vitesse, r);
+    const noms = nomsGenerique(o && o.eleves);
+    return [{ type: 'titre', texte: titre, duree: DUREE_TITRE }]
+      .concat(visibles(v).map((im) => ({ type: 'image', fichier: im.fichier, duree: 1 / ips })))
+      .concat([{ type: 'generique', texte: noms ? 'Un film de ' + noms : 'Fin', duree: DUREE_GENERIQUE }]);
+  }
+  const dureeSequence = (plans) => plans.reduce((t, p) => t + p.duree, 0);
 
   // Le film de l'équipe, gardé à part des séances (d.film) : la séance 4 continue le film commencé en séance 3.
   const filmDe = (d) => copie(d && d.film);
@@ -73,7 +124,7 @@
     return d.film;
   }
 
-  const API = { filmDe, noterFilm, REGLAGES_FILM: REGLAGES, filmVide, prochainNomFilm: prochainNom, ajouterImageFilm: ajouterImage, enleverImageFilm: enleverImage, compteurFilm: compteur, dernieresImages: dernieres, derniereImage: derniere, imagesParSeconde, dureeFilm: duree, conseilDuMoment: conseil };
+  const API = { imagesVisibles: visibles, basculerImage, choisirVitesse, noterTitre, LONGUEUR_TITRE, nomsGenerique, sequenceFilm, dureeSequence, filmDe, noterFilm, REGLAGES_FILM: REGLAGES, filmVide, prochainNomFilm: prochainNom, ajouterImageFilm: ajouterImage, enleverImageFilm: enleverImage, compteurFilm: compteur, dernieresImages: dernieres, derniereImage: derniere, imagesParSeconde, dureeFilm: duree, conseilDuMoment: conseil };
   Object.assign(S, API);
   if (enNode) module.exports = S;
 })(typeof window !== 'undefined' ? window : globalThis);

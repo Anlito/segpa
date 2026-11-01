@@ -488,6 +488,131 @@ async function scenarioStopMotionDossier(navigateur, base) {
   await contexte.close();
 }
 
+// Stop motion, séance 5 (jalon M2) : un film de 16 images tourné en séance 3, puis titre écrit au clavier, vitesse,
+// 2 images ratées enlevées (une remise), le film avec son titre et son générique, cinéma, bilan.
+async function scenarioStopMotionMontage(navigateur, base, taille, captures) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
+  await page.goto(base + 'stop-motion/index.html?enseignant=1');
+  await cliquer(page, '[data-action="commencer"]');
+  await cliquer(page, '[data-prenom="Léa"]');
+  await cliquer(page, '[data-prenom="Tom"]');
+  await cliquer(page, '[data-action="valider"]');
+  await cliquer(page, '[data-action="seance"][data-id="s3"]');
+  for (let i = 0; i < 3; i++) await cliquer(page, '[data-action="fait"]');
+  await tourner(page, 'sm5-tournage', false, 16);
+  await cliquer(page, '[data-action="mission"]');
+  await cliquer(page, '[data-action="seance"][data-id="s5"]');
+  // Le titre : une carte-idée, puis « J'écris un titre ».
+  await sansDefilement(page, 'sm5-titre');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm5-titre.png') });
+  assert.equal(await page.locator('[data-action="garder"]').isDisabled(), true);
+  await cliquer(page, '[data-action="choisir"]');
+  assert.equal(await page.locator('[data-action="garder"]').isDisabled(), false);
+  await cliquer(page, '[data-action="ecrire"]');
+  await page.keyboard.type('Le dragon perdu dans la forêt');
+  await sansDefilement(page, 'sm5-titre-ecrit');
+  assert.equal(await page.locator('.carte-titre-apercu strong').textContent(), 'Le dragon perdu dans la forêt');
+  await cliquer(page, '[data-action="garder"]');
+  // La vitesse : le film tourne en boucle, « Lent » est gardé.
+  await page.locator('.lecteur[data-plan="image"]').waitFor();
+  await sansDefilement(page, 'sm5-vitesse');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm5-vitesse.png') });
+  await cliquer(page, '[data-action="vitesse"][data-v="lent"]');
+  assert.match(await page.locator('.infos-film').textContent(), /16 images · 10 secondes/);
+  await cliquer(page, '[data-action="fait"]');
+  // Les images ratées : 2 enlevées, une remise ; 2 pages.
+  await page.locator('.vignette-tri img[src]').first().waitFor();
+  await cliquer(page, '[data-action="basculer"][data-i="2"]');
+  await cliquer(page, '[data-action="basculer"][data-i="5"]');
+  await cliquer(page, '[data-action="basculer"][data-i="7"]');
+  await cliquer(page, '[data-action="basculer"][data-i="7"]');
+  assert.equal(await page.locator('.compte-tri').textContent(), '14 images gardées');
+  await sansDefilement(page, 'sm5-tri');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm5-tri.png') });
+  await cliquer(page, '[data-action="page"]');
+  assert.equal(await page.locator('.vignette-tri').count(), 1);
+  await cliquer(page, '[data-action="fait"]');
+  // Le film fini : carte-titre, images, générique.
+  await page.locator('.lecteur[data-plan="titre"] .lecteur-texte', { hasText: 'Le dragon perdu dans la forêt' }).waitFor();
+  await sansDefilement(page, 'sm5-film');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm5-film.png') });
+  await page.locator('.lecteur[data-plan="generique"] .lecteur-texte', { hasText: 'Un film de Léa et Tom' }).waitFor({ timeout: 15000 });
+  await page.locator('[data-action="lecture"]', { hasText: 'Revoir' }).waitFor({ timeout: 6000 });
+  await cliquer(page, '[data-action="fait"]');
+  await cliquer(page, '[data-action="fait"]'); // séance cinéma
+  for (const q of await page.locator('.question-bilan').all()) await q.locator('.visage').first().click();
+  await sansDefilement(page, 'sm5-bilan');
+  await cliquer(page, '[data-action="fait"]');
+  await page.locator('[data-action="fini"]').waitFor();
+  const f = await page.evaluate(() => Segpa.filmDe(Segpa.app.etat.session.donnees));
+  assert.equal(f.titre, 'Le dragon perdu dans la forêt');
+  assert.equal(f.vitesse, 'lent');
+  assert.deepEqual(f.images.map((im, i) => (im.enlevee ? i : -1)).filter((i) => i >= 0), [2, 5]);
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
+// Séance cinéma (cinema.html) : le dossier Stop-motion (simulé) avec 2 films et une équipe sans image ; le programme,
+// la projection (titre, images, générique, applaudissements), Pause, vitesse, film suivant, « Bravo à tous ».
+async function scenarioCinema(navigateur, base, captures) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  const jpeg = require('./photo-fictive.js').toString('base64');
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64');
+  const equipe = (eleves, film) => {
+    const nom = eleves.join('_');
+    const d = { application: 'segpa', projet: 'stop-motion', formatVersion: 1, equipe: { eleves, classe: '6A' }, seances: {}, photos: [], aides: [], modifieLe: '2026-11-20T10:00:00.000Z' };
+    if (film) d.film = film;
+    const images = film ? film.images.map((im) => ({ kind: 'file', name: im.fichier.split('/').pop(), data: jpeg })) : [];
+    return { kind: 'directory', name: nom, children: [{ kind: 'file', name: nom + '.json', data: b64(d) }].concat(images.length ? [{ kind: 'directory', name: 'photos', children: [{ kind: 'directory', name: 'film', children: images }] }] : []) };
+  };
+  const images = (n) => Array.from({ length: n }, (_, i) => ({ fichier: `photos/film/${String(i + 1).padStart(4, '0')}.jpg`, date: '2026-11-20T10:00:00.000Z' }));
+  await injecterDossier(page, {
+    kind: 'directory',
+    name: 'Stop-motion',
+    children: [
+      { kind: 'file', name: 'classe.json', data: b64({ classe: '6A', eleves: ['Léa', 'Tom', 'Inès', 'Noah', 'Jade', 'Sami'] }) },
+      equipe(['Léa', 'Tom'], { images: images(12), vitesse: 'rapide', titre: 'La course folle' }),
+      equipe(['Inès', 'Noah'], { images: images(8), vitesse: 'normal' }),
+      equipe(['Jade', 'Sami'], null),
+    ],
+  });
+  await page.goto(base + 'stop-motion/cinema.html');
+  await sansDefilement(page, 'cinema-accueil');
+  await cliquer(page, '[data-action="ouvrir"]');
+  await page.locator('.carte-programme').first().waitFor();
+  assert.equal(await page.locator('.carte-programme').count(), 3);
+  assert.equal(await page.locator('.carte-programme[aria-pressed="true"]').count(), 2, 'l’équipe sans image n’est pas au programme');
+  assert.match(await page.locator('.carte-programme', { hasText: 'Inès et Noah' }).textContent(), /Mon film[\s\S]*8 images/, 'sans titre : « Mon film »');
+  await sansDefilement(page, 'cinema-programme');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'cinema-programme.png') });
+  await cliquer(page, '[data-action="lancer"]');
+  // Film 1 (Inès et Noah, sans titre) : pause à la barre d'espace, film suivant.
+  await page.locator('.lecteur[data-plan="titre"] .lecteur-texte', { hasText: 'Mon film' }).waitFor();
+  await page.keyboard.press('Space');
+  await page.locator('[data-action="lecture"]', { hasText: 'Lecture' }).waitFor();
+  await page.keyboard.press('Space');
+  await page.locator('[data-action="lecture"]', { hasText: 'Pause' }).waitFor();
+  await cliquer(page, '[data-action="suivant"]');
+  // Film 2 (Léa et Tom) : sa vitesse, ses images, son générique, les applaudissements.
+  assert.equal(await page.locator('.numero-film').textContent(), 'Film 2 sur 2');
+  await page.locator('.lecteur[data-plan="titre"] .lecteur-texte', { hasText: 'La course folle' }).waitFor();
+  assert.equal(await page.locator('[data-action="vitesse"][data-v="rapide"]').getAttribute('aria-pressed'), 'true', 'la vitesse choisie par l’équipe');
+  await page.locator('.lecteur[data-plan="image"] .lecteur-image[src^="blob:"]').waitFor({ timeout: 6000 });
+  await sansDefilement(page, 'cinema-projection');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'cinema-projection.png') });
+  await page.locator('.lecteur[data-plan="generique"] .lecteur-texte', { hasText: 'Un film de Léa et Tom' }).waitFor({ timeout: 8000 });
+  await page.locator('.entracte:not([hidden])').waitFor({ timeout: 6000 });
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'cinema-entracte.png') });
+  await page.keyboard.press('ArrowRight');
+  await page.locator('.palmares li').first().waitFor();
+  assert.equal(await page.locator('.palmares li').count(), 2);
+  await sansDefilement(page, 'cinema-fin');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
 // Outil professeur de la voiture : 4 équipes fictives (essais, course, matériel), piste proposée, onglets Essais et
 // Voiture et course, évaluation à 7 critères avec repères, exports.
 async function scenarioProfesseurVoiture(navigateur, base) {
@@ -914,6 +1039,26 @@ async function scenarioProfesseur(navigateur, base) {
       } catch (e) {
         ok = false;
         noter(`- ÉCHEC ${nomBase} 1366×768 · stop motion avec dossier : ${e.message.split('\n')[0]}`);
+      }
+    }
+    for (const [nomBase, base] of bases)
+      for (const taille of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+        const t = `${taille.width}×${taille.height}`;
+        try {
+          await scenarioStopMotionMontage(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
+          noter(`- OK ${nomBase} ${t} · stop motion, séance 5 (jalon M2) : titre (carte-idée puis écrit au clavier), vitesse « Lent » gardée, 2 images ratées enlevées (une autre enlevée puis remise), le film avec sa carte-titre et « Un film de Léa et Tom », cinéma, bilan, rien ne dépasse, aucune erreur.`);
+        } catch (e) {
+          ok = false;
+          noter(`- ÉCHEC ${nomBase} ${t} · stop motion, séance 5 : ${e.message.split('\n').slice(0, 4).join(' ')}`);
+        }
+      }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioCinema(navigateur, base, nomBase === 'file://');
+        noter(`- OK ${nomBase} 1366×768 · séance cinéma : dossier Stop-motion avec 2 films et une équipe sans image (pas au programme), projection en grand (carte-titre, images lues dans les dossiers, générique, applaudissements), vitesse de l’équipe, pause à la barre d’espace, film suivant, « Bravo à tous les réalisateurs », aucune erreur.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · séance cinéma : ${e.message.split('\n').slice(0, 4).join(' ')}`);
       }
     }
     // Le dossier privé du navigateur n'existe pas en file:// : ce scénario passe par le serveur local.
