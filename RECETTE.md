@@ -132,3 +132,10 @@ Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemp
 - [ ] Un dessin posé trop près d'un bord, d'un pli ou de la fente du toit est remis dans la pièce (« Je l'ai remis dans la pièce. », en ambre).
 - [ ] Toute ma voiture : le patron entier avec les dessins, aux bons endroits ; « C'est fini ».
 - [ ] Les dessins sont-ils assez gros et assez simples pour le stylo gel de 0,8 mm et le coloriage ?
+
+## Voiture à ballon — atelier « Je dessine ma carrosserie », jalon D2
+- [ ] « Nom » : le nom choisi en séance 1 s'écrit en majuscules à un trait, là où je clique ; trop long pour une pièce, il rapetisse (7 mm au moins).
+- [ ] « Numéro » : 3 chiffres au plus, tapés au clavier ; « Texte » : 12 caractères au plus (lettres, chiffres, accents).
+- [ ] « Crayon » : je dessine bouton appuyé ; le tracé est lissé, et coupé là où il sort de la pièce (message ambre).
+- [ ] Sur un côté, « Pareil à droite » (ou « à gauche ») reproduit le dessin en miroir ; le texte reste lisible ; si l'autre côté a déjà des dessins, on me demande avant de les remplacer.
+- [ ] Les lettres sont-elles assez grandes et nettes au stylo gel de 0,8 mm ?

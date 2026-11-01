@@ -43,8 +43,11 @@
     racine.innerHTML = html;
     if (apres) apres();
     majMinuteur();
+    // Le bouton principal prend la main au clavier, sauf si l'écran vient de donner la main à un champ de saisie.
+    const actif = document.activeElement;
+    const saisie = actif && racine.contains(actif) && actif.matches('input, textarea');
     const premier = racine.querySelector('.btn-principal:not(:disabled), .choix');
-    if (premier && !('ontouchstart' in global)) premier.focus({ preventScroll: true });
+    if (premier && !saisie && !('ontouchstart' in global)) premier.focus({ preventScroll: true });
   }
 
   racine.addEventListener('click', (e) => {

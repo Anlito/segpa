@@ -144,6 +144,17 @@ async function faireEcran(page, nom, captures, demo) {
     await page.mouse.click(b.x + b.width * 0.98, b.y + b.height * 0.5);
     await page.locator('.plan-de-travail .element').first().waitFor();
     await cliquer(page, '[data-action="agrandir"]');
+    // Le nom de la voiture (police à un trait), un trait au crayon, puis « Pareil à droite ».
+    await cliquer(page, '[data-action="outil-nom"]');
+    await page.mouse.click(b.x + b.width * 0.55, b.y + b.height * 0.5);
+    await cliquer(page, '[data-action="outil-crayon"]');
+    const c = await page.locator('.plan-de-travail svg').boundingBox();
+    await page.mouse.move(c.x + c.width * 0.3, c.y + c.height * 0.75);
+    await page.mouse.down();
+    for (let i = 0; i <= 20; i++) await page.mouse.move(c.x + c.width * (0.3 + i * 0.02), c.y + c.height * (0.75 + 0.05 * Math.sin(i / 2)));
+    await page.mouse.up();
+    await page.waitForTimeout(150);
+    if (await visible(page, '[data-action="miroir"]:not([disabled])')) await cliquer(page, '[data-action="miroir"]');
     await sansDefilement(page, nom + '-atelier');
     if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '-atelier.png') });
     await cliquer(page, '[data-action="piece-finie"]');
@@ -296,7 +307,8 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   }
   assert.equal(await page.locator('.carte-seance.fait').count(), 4);
   const dessin = await page.evaluate(() => Segpa.dessin.nombreElements(Segpa.valeurEtape(Segpa.app.etat.session.donnees, 'sd', 'dessin')));
-  assert.equal(dessin, 1, 'un dessin posé sur la carrosserie');
+  assert.ok(dessin >= 4, `étoile, nom, crayon et leur copie de l'autre côté (${dessin})`);
+  assert.ok(await page.evaluate(() => (Segpa.valeurEtape(Segpa.app.etat.session.donnees, 'sd', 'dessin').pieces['cote-droit'] || []).some((e) => e.type === 'texte')), 'le nom copié sur le côté droit');
   const d = await page.evaluate(() => Segpa.voitureDe(Segpa.app.etat.session.donnees));
   assert.equal(d.nom, 'Turbo Ballon');
   assert.equal(d.nomCouleur, 'Bleu');

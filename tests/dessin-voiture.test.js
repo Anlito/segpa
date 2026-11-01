@@ -71,3 +71,45 @@ test('tampons : contours fermés, tous différents', () => {
   assert.equal(new Set(D.TAMPONS.map((t) => t.id)).size, D.TAMPONS.length);
   for (const t of D.TAMPONS) for (const a of t.anneaux) assert.ok(a.length >= 3, t.id);
 });
+
+test('police à un trait : majuscules, accents, caractères inconnus retirés, 12 caractères pour un texte libre', () => {
+  assert.equal(D.texteTracable('Turbo Ballon'), 'TURBO BALLON');
+  assert.equal(D.texteTracable('éclair #1 !', 12), 'ÉCLAIR 1 !');
+  assert.equal(D.texteTracable('abcdefghijklmnop', 12).length, 12);
+  for (const c of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ÉÈÊÀÇ') assert.ok(D.traitsTexte(c).traits.length > 0, `lettre ${c}`);
+});
+
+test('un texte posé reste dans la pièce, jamais sous 7 mm de haut ; ses traits sont ouverts à l’export', () => {
+  const p = D.pieceDroite(piece('cote-gauche'));
+  const [cx, cy] = D.centreZone(p.zone);
+  const r = D.ramener({ type: 'texte', texte: 'TURBO BALLON', x: cx, y: cy, taille: 40, angle: 0 }, p.zone);
+  assert.ok(r.element && r.element.taille >= D.TAILLE_MIN_TEXTE && r.element.taille < 40, 'rapetissé pour tenir');
+  assert.ok(D.dansZone(D.contoursElement(r.element).flat(), p.zone));
+  const chemins = D.cheminsDessin({ pieces: { 'cote-gauche': [r.element] } }, patron.pieces);
+  assert.ok(chemins.length > 10 && chemins.every((c) => !c.endsWith('Z')), 'des traits, pas des contours');
+});
+
+test('crayon libre : coupé là où il sort de la zone, lissé, les petits bouts oubliés', () => {
+  const p = D.pieceDroite(piece('toit'));
+  const y = D.centreZone(p.zone)[1];
+  const ligne = Array.from({ length: 120 }, (_, i) => [i * (p.largeur / 119), y]); // traverse tout le toit, fente comprise
+  const { elements, coupe } = D.traitsCrayon(ligne, p.zone);
+  assert.ok(coupe, 'le tracé sortait de la zone');
+  assert.ok(elements.length >= 2, 'coupé en morceaux autour de la fente');
+  for (const el of elements) assert.ok(D.dansZone(el.points, p.zone));
+  assert.equal(D.traitsCrayon([[0, 0], [0.5, 0.5]], p.zone).elements.length, 0);
+});
+
+test('« Pareil de l’autre côté » : en miroir, le texte reste lisible', () => {
+  const g = D.pieceDroite(piece('cote-gauche'));
+  const d = D.pieceDroite(piece('cote-droit'));
+  const [cx, cy] = D.centreZone(g.zone);
+  const flamme = D.ramener({ type: 'tampon', id: 'flamme', x: cx - 20, y: cy, taille: 14, angle: 90 }, g.zone).element;
+  const nom = D.ramener({ type: 'texte', texte: 'BOLIDE', x: cx + 10, y: cy, taille: 8, angle: 0 }, g.zone).element;
+  const copies = D.miroirElements([flamme, nom], g.largeur, d.zone);
+  assert.equal(copies.length, 2);
+  assert.equal(copies[0].miroir, true, 'la flamme est retournée');
+  assert.equal(copies[0].angle, 270);
+  assert.equal(copies[1].miroir, false, 'le nom n’est jamais écrit à l’envers');
+  for (const c of copies) assert.ok(D.dansZone(D.contoursElement(c).flat(), d.zone));
+});
