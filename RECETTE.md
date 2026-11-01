@@ -152,3 +152,4 @@ Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemp
 - [ ] Fiche → onglet Carrosserie : le patron décoré dans ses couleurs, les stylos utilisés, « Télécharger le patron (SVG pour la Cricut) » → carrosserie-Prenom_Prenom.svg.
 - [ ] Bandeau « Piste » : « Tous les patrons (.zip) » → un SVG par équipe décorée.
 - [ ] Dans Design Space : calques decoupe (noir), plis (vert), dessin-bleu / dessin-rouge / dessin-marron ; la Cricut demande de changer de stylo entre deux couleurs ; taille 207 × 154 mm.
+- [ ] Dans Design Space, chaque dessin est un seul objet : un clic sélectionne un mot, un numéro (« 10 ») ou un tampon (damier) en entier.

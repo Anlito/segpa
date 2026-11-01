@@ -384,12 +384,16 @@
 
   const chemin = (points, ouvert) => 'M' + points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' L') + (ouvert ? '' : ' Z');
 
+  // Un dessin = un seul chemin SVG, qui regroupe tous ses traits (les 3 traits du « 1 », les 8 carrés du damier…) :
+  // dans Design Space, un clic sélectionne le mot ou le tampon entier (couleur, déplacement). Le stylo trace les mêmes traits.
+  const cheminElement = (el, p) => formesElement(el).map((f) => chemin(f.points.map(p.versPatron), !f.ferme)).join(' ');
+
   // Les chemins SVG du dessin d'une équipe, dans le repère du patron. pieces : les pièces de donnees/patron.js.
   function cheminsDessin(valeur, pieces) {
     const d = [];
     for (const piece of pieces) {
       const p = pieceDroite(piece);
-      for (const el of ((valeur && valeur.pieces) || {})[piece.id] || []) for (const f of formesElement(el)) d.push(chemin(f.points.map(p.versPatron), !f.ferme));
+      for (const el of ((valeur && valeur.pieces) || {})[piece.id] || []) d.push(cheminElement(el, p));
     }
     return d;
   }
@@ -403,7 +407,7 @@
       const p = pieceDroite(piece);
       for (const el of ((valeur && valeur.pieces) || {})[piece.id] || []) {
         const c = el.couleur || COULEUR_PAR_DEFAUT;
-        for (const f of formesElement(el)) (parCouleur[c] = parCouleur[c] || []).push(chemin(f.points.map(p.versPatron), !f.ferme));
+        (parCouleur[c] = parCouleur[c] || []).push(cheminElement(el, p));
       }
     }
     return parCouleur;
