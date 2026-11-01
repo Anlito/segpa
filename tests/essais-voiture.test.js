@@ -25,7 +25,7 @@ test('les écrans d’un essai s’enchaînent dans l’ordre', () => {
     v = S.noterEssai(v, quoi, donnee);
   }
   assert.deepEqual(vus, ['ligne', 'gonfle', 'lache', 'mesure', 'direction']);
-  assert.equal(S.ecranEssai(v), 'changer', 'avant 3 essais, on change une chose');
+  assert.equal(S.ecranEssai(v), 'changer', 'après 1 essai, on change une chose');
 });
 
 test('on change UNE chose, puis après 3 essais on choisit : encore un essai ou le graphique ; 5 essais au plus', () => {
@@ -37,6 +37,7 @@ test('on change UNE chose, puis après 3 essais on choisit : encore un essai ou 
   assert.deepEqual(S.rouesDe(v, 0), { avant: '30', arriere: '30' });
   assert.equal(v.essais[1].changement.cote, 'arriere');
   v = essai(v, 10, 260, 'gauche');
+  assert.equal(S.ecranEssai(v), 'suite', 'après 2 essais : encore un essai, ou « ma voiture est prête »');
   v = S.noterEssai(v, 'changer', { type: 'ballon', choix: 'plus' });
   v = essai(v, 14, 310, 'droit');
   assert.equal(S.ecranEssai(v), 'suite');
@@ -53,12 +54,14 @@ test('on change UNE chose, puis après 3 essais on choisit : encore un essai ou 
   assert.ok(r.fini);
 });
 
-test('« Mon graphique » après 3 essais', () => {
+test('« Ma voiture est prête » après 2 essais : le graphique, puis la fin', () => {
   let v = roues(20, 20);
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {
     if (i) v = S.noterEssai(v, 'changer', { type: 'ballon', choix: 'moins' });
     v = essai(v, 8, 100 + i, 'droit');
   }
+  assert.equal(S.ecranEssai(v), 'suite');
+  assert.equal(S.ecranEssai(v, { min: 3 }), 'changer', 'le minimum se règle dans les données');
   v = S.noterEssai(v, 'graphique');
   assert.equal(S.ecranEssai(v), 'graphique');
   assert.equal(S.ecranEssai(S.reculerEssai(v)), 'suite');

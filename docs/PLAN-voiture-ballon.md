@@ -61,7 +61,7 @@ Puis rangement + photo de la voiture à sa place (la décoration est la séance 
 à l'étape de fabrication concernée, sans donner la solution.
 
 **S4 — Je teste et j'améliore** (fait le 29/10, `js/essais.js` + `js/ecran-essais.js`) — règles (pompe, piste libre, une chose à la
-fois) · « Quelles roues sont sur ma voiture ? » (une fois) · de 3 à 5 essais ; pour chaque essai : je pose la voiture sur la ligne · je gonfle le ballon avec la
+fois) · « Quelles roues sont sur ma voiture ? » (une fois) · de 2 à 5 essais (2 au moins depuis le 01/11, puis « Ma voiture est prête ») ; pour chaque essai : je pose la voiture sur la ligne · je gonfle le ballon avec la
 pompe · je lâche · 📏 je mesure (pavé, en cm, unité toujours affichée ; un résultat 10 fois plus grand que les autres → « Mesure encore une
 fois ? » en ambre) · ma voiture roule : tout droit / à gauche / à droite · **je change UNE chose** avant l'essai suivant.
 Cartes « je change une chose » (*à valider*) : **les roues** (20 · 30 · 40 · 50 mm) · **le ballon** (plus ou moins gonflé : nombre de coups de

@@ -340,8 +340,8 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   await page.locator('.carte-seance').first().waitFor();
   assert.equal(await page.locator('.carte-seance.fait').count(), 5);
   const r = await page.evaluate(() => Segpa.resumeEssais(Segpa.valeurEtape(Segpa.app.etat.session.donnees, 's4', 'essais')));
-  assert.equal(r.nombre, 3);
-  assert.equal(r.changements.length, 2);
+  assert.equal(r.nombre, 2, '2 essais, puis « Ma voiture est prête »');
+  assert.equal(r.changements.length, 1);
   // Séance 5 : prête, règles, attente, mon résultat (démonstration), réponse écrite, bilan, photo finale.
   await cliquer(page, '[data-action="continuer"]');
   ecrans.push(await faireSeance(page, 'voiture-s5', captures));
@@ -748,7 +748,7 @@ async function scenarioProfesseur(navigateur, base) {
         const t = `${taille.width}×${taille.height}`;
         try {
           const ecrans = await scenarioVoiture(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
-          noter(`- OK ${nomBase} ${t} · voiture à ballon : 6 séances de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, atelier de dessin de la carrosserie, carrosserie, photo officielle, 3 essais avec un changement à la fois et graphique, résultat de la course, réponse écrite), Ma mission à 6 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
+          noter(`- OK ${nomBase} ${t} · voiture à ballon : 6 séances de ${ecrans.join(', ')} écrans (nom, couleur, matériel, fabrication, atelier de dessin de la carrosserie, carrosserie, photo officielle, 2 essais avec un changement, « Ma voiture est prête » et graphique, résultat de la course, réponse écrite), Ma mission à 6 séances, dépannage vers la séance 2, rien ne dépasse, aucune erreur.`);
         } catch (e) {
           ok = false;
           noter(`- ÉCHEC ${nomBase} ${t} · voiture à ballon : ${e.message.split('\n')[0]}`);
