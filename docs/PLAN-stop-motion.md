@@ -1,6 +1,6 @@
 # Plan court — Film en stop motion avec des briques (6e SEGPA)
 
-Version 1 · 01/11/2026 · **à valider par Thomas**. À lire avec `BRIEF-CLAUDE-CODE-stop-motion.md` (proposition d'origine) et
+Version 2 · 01/11/2026 · **réponses de Thomas reportées** (§1 et §7). À lire avec `BRIEF-CLAUDE-CODE-stop-motion.md` (proposition d'origine) et
 `PLAN.md` (organisation du dépôt, socle commun).
 
 ## 1. Décisions déjà prises
@@ -14,6 +14,11 @@ Version 1 · 01/11/2026 · **à valider par Thomas**. À lire avec `BRIEF-CLAUDE
 | Caméra | une webcam par binôme |
 | Film | **projection depuis le site** (pas de fichier vidéo dans la première version ; export `.webm` ou GIF plus tard si besoin) |
 | Film | 30 images au moins (compteur « 12 / 30 »), 120 au plus (« Ton film est assez long ! » en ambre) |
+| Son (01/11) | **film muet** dans la première version ; plus tard, une **banque de bandes-son** où chaque équipe choisit celle qui va avec son histoire |
+| Caméra (01/11) | **support imprimé en 3D** pour garder le même point de vue (webcams achetées par Thomas : dimensions à relever) |
+| Histoire (01/11) | **pas de thème imposé** ; des **idées proposées** (lieux, héros, problèmes, titres) écrites par Claude dans `donnees/idees.js`, modifiables |
+| Matériel (01/11) | on compte **seulement la plaque** (pas les briques) ; les 3 règles du matériel sont validées |
+| Univers (01/11) | deux directions à proposer sur maquette (jalon M0) |
 
 ## 2. Dans le dépôt
 
@@ -32,7 +37,7 @@ site/stop-motion/
 « Je range les briques par couleur. ») · **Début · Milieu · Fin** : une carte-idée par temps (lieux, héros, problèmes, dans
 `donnees/idees.js`) ou « mon idée » · le **titre** (cartes ou « J'écris un titre ») · 📷 le storyboard dessiné sur papier (3 cases).
 
-**S2 — Je construis mon décor et mes personnages** : « J'ai pris … briques » et la plaque (− et +) · le décor, le héros, les objets
+**S2 — Je construis mon décor et mes personnages** : « J'ai pris ma plaque » (on ne compte pas les briques) · le décor, le héros, les objets
 (📷 à chaque étape) · « Je secoue doucement la table : rien ne tombe ? » · rangement par couleur, le décor reste sur la plaque.
 
 **S3 et S4 — Je filme** : 3 rappels (la caméra ne bouge pas · je bouge un tout petit peu · je prends une photo) puis l'**écran de
@@ -52,8 +57,8 @@ Facultatif, plus tard : « Ça a bougé ? » (comparaison grossière entre le di
 
 ## 5. Outil professeur
 
-Socle repris (suivi, aide, évaluation, exports). Tuile : nombre d'images, dernière image, briques prises / rendues. Album : storyboard,
-construction, pellicule, lecture du film. Alertes : pas encore d'image à mi-séance de tournage ; briques prises ≠ rendues.
+Socle repris (suivi, aide, évaluation, exports). Tuile : nombre d'images, dernière image, plaque prise / rendue. Album : storyboard,
+construction, pellicule, lecture du film. Alertes : pas encore d'image à mi-séance de tournage ; plaque non rendue.
 **`cinema.html`** : tous les films de la classe l'un après l'autre, carte-titre « Titre — Un film de … », suivant, pause, vitesse,
 lus directement dans les dossiers.
 
@@ -68,12 +73,7 @@ lus directement dans les dossiers.
 | M4 | outil professeur, 7 critères et ceinture (à valider), exports |
 | M5 | recette automatique (caméra simulée), essai réel, publication |
 
-## 7. Questions à Thomas
+## 7. Restant
 
-1. Film **muet** (première version sans son) ?
-2. **Support de webcam** imprimé en 3D (je peux le dessiner si tu me donnes la webcam) ou pâte adhésive ?
-3. Un **thème imposé** (une course, un sauvetage, un voyage…) ou libre ?
-4. Les **cartes-idées** (lieux, héros, problèmes) et les **titres** : tu les écris, ou je propose une première liste ?
-5. **Briques par binôme** : environ 125 (1 000 ÷ 8) ? On les compte, ou seulement la plaque ?
-6. Les 3 **règles du matériel** ci-dessus te vont ?
-7. L'**univers graphique** : une idée (cinéma, studio de tournage, briques…) ?
+- Dimensions de la webcam (ou photo avec une règle) pour dessiner le support 3D.
+- Bandes-son : après la première version (sons écrits dans le dépôt ou fichiers libres de droits, rien en ligne).
