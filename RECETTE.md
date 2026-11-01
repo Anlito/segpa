@@ -153,3 +153,63 @@ Page professeur → « Suivre la classe » (essai sans élèves : `npm run exemp
 - [ ] Bandeau « Piste » : « Tous les patrons (.zip) » → un SVG par équipe décorée.
 - [ ] Dans Design Space : calques decoupe (noir), plis (vert), dessin-bleu / dessin-rouge / dessin-marron ; la Cricut demande de changer de stylo entre deux couleurs ; taille 207 × 154 mm.
 - [ ] Dans Design Space, chaque dessin est un seul objet : un clic sélectionne un mot, un numéro (« 10 ») ou un tampon (damier) en entier.
+
+## Film en stop motion — jalon M1 (écran de tournage, univers « Cinéma en briques »)
+À faire sur un vrai poste du collège, avec la webcam sur son support et une plaque devant (ouvrir
+`site/stop-motion/index.html`, ou `?enseignant=1` pour essayer sans rien enregistrer).
+- [ ] Accueil, Ma mission : studio sombre, clap en haut, bande de film en bas ; boutons et cartes en briques, 5 séances « J'invente · Je construis · Je filme · Je filme · Je projette ».
+- [ ] Séance 3 : 3 rappels (la caméra ne bouge pas · je bouge un tout petit peu · je prends une photo), puis l'écran de tournage.
+- [ ] La webcam s'allume dans le cadre de cinéma ; si elle est débranchée : message ambre et « Réessayer » ; avec 2 caméras, « Autre caméra ».
+- [ ] Le gros bouton jaune et la **barre d'espace** prennent une image (déclic, flash) ; « Image 1 / 30 », la barre avance ; la pellicule montre les 6 dernières.
+- [ ] Le **calque** (l'image précédente à 40 %) aide à bouger un tout petit peu ; « Calque » et « Grille » se coupent et se remettent.
+- [ ] « Enlever la dernière » : la dernière image en grand, « J'enlève cette image ? » ; « Non, je la garde » ne change rien ; « Oui, j'enlève » l'enlève du film (le fichier reste dans le dossier).
+- [ ] « Voir » : les 10 dernières images en boucle (6 par seconde) ; « Stop » revient à la caméra.
+- [ ] « Pause café » : écran noir « La caméra ne bouge pas ! » ; « Je reviens » (ou la barre d'espace) revient au tournage.
+- [ ] Le conseil en bas change toutes les 40 secondes.
+- [ ] Dans le dossier de l'équipe : `photos/film/0001.jpg`, `0002.jpg`… ; 10 images prises vite : le poste ne ralentit pas.
+- [ ] « J'arrête pour aujourd'hui », rangement, Bravo ; en séance 4, le film reprend là où il en était (« Image 12 / 30 »).
+- [ ] Les briques bougées entre deux images se voient-elles bien avec la webcam du collège (lumière, netteté) ?
+
+## Film en stop motion — jalon M2 (séance 5 et séance cinéma)
+Élèves (`site/stop-motion/index.html`, après avoir tourné quelques images en séance 3) :
+- [ ] « Je choisis le titre de mon film » : 6 cartes-idées (`donnees/idees.js`) ou « J'écris un titre » (40 caractères au plus) ; la carte-titre s'affiche comme au début du film.
+- [ ] « Je regarde mon film » : le film tourne en boucle ; Lent, Normal, Rapide (4, 6, 10 images par seconde) changent la vitesse tout de suite ; la vitesse choisie est gardée.
+- [ ] « J'enlève les images ratées » : toucher une image la grise (« Enlevée »), la toucher encore la remet ; « 14 images gardées » ; plusieurs pages si le film est long.
+- [ ] « Voici mon film ! » : la carte-titre, les images gardées, « Un film de Léa et Tom » ; « Revoir ».
+- [ ] Séance cinéma, puis le bilan (3 phrases, smileys).
+
+Professeur (`site/stop-motion/cinema.html`, au vidéoprojecteur) :
+- [ ] « Essayer avec 2 films d'exemple » marche sans dossier.
+- [ ] « Ouvrir le dossier Stop-motion » : une carte par équipe (titre, prénoms, images, durée) ; une équipe sans image n'est pas au programme ; toucher une carte l'enlève du programme ou l'y remet.
+- [ ] « On lance la séance » : plein écran ; chaque film avec son titre et son générique, à la vitesse choisie par l'équipe ; « Applaudissements ! » puis le film suivant au bout de 5 secondes.
+- [ ] Pupitre : Précédent, Pause, Recommencer, Lent / Normal / Rapide (pour ce film), Suivant, Programme ; clavier : Espace, ←, →, R.
+- [ ] « Bravo à tous les réalisateurs ! » avec tous les titres ; « Tout revoir ».
+- [ ] Au vidéoprojecteur de la salle : les images sont-elles assez nettes, le texte assez grand ?
+
+## Film en stop motion — jalon M3 (séances 1 et 2)
+Séance 1 (`site/stop-motion/index.html`) — le scénario (retours de Thomas du 01/11 : pas de photo du storyboard, 3 questions en plus, un récap) :
+- [ ] Les 3 règles, puis 7 questions, chacune avec 6 cartes-idées ou « J'écris mon idée » : Qui est mon héros ? · Où se passe mon histoire ? · Que fait mon héros au début ? (Début) · Quel problème arrive ? · Comment le problème est réglé ? (Milieu) · Comment finit mon histoire ? (Fin) · Quels objets je dois construire ? (3 cartes au plus).
+- [ ] Les idées (`donnees/idees.js`) vous conviennent-elles ? Elles sont écrites sans « il » ni « elle », pour aller avec tous les héros.
+- [ ] Le titre, puis le récap : le titre, 3 briques (« Un dragon, sur la Lune, dort tranquillement. » · « Une tempête arrive. Un ami vient aider. » · « C'est la fête ! ») et « Mes objets : … », lus à voix haute.
+- [ ] Séances 3 et 4 : « Je relis mon histoire » (le même récap) avant les rappels du tournage. En séance 5, le titre est déjà là.
+
+Séance 2 :
+- [ ] « Je prends ma plaque » ; décor, héros, objets : chaque consigne rappelle l'histoire (« Mon lieu : sur la Lune », « Mes objets : une maison, un arbre ») et est suivie d'une photo.
+- [ ] « Je secoue doucement la table » ; rangement : briques par couleur, décor sur la plaque, nom sur la plaque.
+
+## Film en stop motion — jalon M4 (outil professeur)
+Essai sans élèves : `npm run exemples`, puis `site/stop-motion/prof.html` → « Ouvrir le dossier de la classe » → `exemples/Stop-motion`.
+- [ ] Tuiles : titre du film, « Scénario : 7 / 7 ✓ », « Plaque : prise ✓ · rangée ✓ », « Film : 18 / 30 images · normal ».
+- [ ] Alertes (ambre) : « Pas encore d'image dans cette séance » (séance 3 ou 4 commencée depuis 25 min) ; « Plaque prise, rangement pas fait » (fin de séance 2).
+- [ ] Bandeau « Films » : nombre de films à 30 images, lien vers la séance cinéma.
+- [ ] Fiche d'une équipe → « Scénario » : début, milieu, fin et les 7 réponses ; « Film » : le film avec titre et générique, toutes les images (les enlevées grisées), images prises par séance.
+- [ ] « Évaluation » : les 7 critères proposés (à valider ou à changer dans `donnees/criteres.js`), repères à côté, ceinture d'après le critère « Son film est fini » ; exports Excel, CSV, Carnet de classe, feuilles ceinture.
+- [ ] Les 4 aides de différenciation proposées vous conviennent-elles ? (scénario dicté à l'adulte · rôles photographe / animateur · film plus court accepté · élève rapide tuteur)
+
+## Outils professeur (les 3 projets) — nouvelle interface (01/11/2026)
+- [ ] En-tête sur une ligne : logo du projet, « Professeur », dossier et classe, « En direct ».
+- [ ] Accueil : le projet en grand, « Ouvrir le dossier de la classe » mis en avant, le chemin du dossier en étiquettes.
+- [ ] Classe : bandeau violet des aides ; 3 compteurs (équipes, aides en cours, à regarder) ; l'avancement de chaque séance en barres (finies en vert, en cours hachurées) ; outils du projet et exports côte à côte.
+- [ ] Filtres : Toutes · À regarder · En séance N (avec le nombre d'équipes).
+- [ ] Tuiles : prénoms, « Active · il y a 2 min » (point vert), petite photo, frise des séances sur une ligne, lignes du projet, alertes en ambre avec icône.
+- [ ] Fiche d'une équipe : résumé toujours visible (photo, frise, lignes, alertes), onglets en pastilles (nombre de photos sur Album), bilan des séances en cartes avec barre d'avancement ; ← → pour changer d'équipe, Échap pour revenir.

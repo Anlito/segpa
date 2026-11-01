@@ -923,6 +923,12 @@
     rafraichir: () => ecranEtape(),
     enregistrer: (geste) => etat.session.aEnregistrer(geste),
     urlPhoto: (fichier) => etat.session.urlPhoto(fichier),
+    // Image sans entrée dans l'album (film image par image) : → le chemin écrit dans le dossier de l'équipe.
+    ecrireImage: (blob, prochainNom) => etat.session.ecrireImage(blob, prochainNom),
+    // À appeler dans « apres » : ce qui sera défait quand l'écran change (écouteurs, minuteurs).
+    nettoyer: (f) => {
+      nettoyage = f;
+    },
     pave: { html: paveHtml, appui: paveAppui },
   };
 

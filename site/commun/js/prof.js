@@ -24,6 +24,7 @@
     vue: 'accueil',
     courante: null,
     onglet: 'bilan',
+    filtre: 'toutes',
     aidesConnues: new Set(),
     urls: new Map(),
     actions: {},
@@ -184,21 +185,26 @@
     etat.vue = 'accueil';
     const dernier = S.fichiers.accesDossiers ? await S.fichiers.memorise('prof-projet') : null;
     const chemin = S.remplirChemin((S.college && S.college.cheminClasse) || [], (S.reglages.classes || ['…']).join(' / ')).concat(S.reglages.cheminProjet || []);
+    const p = S.projet;
     afficher(
       `<section class="pa">
-        <h2>Suivre une classe</h2>
-        <p class="pa-intro">Ouvrez le dossier <strong>${ech(chemin.join(' › '))}</strong> : l’outil lit le dossier de chaque équipe
-          (Prénom_Prénom) et le relit toutes les 20 secondes pendant la séance.</p>
+        <div class="pa-hero">
+          <span class="pa-logo">${pic(p.picto)}</span>
+          <div><p class="pa-sur">Outil professeur · ${ech(p.niveau || '6e SEGPA')}</p><h2>${ech(p.titre)}</h2>
+            <p class="pa-intro">Suivez les équipes en direct pendant la séance, répondez aux demandes d’aide, puis évaluez.</p></div>
+        </div>
         ${S.fichiers.accesDossiers ? '' : '<p class="pa-alerte">Ce navigateur ne peut pas ouvrir un dossier : utilisez Chrome ou Edge pour le suivi en direct, ou importez les fichiers .json.</p>'}
         <div class="pa-cartes">
-          ${S.fichiers.accesDossiers ? `<button type="button" class="pa-carte" data-action="ouvrir">${pic('dossier')}<strong>Ouvrir le dossier de la classe</strong><span>Suivi en direct, alerte quand une équipe demande de l’aide.</span></button>` : ''}
-          ${dernier ? `<button type="button" class="pa-carte" data-action="reprendre">${pic('remonter')}<strong>Reprendre : ${ech(dernier.name)}</strong><span>Le dernier dossier suivi sur ce poste.</span></button>` : ''}
-          <label class="pa-carte">${pic('continuer')}<strong>Importer des fichiers .json</strong><span>Sans suivi en direct ni photos.</span><input type="file" accept=".json,application/json" multiple hidden data-change="importer"></label>
+          ${S.fichiers.accesDossiers ? `<button type="button" class="pa-carte principale" data-action="ouvrir"><span class="pa-icone">${pic('dossier')}</span><strong>Ouvrir le dossier de la classe</strong><span>Suivi en direct : relu toutes les 20 secondes, alerte quand une équipe demande de l’aide.</span></button>` : ''}
+          ${dernier ? `<button type="button" class="pa-carte" data-action="reprendre"><span class="pa-icone">${pic('remonter')}</span><strong>Reprendre : ${ech(dernier.name)}</strong><span>Le dernier dossier suivi sur ce poste.</span></button>` : ''}
+          <label class="pa-carte"><span class="pa-icone">${pic('continuer')}</span><strong>Importer des fichiers .json</strong><span>Sans suivi en direct ni photos (ex. : fichiers rapportés sur une clé).</span><input type="file" accept=".json,application/json" multiple hidden data-change="importer"></label>
         </div>
         <p class="pa-message" role="alert" hidden></p>
+        <div class="pa-chemin"><span>Le dossier à ouvrir</span><p class="pa-fil">${chemin.map((c, i) => `<span${i === chemin.length - 1 ? ' class="cible"' : ''}>${ech(c)}</span>`).join('<i aria-hidden="true">›</i>')}</p>
+          <small>Il contient un dossier par équipe (Prénom_Prénom).</small></div>
         <ul class="pa-notes">
-          <li>Les fichiers sont lus dans ce navigateur : rien n’est envoyé ailleurs.</li>
-          <li>Vos notes (aides vues, différenciation) sont écrites dans <code>professeur.json</code>, dans le dossier du projet.</li>
+          <li>${pic('coche')}Les fichiers sont lus dans ce navigateur : rien n’est envoyé ailleurs.</li>
+          <li>${pic('coche')}Vos notes (aides vues, évaluation, différenciation) sont écrites dans <code>professeur.json</code>, dans le dossier du projet.</li>
         </ul>
       </section>`,
       {
@@ -257,30 +263,47 @@
 
   const CLASSE_ETAT = { fait: ['fait', '✓'], en_cours: ['en-cours', '●'], a_faire: ['a-faire', '○'] };
 
+  // Une équipe : prénoms, activité, frise des séances, dernière photo, lignes du projet, alertes, aides prévues.
   function tuile(eq) {
     const r = eq.resume;
     const aide = eq.alertes.find((a) => a.sorte === 'aide');
+    const autres = eq.alertes.filter((a) => a.sorte !== 'aide');
     const drapeaux = (etat.professeur.drapeaux[eq.nom] || []).map((id) => (P().drapeaux.find((d) => d.id === id) || { texte: id }).texte);
-    return `<button type="button" class="pt${aide ? ' pt-aide' : eq.alertes.length ? ' pt-alerte' : ''}" data-action="equipe" data-cle="${ech(eq.cle)}">
-      <span class="pt-haut"><strong>${ech(r.noms)}</strong>${aide ? `<span class="pt-badge aide">${pic('aide')}Aide</span>` : ''}</span>
-      <span class="pt-milieu">
+    const actif = r.minutes !== null && r.minutes < 5;
+    return `<button type="button" class="pt${aide ? ' pt-aide' : autres.length ? ' pt-alerte' : ''}" data-action="equipe" data-cle="${ech(eq.cle)}">
+      <span class="pt-haut">
+        <span class="pt-nom"><strong>${ech(r.noms)}</strong><span class="pt-temps"><i class="pt-point${actif ? ' actif' : ''}"></i>${actif ? 'Active · ' : ''}${ilYa(r.minutes)}</span></span>
+        ${aide ? `<span class="pt-badge aide">${pic('aide')}Aide</span>` : ''}
         <span class="pt-photo">${r.dernierePhoto && eq.dossier ? `<img data-photo="${ech(r.dernierePhoto.fichier)}" alt="${ech(r.dernierePhoto.legende)}">` : pic('photo')}</span>
-        <span class="pt-infos">
-          <span class="pt-frise">${r.seances.map((s, i) => `<span class="${CLASSE_ETAT[s.etat][0]}" title="${ech(s.titre)}">${CLASSE_ETAT[s.etat][1]} S${i + 1}</span>`).join('')}</span>
-          ${eq.lignes.map((l) => `<span class="pt-ligne">${ech(l)}</span>`).join('')}
-          <span class="pt-temps">${ilYa(r.minutes)}</span>
-        </span>
       </span>
-      ${eq.alertes.filter((a) => a.sorte !== 'aide').map((a) => `<span class="pt-badge ambre">${ech(a.texte)}</span>`).join('')}
-      ${drapeaux.map((t) => `<span class="pt-badge drapeau">${ech(t)}</span>`).join('')}
+      ${frise(r)}
+      <span class="pt-infos">${eq.lignes.map((l) => `<span class="pt-ligne">${ech(l)}</span>`).join('') || '<span class="pt-ligne pt-rien">Pas encore commencé</span>'}</span>
+      ${autres.length || drapeaux.length ? `<span class="pt-alertes">${autres.map((a) => `<span class="pt-badge ambre">${pic('question')}${ech(a.texte)}</span>`).join('')}${drapeaux.map((t) => `<span class="pt-badge drapeau">${pic('etiquette')}${ech(t)}</span>`).join('')}</span>` : ''}
     </button>`;
   }
+
+  // La frise des séances : un segment par séance (✓ faite · ● en cours · ○ à faire), jamais la couleur seule.
+  const frise = (r) =>
+    `<span class="pt-frise" style="--n:${r.seances.length}">${r.seances
+      .map((x, i) => `<span class="${CLASSE_ETAT[x.etat][0]}" title="Séance ${i + 1} · ${ech(x.titre)}">${CLASSE_ETAT[x.etat][1]} S${i + 1}</span>`)
+      .join('')}</span>`;
+
+  const aRegarder = (eq) => eq.alertes.length > 0;
 
   function ecranClasse() {
     etat.vue = 'classe';
     const liste = S.trier(etat.equipes);
     const aides = liste.filter((eq) => eq.alertes.some((a) => a.sorte === 'aide'));
-    const finies = (id) => etat.equipes.filter((eq) => eq.resume.seances.find((s) => s.id === id).etat === 'fait').length;
+    const n = etat.equipes.length;
+    const nbSeance = (id, e) => etat.equipes.filter((eq) => eq.resume.seances.find((s) => s.id === id).etat === e).length;
+    // Filtres : toutes · à regarder (aide ou alerte) · en séance N (la séance où en est l'équipe).
+    const filtres = [{ id: 'toutes', texte: 'Toutes', garde: () => true }, { id: 'regarder', texte: 'À regarder', garde: aRegarder }].concat(
+      S.etapes.seances.map((s, i) => ({ id: s.id, texte: `En séance ${i + 1}`, garde: (eq) => eq.resume.courante === s.id && eq.resume.seances[i].etat !== 'fait' }))
+    );
+    const filtresVus = filtres.filter((f) => f.id === 'toutes' || f.id === etat.filtre || liste.some(f.garde));
+    const filtre = filtres.find((f) => f.id === etat.filtre) || filtres[0];
+    const montrees = liste.filter(filtre.garde);
+    const regarder = liste.filter(aRegarder).length;
     afficher(
       `<section class="pc">
         ${
@@ -290,10 +313,30 @@
                 .join('')}</div>`
             : ''
         }
-        <div class="pc-resume"><span><b>${etat.equipes.length}</b> équipe${etat.equipes.length > 1 ? 's' : ''}</span>${S.etapes.seances.map((s, i) => `<span>Séance ${i + 1} finie : <b>${finies(s.id)}</b></span>`).join('')}<span>Aides en cours : <b>${aides.length}</b></span></div>
-        ${P().bandeauClasse ? P().bandeauClasse(etat.equipes) : ''}
-        ${S.criteres ? `<div class="pc-exports"><span>Évaluation :</span><button type="button" class="pb-btn" data-action="excel">Excel</button><button type="button" class="pb-btn" data-action="csv">CSV</button><button type="button" class="pb-btn" data-action="carnet" title="Niveaux 1 à 4 par critère, à importer dans le Carnet de classe">Carnet de classe</button><button type="button" class="pb-btn" data-action="ceintures">Feuilles ceinture</button>${etat.dossier ? '' : '<span class="pc-attention">Fichiers importés : l’évaluation n’est pas enregistrée, pensez à exporter.</span>'}</div>` : ''}
-        <div class="pc-tuiles">${liste.map(tuile).join('') || '<p class="pc-vide">Aucune équipe pour l’instant.</p>'}</div>
+        <div class="pc-tableau">
+          <div class="pc-kpis">
+            <div class="pc-kpi"><b>${n}</b><span>équipe${n > 1 ? 's' : ''}</span></div>
+            <div class="pc-kpi${aides.length ? ' aide' : ''}"><b>${aides.length}</b><span>aide${aides.length > 1 ? 's' : ''} en cours</span></div>
+            <div class="pc-kpi${regarder ? ' ambre' : ''}"><b>${regarder}</b><span>à regarder</span></div>
+          </div>
+          <div class="pc-avancement" aria-label="Avancement de la classe">${S.etapes.seances
+            .map((s, i) => {
+              const f = nbSeance(s.id, 'fait');
+              const c = nbSeance(s.id, 'en_cours');
+              return `<div class="pc-seance"><span class="pc-seance-nom"><b>S${i + 1}</b> ${ech(s.titre)}</span>
+                <span class="pc-barre" role="img" aria-label="${f} finies, ${c} en cours sur ${n}"><i class="fait" style="width:${n ? (f / n) * 100 : 0}%"></i><i class="en-cours" style="width:${n ? (c / n) * 100 : 0}%"></i></span>
+                <span class="pc-seance-compte">${f} / ${n}${c ? ` <small>· ${c} en cours</small>` : ''}</span></div>`;
+            })
+            .join('')}</div>
+        </div>
+        <div class="pc-outils">
+          ${P().bandeauClasse ? P().bandeauClasse(etat.equipes) : ''}
+          ${S.criteres ? `<div class="pc-exports"><span>Évaluation</span><button type="button" class="pb-btn" data-action="excel">Excel</button><button type="button" class="pb-btn" data-action="csv">CSV</button><button type="button" class="pb-btn" data-action="carnet" title="Niveaux 1 à 4 par critère, à importer dans le Carnet de classe">Carnet de classe</button><button type="button" class="pb-btn" data-action="ceintures">Feuilles ceinture</button>${etat.dossier ? '' : '<span class="pc-attention">Fichiers importés : l’évaluation n’est pas enregistrée, pensez à exporter.</span>'}</div>` : ''}
+        </div>
+        <div class="pc-filtres" role="toolbar" aria-label="Filtrer les équipes">${filtresVus
+          .map((f) => `<button type="button" class="pc-filtre" data-action="filtre" data-f="${f.id}" aria-pressed="${f.id === filtre.id}">${ech(f.texte)} <b>${liste.filter(f.garde).length}</b></button>`)
+          .join('')}</div>
+        <div class="pc-tuiles">${montrees.map(tuile).join('') || `<p class="pc-vide">${liste.length ? 'Aucune équipe dans ce filtre.' : 'Aucune équipe pour l’instant : elles apparaissent dès qu’elles commencent.'}</p>`}</div>
         ${etat.invalides.length ? `<details class="pc-invalides"><summary>${etat.invalides.length} fichier(s) non lu(s)</summary><ul>${etat.invalides.map((x) => `<li>${ech(x.nom)} : ${ech(x.raison)}</li>`).join('')}</ul></details>` : ''}
       </section>`,
       {
@@ -310,6 +353,10 @@
           alert('Fichier pour le Carnet de classe enregistré dans Téléchargements.\n\nDans le projet du Carnet, créez d’abord les 7 critères avec les mêmes libellés.\nLe Carnet recalcule sa propre note (moyenne des niveaux × 5) : elle peut différer de la note de l’Excel, qui reste la note de référence.');
         },
         ceintures: () => ecranCeintures(),
+        filtre: (b) => {
+          etat.filtre = b.dataset.f;
+          ecranClasse();
+        },
         vu: async (b) => {
           const eq = etat.equipes.find((x) => x.cle === b.dataset.cle);
           etat.professeur.aidesVues[eq.nom] = eq.resume.aide.date;
@@ -344,21 +391,26 @@
 
   function ongletBilan(eq) {
     const d = eq.donnees;
-    return S.etapes.seances
+    const ligne = (ok, texte, plus) => `<li class="${ok === true ? 'ok' : ok === 'passe' ? 'passe' : ''}"><span class="pe-coche">${ok === true ? '✓' : ok === 'passe' ? '⚠' : '○'}</span><span>${texte}${plus || ''}</span></li>`;
+    const cartes = S.etapes.seances
       .map((s, i) => {
         const r = eq.resume.seances[i];
         const details = s.etapes
           .map((e) => {
             const x = S.etatEtape(d, s.id, e.id);
-            if (e.type === 'cases') return `<li>${x && x.fait ? '✓' : '○'} ${ech(e.texte)} ${(e.lignes || []).map((l, j) => `<span class="pe-case">${x && Array.isArray(x.valeur) && x.valeur[j] ? '✓' : '○'} ${ech(l.texte)}</span>`).join('')}</li>`;
-            if (e.type === 'bilan') return `<li>${x && x.fait ? '✓' : '○'} Bilan : ${(e.phrases || []).map((ph, j) => `<span class="pe-case">${ech(ph)} → <b>${x && Array.isArray(x.valeur) && Number.isInteger(x.valeur[j]) ? MOTS_BILAN[x.valeur[j]] : '—'}</b></span>`).join('')}</li>`;
-            if (e.type === 'photo') return `<li>${x && x.fait ? '✓' : x && x.passe ? '⚠ laissée pour plus tard :' : '○'} ${ech(e.texte)}</li>`;
+            const fait = !!(x && x.fait);
+            if (e.type === 'cases') return ligne(fait, ech(e.texte), `<span class="pe-sous">${(e.lignes || []).map((l, j) => `<span>${x && Array.isArray(x.valeur) && x.valeur[j] ? '✓' : '○'} ${ech(l.texte)}</span>`).join('')}</span>`);
+            if (e.type === 'bilan') return ligne(fait, 'Bilan', `<span class="pe-sous">${(e.phrases || []).map((ph, j) => `<span>${ech(ph)} → <b>${x && Array.isArray(x.valeur) && Number.isInteger(x.valeur[j]) ? MOTS_BILAN[x.valeur[j]] : '—'}</b></span>`).join('')}</span>`);
+            if (e.type === 'photo') return ligne(fait ? true : x && x.passe ? 'passe' : false, `${x && x.passe && !fait ? 'Laissée pour plus tard : ' : ''}${ech(e.texte)}`);
             return '';
           })
           .join('');
-        return `<section class="pp-bloc"><h3>Séance ${i + 1} · ${ech(s.titre)} <span class="pe-etat ${CLASSE_ETAT[r.etat][0]}">${CLASSE_ETAT[r.etat][1]} ${r.avancement.faites} écrans sur ${r.avancement.total}</span></h3><ul class="pe-liste">${details}</ul></section>`;
+        const part = r.avancement.total ? Math.round((r.avancement.faites / r.avancement.total) * 100) : 0;
+        return `<section class="pp-bloc pe-seance ${CLASSE_ETAT[r.etat][0]}"><h3><span class="pe-numero">S${i + 1}</span>${ech(s.titre)} <span class="pe-etat ${CLASSE_ETAT[r.etat][0]}">${CLASSE_ETAT[r.etat][1]} ${r.avancement.faites} / ${r.avancement.total} écrans</span></h3>
+          <span class="pe-barre"><i style="width:${part}%"></i></span>${details ? `<ul class="pe-liste">${details}</ul>` : ''}</section>`;
       })
-      .join('') + `<section class="pp-bloc"><h3>Aide</h3><p>${d.aides.length} demande${d.aides.length > 1 ? 's' : ''} d’aide${d.aides.length ? ' — voir l’historique' : ''}.</p></section>`;
+      .join('');
+    return `<div class="pe-grille">${cartes}<section class="pp-bloc"><h3>Aide</h3><p>${d.aides.length} demande${d.aides.length > 1 ? 's' : ''} d’aide${d.aides.length ? ' — voir l’onglet Historique' : ''}.</p></section></div>`;
   }
 
   async function ongletAlbum(eq) {
@@ -418,10 +470,16 @@
           <button type="button" class="pb-btn" data-action="aller" data-i="${(i + liste.length - 1) % liste.length}" aria-label="Équipe précédente">‹</button>
           <h2>${ech(eq.resume.noms)}</h2>
           <button type="button" class="pb-btn" data-action="aller" data-i="${(i + 1) % liste.length}" aria-label="Équipe suivante">›</button>
-          <span class="pe-info">${eq.donnees.equipe.classe ? ech(eq.donnees.equipe.classe) + ' · ' : ''}dernière activité ${ilYa(eq.resume.minutes)}${eq.autres.length ? ` · ⚠ autres fichiers ignorés : ${ech(eq.autres.join(', '))}` : ''}</span>
+          <span class="pe-info">${eq.donnees.equipe.classe ? ech(eq.donnees.equipe.classe) + ' · ' : ''}équipe ${i + 1} sur ${liste.length} · dernière activité ${ilYa(eq.resume.minutes)} · ← → pour changer, Échap pour revenir${eq.autres.length ? ` · ⚠ autres fichiers ignorés : ${ech(eq.autres.join(', '))}` : ''}</span>
         </div>
-        ${eq.alertes.length ? `<div class="pe-alertes">${eq.alertes.map((a) => `<span class="pt-badge ${a.sorte === 'aide' ? 'aide' : 'ambre'}">${ech(a.texte)}</span>`).join('')}</div>` : ''}
-        <nav class="pe-onglets" role="tablist">${onglets.map((x) => `<button type="button" role="tab" aria-selected="${x.id === o.id}" data-action="onglet" data-id="${x.id}">${ech(x.titre)}</button>`).join('')}</nav>
+        <div class="pe-resume">
+          <span class="pt-photo">${eq.resume.dernierePhoto && eq.dossier ? `<img data-photo="${ech(eq.resume.dernierePhoto.fichier)}" alt="${ech(eq.resume.dernierePhoto.legende)}">` : pic('photo')}</span>
+          <div class="pe-resume-infos">${frise(eq.resume)}
+            <div class="pe-lignes">${eq.lignes.map((l) => `<span>${ech(l)}</span>`).join('') || '<span class="pt-rien">Pas encore commencé</span>'}</div>
+            ${eq.alertes.length ? `<div class="pe-alertes">${eq.alertes.map((a) => `<span class="pt-badge ${a.sorte === 'aide' ? 'aide' : 'ambre'}">${pic(a.sorte === 'aide' ? 'aide' : 'question')}${ech(a.texte)}</span>`).join('')}</div>` : ''}
+          </div>
+        </div>
+        <nav class="pe-onglets" role="tablist">${onglets.map((x) => `<button type="button" role="tab" aria-selected="${x.id === o.id}" data-action="onglet" data-id="${x.id}">${ech(x.titre)}${x.id === 'album' && eq.resume.nbPhotos ? ` <small>${eq.resume.nbPhotos}</small>` : ''}</button>`).join('')}</nav>
         <div class="pe-contenu" role="tabpanel">${contenu}</div>
       </section>`,
       {
@@ -460,7 +518,8 @@
           etat.professeur.drapeaux[eq.nom] = [...set];
           if (!(await ecrireProfesseur())) c.checked = !c.checked;
         },
-      }
+      },
+      () => chargerPhotos()
     );
   }
 
@@ -607,7 +666,7 @@
     if (p.accent) r.setProperty('--accent', p.accent);
     if (p.accentFonce) r.setProperty('--accent-fonce', p.accentFonce);
     if (p.accentClair) r.setProperty('--accent-clair', p.accentClair);
-    document.querySelector('.pb-titre').innerHTML = `${ech(p.titre)} <span>· Professeur</span>`;
+    document.querySelector('.pb-titre').innerHTML = `${ech(p.titre)} <span class="pb-role">Professeur</span>`;
     document.querySelector('.pb-logo').innerHTML = pic(p.picto);
     ecranAccueil();
   }

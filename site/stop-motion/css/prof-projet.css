@@ -1,0 +1,15 @@
+/* Outil professeur du stop motion : le film (lecteur) et la pellicule de toutes les images. */
+.ecran-film { position: relative; width: min(100%, 40rem); aspect-ratio: 16 / 9; background: #000; border-radius: 0.5rem; overflow: hidden; }
+.ecran-film .lecteur-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ecran-film .lecteur-carte { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; text-align: center; background: #000; }
+.ecran-film .lecteur-texte { font-size: 1.75rem; font-weight: 800; color: #FACC15; }
+.ecran-film .lecteur-carte.generique .lecteur-texte { color: #F4F1E8; font-size: 1.375rem; }
+.ecran-film .lecteur-attente { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #C9C4DD; }
+.pp-pellicule { display: grid; grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); gap: 0.5rem; margin-top: 0.75rem; }
+.pp-pellicule figure { margin: 0; }
+.pp-pellicule img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 0.25rem; display: block; }
+.pp-pellicule figcaption { font-size: 0.875rem; color: var(--encre-douce); }
+.pp-pellicule .enlevee img { filter: grayscale(1); opacity: 0.45; }
+
+/* Page claire du professeur : le jaune du projet devient un ambre foncé, lisible sur fond blanc (texte blanc dessus). */
+.page-prof { --accent: #A16207; --accent-fonce: #713F12; --accent-clair: #FEF9C3; }

@@ -7,7 +7,7 @@ Un dossier, plusieurs projets, **le même squelette** : l'élève retrouve les m
 |---|---|---|
 | Je démonte un objet technique (taille-crayon à manivelle) | 3 | jalons 1 à 4 faits (écrans élèves, outil professeur, évaluation et exports), recette avec Thomas |
 | Course de voitures à ballon | 6 | jalons V1 à V4 faits (écrans élèves, essais, course au vidéoprojecteur, outil professeur), en ligne ; essais réels et critères à valider avec Thomas |
-| Film en stop motion avec des briques | 5 | à venir |
+| Film en stop motion avec des briques (« Mon film en briques ») | 5 | jalons M0 à M4 faits (univers Cinéma en briques, tournage, montage et séance cinéma, scénario, outil professeur), en ligne |
 
 Documents : `docs/CAHIER-DES-CHARGES-outils-6e-segpa.md` (socle commun), un brief par projet, `docs/PLAN.md`,
 `docs/MAQUETTE.md` (écrans), `docs/sources/` (documents de Thomas pour le taille-crayon).
@@ -22,6 +22,8 @@ site/taille-crayon/        index.html (élèves), prof.html (professeur), js/ (�
                            (projet, classes, modèle, étapes), img/ (photos de Thomas)
 site/voiture-ballon/       index.html (élèves), prof.html (professeur), course.html (vidéoprojecteur), css/univers.css
                            (Grand prix), js/ (essais, course, écrans), donnees/, documents/ (gabarits de carrosserie, SVG Cricut)
+site/stop-motion/          index.html (élèves), prof.html (professeur), cinema.html (vidéoprojecteur), css/univers.css
+                           (Cinéma en briques), js/ (studio, tournage, montage, lecteur, histoire), donnees/ (étapes, idées, film)
 tests/                     npm test (moteur et données)
 tools/                     serve.js (npm start), exemples-*.js (npm run exemples), recette.js (npm run recette),
                            gabarits/ (sources des gabarits de carrosserie)

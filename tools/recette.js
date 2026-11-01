@@ -357,6 +357,349 @@ async function scenarioVoiture(navigateur, base, taille, captures) {
   return ecrans;
 }
 
+// Film en stop motion (jalon M1) : Ma mission à 5 séances, séance 3 jusqu'au tournage, 5 images (bouton et barre
+// d'espace), « Enlever la dernière » (Non puis Oui), « Voir », calque et grille, pause café, « J'arrête pour
+// aujourd'hui » ; la séance 4 reprend le même film.
+async function tourner(page, nom, captures, n) {
+  await page.waitForFunction(() => document.querySelector('.ecran-cinema video') && document.querySelector('.ecran-cinema video').videoWidth > 0, null, { timeout: 10000 });
+  await sansDefilement(page, nom);
+  for (let i = 0; i < n; i++) {
+    const avant = await page.evaluate(() => Segpa.filmDe(Segpa.app.etat.session.donnees).images.length);
+    if (i % 2) await page.keyboard.press('Space');
+    else await cliquer(page, '[data-action="prendre"]');
+    await page.waitForFunction((a) => Segpa.filmDe(Segpa.app.etat.session.donnees).images.length === a + 1 && !document.querySelector('[data-action="prendre"]').disabled, avant);
+  }
+  await page.waitForTimeout(200);
+  await sansDefilement(page, nom + '-images');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '.png') });
+}
+
+async function scenarioStopMotion(navigateur, base, taille, captures) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
+  await page.goto(base + 'stop-motion/index.html?enseignant=1');
+  await sansDefilement(page, 'sm-accueil');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm-accueil.png') });
+  await cliquer(page, '[data-action="commencer"]');
+  await cliquer(page, '[data-prenom="Léa"]');
+  await cliquer(page, '[data-prenom="Tom"]');
+  await cliquer(page, '[data-action="valider"]');
+  assert.equal(await page.locator('.carte-seance').count(), 5);
+  await sansDefilement(page, 'sm-mission');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm-mission.png') });
+  await cliquer(page, '[data-action="seance"][data-id="s3"]');
+  await page.locator('.trois-temps').waitFor();
+  await sansDefilement(page, 'sm-s3-relire');
+  await cliquer(page, '[data-action="fait"]');
+  for (let i = 0; i < 3; i++) {
+    await sansDefilement(page, 'sm-s3-rappel-' + (i + 1));
+    if (captures && !i) await page.screenshot({ path: path.join(SORTIE, 'sm-s3-rappel.png') });
+    await cliquer(page, '[data-action="fait"]');
+  }
+  assert.equal(await page.locator('[data-action="enlever"]').isDisabled(), true, 'pas d’image : rien à enlever');
+  assert.equal(await page.locator('[data-action="voir"]').isDisabled(), true);
+  assert.equal(await page.locator('.calque-image').isHidden(), true);
+  await tourner(page, 'sm-tournage', captures, 5);
+  assert.equal(await page.locator('.compteur-film strong').textContent(), 'Image 5 / 30');
+  assert.equal(await page.locator('.pellicule img').count(), 5);
+  assert.equal(await page.locator('.calque-image').isVisible(), true, 'le calque montre la dernière image');
+  // Enlever la dernière : « Non » garde l'image, « Oui » l'enlève.
+  await cliquer(page, '[data-action="enlever"]');
+  await page.locator('.question-image img').waitFor();
+  await sansDefilement(page, 'sm-enlever');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm-enlever.png') });
+  // Pendant la question, la barre d'espace touche « Non, je la garde » (le bouton qui a la main) : rien n'est perdu.
+  await page.keyboard.press('Space');
+  await page.locator('.question-image').waitFor({ state: 'detached' });
+  assert.equal(await page.locator('.compteur-film strong').textContent(), 'Image 5 / 30', 'ni photo ni image enlevée');
+  await cliquer(page, '[data-action="enlever"]');
+  await cliquer(page, '[data-action="oui-enlever"]');
+  await page.waitForFunction(() => document.querySelector('.compteur-film strong').textContent === 'Image 4 / 30');
+  // Voir : les dernières images en boucle, puis Stop.
+  await cliquer(page, '[data-action="voir"]');
+  await page.locator('.lecture-film img[src]').waitFor();
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm-voir.png') });
+  await cliquer(page, '[data-action="voir"]');
+  assert.equal(await page.locator('.lecture-film').count(), 0);
+  // Calque et grille se coupent et se remettent.
+  await cliquer(page, '[data-action="calque"]');
+  assert.equal(await page.locator('.calque-image').isHidden(), true);
+  await cliquer(page, '[data-action="calque"]');
+  await cliquer(page, '[data-action="grille"]');
+  assert.equal(await page.locator('.grille-tiers').isHidden(), true);
+  await cliquer(page, '[data-action="grille"]');
+  // Pause café : écran noir ; la barre d'espace touche « Je reviens » (elle ne prend pas de photo).
+  await cliquer(page, '[data-action="pause"]');
+  await sansDefilement(page, 'sm-pause');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm-pause.png') });
+  await page.keyboard.press('Space');
+  await page.locator('.pause-cafe').waitFor({ state: 'detached' });
+  assert.equal(await page.locator('.compteur-film strong').textContent(), 'Image 4 / 30');
+  await cliquer(page, '[data-action="fin"]');
+  await faireSeance(page, 'sm-s3-fin', false);
+  await cliquer(page, '[data-action="fini"]');
+  // Séance 4 : le même film continue.
+  await cliquer(page, '[data-action="seance"][data-id="s4"]');
+  for (let i = 0; i < 4; i++) await cliquer(page, '[data-action="fait"]');
+  await page.locator('.compteur-film strong', { hasText: 'Image 4 / 30' }).waitFor();
+  await tourner(page, 'sm-s4-tournage', false, 2);
+  const film = await page.evaluate(() => Segpa.filmDe(Segpa.app.etat.session.donnees).images.map((i) => i.fichier));
+  assert.deepEqual(film, ['0001', '0002', '0003', '0004', '0006', '0007'].map((n) => `photos/film/${n}.jpg`), 'l’image enlevée garde son numéro (rien n’est écrasé)');
+  assert.equal(await page.evaluate(() => Segpa.app.etat.session.donnees.photos.length), 0, 'les images du film ne vont pas dans l’album');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
+// Stop motion avec un dossier de classe (simulé en mémoire) : les images sont des fichiers JPEG dans
+// Prénom_Prénom/photos/film/, jamais dans le .json.
+async function scenarioStopMotionDossier(navigateur, base) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  const classe = Buffer.from(JSON.stringify({ classe: '6A', eleves: ['Léa', 'Tom', 'Ines', 'Noah'] })).toString('base64');
+  await injecterDossier(page, { kind: 'directory', name: 'Stop-motion', children: [{ kind: 'file', name: 'classe.json', data: classe }] });
+  await page.addInitScript(() =>
+    document.addEventListener('DOMContentLoaded', () => {
+      window.Segpa.fichiers.memoriser = async () => {};
+      window.Segpa.fichiers.memorise = async () => null;
+    })
+  );
+  await page.goto(base + 'stop-motion/index.html');
+  await cliquer(page, '[data-action="commencer"]');
+  await cliquer(page, '[data-action="ouvrir"]');
+  await cliquer(page, '[data-prenom="Ines"]');
+  await cliquer(page, '[data-prenom="Noah"]');
+  await cliquer(page, '[data-action="valider"]');
+  await cliquer(page, '[data-action="seance"][data-id="s3"]');
+  for (let i = 0; i < 4; i++) await cliquer(page, '[data-action="fait"]');
+  await tourner(page, 'sm-dossier', false, 3);
+  await cliquer(page, '[data-action="enlever"]');
+  await cliquer(page, '[data-action="oui-enlever"]');
+  await cliquer(page, '[data-action="fin"]');
+  await page.waitForTimeout(600);
+  const r = await page.evaluate(() => {
+    const eq = window.__arbre.children.find((c) => c.name === 'Ines_Noah');
+    const json = eq.children.find((c) => c.name === 'Ines_Noah.json');
+    const film = eq.children.find((c) => c.name === 'photos').children.find((c) => c.name === 'film');
+    return { json: new TextDecoder().decode(Uint8Array.from(atob(json.data), (c) => c.charCodeAt(0))), images: film.children.map((c) => [c.name, atob(c.data).slice(0, 3).split('').map((x) => x.charCodeAt(0))]) };
+  });
+  assert.deepEqual(r.images.map((i) => i[0]), ['0001.jpg', '0002.jpg', '0003.jpg'], 'les 3 fichiers restent (l’image enlevée n’est pas effacée)');
+  for (const [, debut] of r.images) assert.deepEqual(debut, [0xff, 0xd8, 0xff], 'JPEG');
+  const d = JSON.parse(r.json);
+  assert.deepEqual(d.film.images.map((i) => i.fichier), ['photos/film/0001.jpg', 'photos/film/0002.jpg']);
+  assert.ok(!r.json.includes('data:image'), 'aucune image dans le .json');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
+// Stop motion, séance 5 (jalon M2) : un film de 16 images tourné en séance 3, puis titre écrit au clavier, vitesse,
+// 2 images ratées enlevées (une remise), le film avec son titre et son générique, cinéma, bilan.
+async function scenarioStopMotionMontage(navigateur, base, taille, captures) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
+  await page.goto(base + 'stop-motion/index.html?enseignant=1');
+  await cliquer(page, '[data-action="commencer"]');
+  await cliquer(page, '[data-prenom="Léa"]');
+  await cliquer(page, '[data-prenom="Tom"]');
+  await cliquer(page, '[data-action="valider"]');
+  await cliquer(page, '[data-action="seance"][data-id="s3"]');
+  for (let i = 0; i < 4; i++) await cliquer(page, '[data-action="fait"]');
+  await tourner(page, 'sm5-tournage', false, 16);
+  await cliquer(page, '[data-action="mission"]');
+  await cliquer(page, '[data-action="seance"][data-id="s5"]');
+  // Le titre : une carte-idée, puis « J'écris un titre ».
+  await sansDefilement(page, 'sm5-titre');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm5-titre.png') });
+  assert.equal(await page.locator('[data-action="garder"]').isDisabled(), true);
+  await cliquer(page, '[data-action="choisir"]');
+  assert.equal(await page.locator('[data-action="garder"]').isDisabled(), false);
+  await cliquer(page, '[data-action="ecrire"]');
+  await page.keyboard.type('Le dragon perdu dans la forêt');
+  await sansDefilement(page, 'sm5-titre-ecrit');
+  assert.equal(await page.locator('.carte-titre-apercu strong').textContent(), 'Le dragon perdu dans la forêt');
+  await cliquer(page, '[data-action="garder"]');
+  // La vitesse : le film tourne en boucle, « Lent » est gardé.
+  await page.locator('.lecteur[data-plan="image"]').waitFor();
+  await sansDefilement(page, 'sm5-vitesse');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm5-vitesse.png') });
+  await cliquer(page, '[data-action="vitesse"][data-v="lent"]');
+  assert.match(await page.locator('.infos-film').textContent(), /16 images · 10 secondes/);
+  await cliquer(page, '[data-action="fait"]');
+  // Les images ratées : 2 enlevées, une remise ; 2 pages.
+  await page.locator('.vignette-tri img[src]').first().waitFor();
+  await cliquer(page, '[data-action="basculer"][data-i="2"]');
+  await cliquer(page, '[data-action="basculer"][data-i="5"]');
+  await cliquer(page, '[data-action="basculer"][data-i="7"]');
+  await cliquer(page, '[data-action="basculer"][data-i="7"]');
+  assert.equal(await page.locator('.compte-tri').textContent(), '14 images gardées');
+  await sansDefilement(page, 'sm5-tri');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm5-tri.png') });
+  await cliquer(page, '[data-action="page"]');
+  assert.equal(await page.locator('.vignette-tri').count(), 1);
+  await cliquer(page, '[data-action="fait"]');
+  // Le film fini : carte-titre, images, générique.
+  await page.locator('.lecteur[data-plan="titre"] .lecteur-texte', { hasText: 'Le dragon perdu dans la forêt' }).waitFor();
+  await sansDefilement(page, 'sm5-film');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm5-film.png') });
+  await page.locator('.lecteur[data-plan="generique"] .lecteur-texte', { hasText: 'Un film de Léa et Tom' }).waitFor({ timeout: 15000 });
+  await page.locator('[data-action="lecture"]', { hasText: 'Revoir' }).waitFor({ timeout: 6000 });
+  await cliquer(page, '[data-action="fait"]');
+  await cliquer(page, '[data-action="fait"]'); // séance cinéma
+  for (const q of await page.locator('.question-bilan').all()) await q.locator('.visage').first().click();
+  await sansDefilement(page, 'sm5-bilan');
+  await cliquer(page, '[data-action="fait"]');
+  await page.locator('[data-action="fini"]').waitFor();
+  const f = await page.evaluate(() => Segpa.filmDe(Segpa.app.etat.session.donnees));
+  assert.equal(f.titre, 'Le dragon perdu dans la forêt');
+  assert.equal(f.vitesse, 'lent');
+  assert.deepEqual(f.images.map((im, i) => (im.enlevee ? i : -1)).filter((i) => i >= 0), [2, 5]);
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
+// Séance cinéma (cinema.html) : le dossier Stop-motion (simulé) avec 2 films et une équipe sans image ; le programme,
+// la projection (titre, images, générique, applaudissements), Pause, vitesse, film suivant, « Bravo à tous ».
+async function scenarioCinema(navigateur, base, captures) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  const jpeg = require('./photo-fictive.js').toString('base64');
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64');
+  const equipe = (eleves, film) => {
+    const nom = eleves.join('_');
+    const d = { application: 'segpa', projet: 'stop-motion', formatVersion: 1, equipe: { eleves, classe: '6A' }, seances: {}, photos: [], aides: [], modifieLe: '2026-11-20T10:00:00.000Z' };
+    if (film) d.film = film;
+    const images = film ? film.images.map((im) => ({ kind: 'file', name: im.fichier.split('/').pop(), data: jpeg })) : [];
+    return { kind: 'directory', name: nom, children: [{ kind: 'file', name: nom + '.json', data: b64(d) }].concat(images.length ? [{ kind: 'directory', name: 'photos', children: [{ kind: 'directory', name: 'film', children: images }] }] : []) };
+  };
+  const images = (n) => Array.from({ length: n }, (_, i) => ({ fichier: `photos/film/${String(i + 1).padStart(4, '0')}.jpg`, date: '2026-11-20T10:00:00.000Z' }));
+  await injecterDossier(page, {
+    kind: 'directory',
+    name: 'Stop-motion',
+    children: [
+      { kind: 'file', name: 'classe.json', data: b64({ classe: '6A', eleves: ['Léa', 'Tom', 'Inès', 'Noah', 'Jade', 'Sami'] }) },
+      equipe(['Léa', 'Tom'], { images: images(12), vitesse: 'rapide', titre: 'La course folle' }),
+      equipe(['Inès', 'Noah'], { images: images(8), vitesse: 'normal' }),
+      equipe(['Jade', 'Sami'], null),
+    ],
+  });
+  await page.goto(base + 'stop-motion/cinema.html');
+  await sansDefilement(page, 'cinema-accueil');
+  await cliquer(page, '[data-action="ouvrir"]');
+  await page.locator('.carte-programme').first().waitFor();
+  assert.equal(await page.locator('.carte-programme').count(), 3);
+  assert.equal(await page.locator('.carte-programme[aria-pressed="true"]').count(), 2, 'l’équipe sans image n’est pas au programme');
+  assert.match(await page.locator('.carte-programme', { hasText: 'Inès et Noah' }).textContent(), /Mon film[\s\S]*8 images/, 'sans titre : « Mon film »');
+  await sansDefilement(page, 'cinema-programme');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'cinema-programme.png') });
+  await cliquer(page, '[data-action="lancer"]');
+  // Film 1 (Inès et Noah, sans titre) : pause à la barre d'espace, film suivant.
+  await page.locator('.lecteur[data-plan="titre"] .lecteur-texte', { hasText: 'Mon film' }).waitFor();
+  await page.keyboard.press('Space');
+  await page.locator('[data-action="lecture"]', { hasText: 'Lecture' }).waitFor();
+  await page.keyboard.press('Space');
+  await page.locator('[data-action="lecture"]', { hasText: 'Pause' }).waitFor();
+  await cliquer(page, '[data-action="suivant"]');
+  // Film 2 (Léa et Tom) : sa vitesse, ses images, son générique, les applaudissements.
+  assert.equal(await page.locator('.numero-film').textContent(), 'Film 2 sur 2');
+  await page.locator('.lecteur[data-plan="titre"] .lecteur-texte', { hasText: 'La course folle' }).waitFor();
+  assert.equal(await page.locator('[data-action="vitesse"][data-v="rapide"]').getAttribute('aria-pressed'), 'true', 'la vitesse choisie par l’équipe');
+  await page.locator('.lecteur[data-plan="image"] .lecteur-image[src^="blob:"]').waitFor({ timeout: 6000 });
+  await sansDefilement(page, 'cinema-projection');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'cinema-projection.png') });
+  await page.locator('.lecteur[data-plan="generique"] .lecteur-texte', { hasText: 'Un film de Léa et Tom' }).waitFor({ timeout: 8000 });
+  await page.locator('.entracte:not([hidden])').waitFor({ timeout: 6000 });
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'cinema-entracte.png') });
+  await page.keyboard.press('ArrowRight');
+  await page.locator('.palmares li').first().waitFor();
+  assert.equal(await page.locator('.palmares li').count(), 2);
+  await sansDefilement(page, 'cinema-fin');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
+// Stop motion, séances 1 et 2 (jalon M3) : règles, héros (carte), lieu (carte), problème écrit au clavier, fin (carte),
+// le scénario en 7 questions (héros, lieu, action, problème, solution, fin, objets), le titre, le récap ; puis la plaque, le décor, le héros et les objets (avec le
+// rappel de l'histoire et une photo chacun), « Je secoue la table », le rangement. Le titre est repris en séance 5.
+async function scenarioStopMotionHistoire(navigateur, base, taille, captures) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
+  await page.goto(base + 'stop-motion/index.html?enseignant=1');
+  await cliquer(page, '[data-action="commencer"]');
+  await cliquer(page, '[data-prenom="Léa"]');
+  await cliquer(page, '[data-prenom="Tom"]');
+  await cliquer(page, '[data-action="valider"]');
+  await cliquer(page, '[data-action="continuer"]');
+  for (let i = 0; i < 3; i++) {
+    await sansDefilement(page, 'sm1-regle-' + (i + 1));
+    await cliquer(page, '[data-action="fait"]');
+  }
+  const carte = async (nom, n) => {
+    await page.locator('[data-action="choisir"]').first().waitFor();
+    await sansDefilement(page, nom);
+    if (captures) await page.screenshot({ path: path.join(SORTIE, nom + '.png') });
+    await page.locator('[data-action="choisir"]').nth(n).click();
+    await cliquer(page, '[data-action="garder"]');
+  };
+  await carte('sm1-heros', 0);
+  await carte('sm1-lieu', 1);
+  await carte('sm1-action', 0);
+  await page.locator('[data-action="choisir"]').first().waitFor();
+  await cliquer(page, '[data-action="ecrire"]');
+  await page.keyboard.type('Un volcan se réveille');
+  await sansDefilement(page, 'sm1-probleme-ecrit');
+  await page.keyboard.press('Enter');
+  await carte('sm1-solution', 0);
+  await carte('sm1-fin', 0);
+  // Les objets : plusieurs cartes (3 au plus), une touchée deux fois est enlevée.
+  await page.locator('[data-action="choisir"]').first().waitFor();
+  await sansDefilement(page, 'sm1-objets');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm1-objets.png') });
+  for (const n of [0, 1, 2, 1, 3]) await page.locator('[data-action="choisir"]').nth(n).click();
+  assert.equal(await page.locator('[data-action="choisir"][aria-pressed="true"]').count(), 3);
+  await page.locator('[data-action="choisir"]').nth(4).click();
+  assert.equal(await page.locator('[data-action="choisir"][aria-pressed="true"]').count(), 3, '3 cartes au plus');
+  await cliquer(page, '[data-action="garder"]');
+  await carte('sm1-titre', 0);
+  // Le récap : le titre, les 3 temps, les objets.
+  await page.locator('.trois-temps').waitFor();
+  assert.equal(await page.locator('.titre-recap').textContent(), 'Le dragon perdu');
+  assert.deepEqual(await page.locator('.temps p').allTextContents(), ['Un dragon, sur la Lune, dort tranquillement.', 'Un volcan se réveille. Un ami vient aider.', 'C\'est la fête !']);
+  assert.equal(await page.locator('.objets-recap').textContent(), 'Mes objets : une maison, une voiture, une fusée');
+  await sansDefilement(page, 'sm1-recap');
+  if (captures) await page.screenshot({ path: path.join(SORTIE, 'sm1-recap.png') });
+  await cliquer(page, '[data-action="fait"]');
+  await page.locator('[data-action="fini"]').waitFor();
+  await cliquer(page, '[data-action="fini"]');
+  // Séance 2.
+  await cliquer(page, '[data-action="continuer"]');
+  const rappels = [];
+  for (let n = 0; n < 30 && !(await visible(page, '[data-action="fini"]')); n++) {
+    await page.waitForTimeout(100);
+    if (await visible(page, '.ligne')) {
+      await sansDefilement(page, 'sm2-rangement');
+      for (const l of await page.locator('.ligne').all()) await l.click();
+      await cliquer(page, '[data-action="fait"]');
+    } else if (await visible(page, '.zone-camera')) {
+      await page.locator('[data-action="prendre"]').waitFor({ timeout: 10000 });
+      await page.waitForFunction(() => document.querySelector('.zone-camera video') && document.querySelector('.zone-camera video').videoWidth > 0);
+      await cliquer(page, '[data-action="prendre"]');
+      await cliquer(page, '[data-action="garder"]');
+    } else {
+      const p = page.locator('.consigne .pastille');
+      if (await p.count()) rappels.push(await p.textContent());
+      await sansDefilement(page, 'sm2-' + n);
+      if (captures && n === 3) await page.screenshot({ path: path.join(SORTIE, 'sm2-construire.png') });
+      await cliquer(page, '[data-action="fait"]');
+    }
+  }
+  assert.ok(rappels.includes('Mon lieu : sur la Lune') && rappels.includes('Mon héros : Un dragon') && rappels.includes('Mes objets : une maison, une voiture, une fusée'), JSON.stringify(rappels));
+  const d = await page.evaluate(() => Segpa.app.etat.session.donnees);
+  assert.equal(d.film.titre, 'Le dragon perdu');
+  assert.deepEqual(d.photos.map((p) => p.legende), ['Mon décor', 'Mon héros', 'Mes objets']);
+  assert.ok(d.seances.s2.etapes.plaque.fait, 'plaque prise');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
 // Outil professeur de la voiture : 4 équipes fictives (essais, course, matériel), piste proposée, onglets Essais et
 // Voiture et course, évaluation à 7 critères avec repères, exports.
 async function scenarioProfesseurVoiture(navigateur, base) {
@@ -412,6 +755,59 @@ async function scenarioProfesseurVoiture(navigateur, base) {
   await page.keyboard.press('Escape');
   const [d] = await Promise.all([page.waitForEvent('download'), cliquer(page, '[data-action="excel"]')]);
   assert.match(d.suggestedFilename(), /^voiture-ballon-6A-\d{4}-\d{2}-\d{2}-evaluation\.xlsx$/);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'pas de défilement horizontal');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
+// Outil professeur du stop motion (jalon M4) : 4 équipes fictives (npm run exemples), aide en premier, tuiles (titre,
+// scénario, plaque, film), alertes (pas d'image à mi-séance, plaque pas rangée), bandeau des films et lien cinéma,
+// onglets Scénario et Film (lecteur, toutes les images), évaluation à 7 critères avec repères et ceinture, Excel.
+async function scenarioProfesseurStopMotion(navigateur, base) {
+  require('./exemples-stop-motion.js');
+  const tree = arbre(path.join(RACINE, 'exemples', 'Stop-motion'));
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  await injecterDossier(page, tree);
+  await page.goto(base + 'stop-motion/prof.html');
+  await cliquer(page, '[data-action="ouvrir"]');
+  await page.locator('.pt').first().waitFor();
+  assert.equal(await page.locator('.pt').count(), 4);
+  assert.match(await page.locator('.pt').first().textContent(), /Léa · Tom/, 'aide en premier');
+  const tuile = (noms) => page.locator('.pt', { hasText: noms }).textContent();
+  assert.match(await tuile('Léa · Tom'), /« Le dragon perdu »[\s\S]*Scénario : 7 \/ 7 ✓/);
+  assert.match(await tuile('Léa · Tom'), /Pas encore d’image dans cette séance/);
+  assert.match(await tuile('Emma · Sami'), /Plaque prise, rangement pas fait/);
+  assert.match(await tuile('Adam · Jade'), /Film : 18 \/ 30 images · normal/);
+  assert.match(await tuile('Inès · Noah'), /Film : 35 \/ 30 images ✓ \(1 enlevée\) · lent[\s\S]*Film monté ✓/);
+  assert.match(await page.locator('.pc-piste').textContent(), /1 avec 30 images ou plus · 2 commencés sur 4/);
+  assert.equal(await page.locator('.pc-piste a[href="cinema.html"]').count(), 1);
+  await page.screenshot({ path: path.join(SORTIE, 'prof-sm-classe.png'), fullPage: true });
+  await page.locator('.pt', { hasText: 'Inès · Noah' }).click();
+  await page.locator('.pe-onglets').waitFor();
+  await cliquer(page, '[data-action="onglet"][data-id="scenario"]');
+  assert.match(await page.locator('.pe-contenu').textContent(), /Un robot, en ville, joue au ballon\.[\s\S]*C'est la panne ! Une machine répare tout\./);
+  await cliquer(page, '[data-action="onglet"][data-id="film"]');
+  await page.locator('.pp-lecteur[data-plan="titre"] .lecteur-texte', { hasText: 'Le robot qui danse' }).waitFor();
+  assert.match(await page.locator('.pe-contenu h3').textContent(), /35 images gardées sur 36 · 9 s · vitesse lent/);
+  assert.equal(await page.locator('.pp-pellicule figure').count(), 36);
+  assert.equal(await page.locator('.pp-pellicule figure.enlevee').count(), 1);
+  await page.waitForFunction(() => document.querySelectorAll('.pp-pellicule img[src^="blob:"]').length === 36);
+  await cliquer(page, '[data-pp-lecture]');
+  await page.locator('.pp-lecteur.joue').waitFor();
+  await page.screenshot({ path: path.join(SORTIE, 'prof-sm-film.png'), fullPage: true });
+  await cliquer(page, '[data-action="onglet"][data-id="evaluation"]');
+  assert.match(await page.locator('.ev-table').textContent(), /Images prises : S3 20 · S4 16 · enlevées au montage : 1/);
+  for (const c of ['scenario', 'regles', 'construction', 'methode', 'film', 'montage', 'autonomie']) {
+    const bouton = `.niv-btn[data-eleve="Inès"][data-critere="${c}"][data-n="3"]`;
+    await cliquer(page, bouton);
+    await page.locator(`${bouton}[aria-pressed="true"]`).waitFor();
+  }
+  await page.waitForFunction(() => /Ceinture vert foncé/.test(document.querySelector('.ev-bilans').textContent));
+  await page.screenshot({ path: path.join(SORTIE, 'prof-sm-evaluation.png'), fullPage: true });
+  await page.keyboard.press('Escape');
+  const [d] = await Promise.all([page.waitForEvent('download'), cliquer(page, '[data-action="excel"]')]);
+  assert.match(d.suggestedFilename(), /^stop-motion-6A-\d{4}-\d{2}-\d{2}-evaluation\.xlsx$/);
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'pas de défilement horizontal');
   assert.deepEqual(erreurs, []);
   assert.deepEqual(horsSite, []);
@@ -642,7 +1038,7 @@ async function scenarioProfesseur(navigateur, base) {
   // Fiche d'une équipe : onglets.
   await page.locator('.pt', { hasText: 'Léa · Tom' }).click();
   await page.locator('.pe-onglets').waitFor();
-  assert.match(await page.locator('.pe-contenu').textContent(), /Séance 1 · Je démonte/);
+  assert.match(await page.locator('.pe-contenu').textContent(), /S1\s*Je démonte[\s\S]*écrans/);
   await cliquer(page, '[data-action="onglet"][data-id="album"]');
   await page.waitForFunction(() => document.querySelectorAll('.pp-photo img').length >= 7);
   await page.screenshot({ path: path.join(SORTIE, 'prof-album.png'), fullPage: true });
@@ -765,6 +1161,57 @@ async function scenarioProfesseur(navigateur, base) {
           noter(`- ÉCHEC ${nomBase} ${t} · course : ${e.message.split('\n')[0]}`);
         }
       }
+    for (const [nomBase, base] of bases)
+      for (const taille of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+        const t = `${taille.width}×${taille.height}`;
+        try {
+          await scenarioStopMotion(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
+          noter(`- OK ${nomBase} ${t} · stop motion (jalon M1) : Ma mission à 5 séances, « Je relis mon histoire », 3 rappels, écran de tournage (5 images au bouton et à la barre d’espace, pellicule, compteur, calque, grille, « Enlever la dernière » avec confirmation, « Voir », pause café), séance 4 qui reprend le même film, rien ne dépasse, aucune erreur.`);
+        } catch (e) {
+          ok = false;
+          noter(`- ÉCHEC ${nomBase} ${t} · stop motion : ${e.message.split('\n').slice(0, 4).join(' ')}`);
+        }
+      }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioStopMotionDossier(navigateur, base);
+        noter(`- OK ${nomBase} 1366×768 · stop motion avec dossier : images JPEG écrites dans Ines_Noah/photos/film/ (0001.jpg…), l’image enlevée reste dans le dossier, aucune image dans le .json.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · stop motion avec dossier : ${e.message.split('\n')[0]}`);
+      }
+    }
+    for (const [nomBase, base] of bases)
+      for (const taille of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+        const t = `${taille.width}×${taille.height}`;
+        try {
+          await scenarioStopMotionHistoire(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
+          noter(`- OK ${nomBase} ${t} · stop motion, séances 1 et 2 (jalon M3) : 3 règles, le scénario en 7 questions (cartes-idées, problème écrit au clavier, 3 objets au plus), le titre, le récap (titre, 3 temps, objets) ; la plaque, décor, héros et objets avec le rappel de l’histoire et une photo chacun, la table secouée, le rangement, rien ne dépasse, aucune erreur.`);
+        } catch (e) {
+          ok = false;
+          noter(`- ÉCHEC ${nomBase} ${t} · stop motion, séances 1 et 2 : ${e.message.split('\n').slice(0, 4).join(' ')}`);
+        }
+      }
+    for (const [nomBase, base] of bases)
+      for (const taille of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+        const t = `${taille.width}×${taille.height}`;
+        try {
+          await scenarioStopMotionMontage(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366);
+          noter(`- OK ${nomBase} ${t} · stop motion, séance 5 (jalon M2) : titre (carte-idée puis écrit au clavier), vitesse « Lent » gardée, 2 images ratées enlevées (une autre enlevée puis remise), le film avec sa carte-titre et « Un film de Léa et Tom », cinéma, bilan, rien ne dépasse, aucune erreur.`);
+        } catch (e) {
+          ok = false;
+          noter(`- ÉCHEC ${nomBase} ${t} · stop motion, séance 5 : ${e.message.split('\n').slice(0, 4).join(' ')}`);
+        }
+      }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioCinema(navigateur, base, nomBase === 'file://');
+        noter(`- OK ${nomBase} 1366×768 · séance cinéma : dossier Stop-motion avec 2 films et une équipe sans image (pas au programme), projection en grand (carte-titre, images lues dans les dossiers, générique, applaudissements), vitesse de l’équipe, pause à la barre d’espace, film suivant, « Bravo à tous les réalisateurs », aucune erreur.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · séance cinéma : ${e.message.split('\n').slice(0, 4).join(' ')}`);
+      }
+    }
     // Le dossier privé du navigateur n'existe pas en file:// : ce scénario passe par le serveur local.
     for (const [nomBase, base] of bases.filter(([n]) => n === 'serveur')) {
       try {
@@ -792,6 +1239,15 @@ async function scenarioProfesseur(navigateur, base) {
       } catch (e) {
         ok = false;
         noter(`- ÉCHEC ${nomBase} 1366×768 · professeur de la voiture : ${e.message.split('\n').slice(0, 6).join(' ')}`);
+      }
+    }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioProfesseurStopMotion(navigateur, base);
+        noter(`- OK ${nomBase} 1366×768 · professeur du stop motion : 4 équipes fictives, aide en premier, tuiles (titre, scénario, plaque, film), alertes (pas d’image à mi-séance, plaque pas rangée), films prêts et lien vers la séance cinéma, onglets Scénario et Film (lecteur, 36 images dont une enlevée), évaluation à 7 critères avec repères et ceinture, export Excel.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · professeur du stop motion : ${e.message.split('\n').slice(0, 6).join(' ')}`);
       }
     }
   } finally {

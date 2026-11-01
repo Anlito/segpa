@@ -92,6 +92,21 @@
       return p;
     }
 
+    // Fichier image sans entrée dans l'album (images d'un film) : écrit dans le dossier de l'équipe, jamais par-dessus
+    // un fichier existant. prochainNom(dejaPris) donne le chemin. → le chemin écrit.
+    async function ecrireImage(blob, prochainNom) {
+      if (s.lecture || !s.dossier) {
+        const fichier = prochainNom([...photosMemoire.keys()]);
+        photosMemoire.set(fichier, blob);
+        urls.set(fichier, URL.createObjectURL(blob));
+        return fichier;
+      }
+      if (!(await S.fichiers.autorise(s.dossier, true))) throw new Error('permission');
+      const fichier = await S.fichiers.ecrirePhoto(s.dossier, prochainNom, blob);
+      urls.set(fichier, URL.createObjectURL(blob));
+      return fichier;
+    }
+
     // Adresse affichable d'une photo (ou null si le fichier n'est plus dans le dossier).
     async function urlPhoto(fichier) {
       if (urls.has(fichier)) return urls.get(fichier);
@@ -117,6 +132,7 @@
       enregistrer,
       etatTexte,
       ajouterPhoto,
+      ecrireImage,
       urlPhoto,
       ecouter: (f) => abonnes.push(f),
     });
