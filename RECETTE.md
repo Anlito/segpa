@@ -213,3 +213,11 @@ Essai sans élèves : `npm run exemples`, puis `site/stop-motion/prof.html` → 
 - [ ] Filtres : Toutes · À regarder · En séance N (avec le nombre d'équipes).
 - [ ] Tuiles : prénoms, « Active · il y a 2 min » (point vert), petite photo, frise des séances sur une ligne, lignes du projet, alertes en ambre avec icône.
 - [ ] Fiche d'une équipe : résumé toujours visible (photo, frise, lignes, alertes), onglets en pastilles (nombre de photos sur Album), bilan des séances en cartes avec barre d'avancement ; ← → pour changer d'équipe, Échap pour revenir.
+
+## Film en stop motion — avis du professeur sur le scénario (retour de Thomas du 01/11)
+Professeur (`stop-motion/prof.html`) :
+- [ ] Tuiles : « Histoire : Un dragon, sur la Lune… / Une tempête… / C'est la fête ! » et « Scénario : 7 / 7 ✓ · avis à donner » (puis « validé ✓ », « à revoir » ou « corrigé, à relire »).
+- [ ] Fiche → Scénario : « Ton avis sur le scénario » : ✓ Validé ou ✎ À revoir, un petit mot, « Envoyer à l'équipe » ; « Envoyé … · pas encore vu / vu par l'équipe ✓ ».
+Élèves (séance suivante, écran « Je relis mon histoire », en séances 2, 3 et 4) :
+- [ ] Validé : « Ton professeur a lu ton histoire. » avec le mot (🔊), puis le récap.
+- [ ] À revoir : le mot en ambre, « Je change une réponse » (choisir la réponse, puis la carte-idée ou le clavier) ou « Je garde mon histoire ». Le même avis n'est montré qu'une fois.

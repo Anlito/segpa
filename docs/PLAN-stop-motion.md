@@ -126,3 +126,13 @@ lus directement dans les dossiers.
 - Différenciation (proposée) : scénario dicté à l'adulte · rôles photographe / animateur · film plus court accepté ·
   élève rapide tuteur.
 - Moteur : `imagesDeSeance`, `alertesFilm`, `resumeFilm` (testés). Équipes fictives : `tools/exemples-stop-motion.js`.
+
+## 12. Avis du professeur sur le scénario (retour de Thomas du 01/11/2026, options 2 et 4)
+
+- Tuile : l'histoire en résumé (début / milieu / fin) et l'état de l'avis (à donner · validé · à revoir · corrigé, à relire).
+- Onglet Scénario : « Validé » ou « À revoir » et un petit mot, enregistrés dans `professeur.json` (rubrique `notes`) et
+  copiés dans le dossier de l'équipe (`avis-professeur.json`, ignoré par la lecture des sauvegardes, comme `course.json`).
+- Élève : l'écran « Je relis mon histoire » (début des séances 2, 3 et 4) montre un nouvel avis une fois (`d.avisVu`) ;
+  « À revoir » propose de changer une réponse (`d.histoireModifieeLe` permet au professeur de voir « corrigé, à relire »).
+- Socle : notes du professeur par équipe, outils et actions pour les onglets des projets (`poserNote`, fichier déposé
+  dans le dossier de l'équipe).

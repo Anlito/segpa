@@ -779,6 +779,8 @@ async function scenarioProfesseurStopMotion(navigateur, base) {
   assert.match(await tuile('Léa · Tom'), /Pas encore d’image dans cette séance/);
   assert.match(await tuile('Emma · Sami'), /Plaque prise, rangement pas fait/);
   assert.match(await tuile('Adam · Jade'), /Film : 18 \/ 30 images · normal/);
+  assert.match(await tuile('Adam · Jade'), /Histoire : Un chat, à la plage…/);
+  assert.match(await tuile('Adam · Jade'), /Scénario : 7 \/ 7 ✓ · avis à donner/);
   assert.match(await tuile('Inès · Noah'), /Film : 35 \/ 30 images ✓ \(1 enlevée\) · lent[\s\S]*Film monté ✓/);
   assert.match(await page.locator('.pc-piste').textContent(), /1 avec 30 images ou plus · 2 commencés sur 4/);
   assert.equal(await page.locator('.pc-piste a[href="cinema.html"]').count(), 1);
@@ -787,6 +789,24 @@ async function scenarioProfesseurStopMotion(navigateur, base) {
   await page.locator('.pe-onglets').waitFor();
   await cliquer(page, '[data-action="onglet"][data-id="scenario"]');
   assert.match(await page.locator('.pe-contenu').textContent(), /Un robot, en ville, joue au ballon\.[\s\S]*C'est la panne ! Une machine répare tout\./);
+  // Avis du professeur : « À revoir » avec un mot, écrit dans professeur.json et dans le dossier de l'équipe.
+  assert.match(await page.locator('.pp-avis').textContent(), /Scénario fini : à toi de donner ton avis/);
+  assert.equal(await page.locator('[data-action="avis-envoyer"]').isDisabled(), true, 'il faut choisir un avis');
+  await cliquer(page, '[data-action="avis-choisir"][data-avis="revoir"]');
+  await page.locator('[data-avis-mot]').fill('Bonne idée ! Ajoute un ami pour aider le robot.');
+  await cliquer(page, '[data-action="avis-envoyer"]');
+  await page.locator('.pp-avis', { hasText: 'pas encore vu par l’équipe' }).waitFor();
+  const ecrit = await page.evaluate(() => {
+    const lire = (c) => JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(c.data), (x) => x.charCodeAt(0))));
+    const prof = lire(window.__arbre.children.find((c) => c.name === 'professeur.json'));
+    const eq = window.__arbre.children.find((c) => c.name === 'Inès_Noah');
+    return { prof: prof.notes['Inès_Noah'].scenario, equipe: lire(eq.children.find((c) => c.name === 'avis-professeur.json')) };
+  });
+  assert.equal(ecrit.prof.avis, 'revoir');
+  assert.equal(ecrit.equipe.type, 'avis');
+  assert.equal(ecrit.equipe.scenario.mot, 'Bonne idée ! Ajoute un ami pour aider le robot.');
+  await page.screenshot({ path: path.join(SORTIE, 'prof-sm-avis.png'), fullPage: true });
+  assert.equal(await page.locator('.pe-resume', { hasText: 'Scénario : 7 / 7 ✓ · à revoir' }).count(), 1, 'le résumé de l’équipe montre l’avis');
   await cliquer(page, '[data-action="onglet"][data-id="film"]');
   await page.locator('.pp-lecteur[data-plan="titre"] .lecteur-texte', { hasText: 'Le robot qui danse' }).waitFor();
   assert.match(await page.locator('.pe-contenu h3').textContent(), /35 images gardées sur 36 · 9 s · vitesse lent/);
@@ -809,6 +829,52 @@ async function scenarioProfesseurStopMotion(navigateur, base) {
   const [d] = await Promise.all([page.waitForEvent('download'), cliquer(page, '[data-action="excel"]')]);
   assert.match(d.suggestedFilename(), /^stop-motion-6A-\d{4}-\d{2}-\d{2}-evaluation\.xlsx$/);
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'pas de défilement horizontal');
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
+// Stop motion, avis du professeur vu par l'élève : l'équipe Adam et Jade reprend en séance 4 ; « Je relis mon histoire »
+// montre l'avis « À revoir » et son mot, l'équipe change la fin, puis relit son histoire. Avis noté comme vu.
+async function scenarioStopMotionAvis(navigateur, base) {
+  require('./exemples-stop-motion.js');
+  const tree = arbre(path.join(RACINE, 'exemples', 'Stop-motion'));
+  const avis = { application: 'segpa', projet: 'stop-motion', type: 'avis', equipe: 'Adam_Jade', scenario: { avis: 'revoir', mot: 'Super ! Change la fin pour retrouver le trésor ensemble.', date: new Date(Date.now() - 60000).toISOString() } };
+  tree.children.find((c) => c.name === 'Adam_Jade').children.push({ kind: 'file', name: 'avis-professeur.json', data: Buffer.from(JSON.stringify(avis)).toString('base64') });
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  await injecterDossier(page, tree);
+  await page.addInitScript(() =>
+    document.addEventListener('DOMContentLoaded', () => {
+      window.Segpa.fichiers.memoriser = async () => {};
+      window.Segpa.fichiers.memorise = async () => null;
+    })
+  );
+  await page.goto(base + 'stop-motion/index.html');
+  await cliquer(page, '[data-action="continuer"]');
+  await cliquer(page, '[data-action="ouvrir"]');
+  await page.locator('.equipe-bouton', { hasText: 'Adam · Jade' }).click();
+  await cliquer(page, '[data-action="continuer"]');
+  await page.locator('.avis-colonne.revoir').waitFor();
+  assert.match(await page.locator('.avis-mot').textContent(), /Change la fin pour retrouver le trésor ensemble/);
+  await sansDefilement(page, 'sm-avis');
+  await page.screenshot({ path: path.join(SORTIE, 'sm-avis.png') });
+  await cliquer(page, '[data-action="changer"]');
+  await page.locator('.cartes-parties').waitFor();
+  await sansDefilement(page, 'sm-avis-parties');
+  await page.screenshot({ path: path.join(SORTIE, 'sm-avis-parties.png') });
+  await cliquer(page, '[data-action="partie"][data-p="fin"]');
+  await page.locator('[data-action="choisir"]', { hasText: 'Un nouvel ami arrive.' }).click();
+  await cliquer(page, '[data-action="garder"]');
+  await page.locator('.carte-partie[data-p="fin"]', { hasText: 'Un nouvel ami arrive.' }).waitFor();
+  await cliquer(page, '[data-action="fini-parties"]');
+  await page.locator('.trois-temps').waitFor();
+  assert.equal(await page.locator('.temps p').nth(2).textContent(), 'Un nouvel ami arrive.');
+  await cliquer(page, '[data-action="fait"]');
+  await page.waitForTimeout(300);
+  const d = await page.evaluate(() => Segpa.app.etat.session.donnees);
+  assert.equal(d.avisVu, avis.scenario.date, 'avis noté comme vu');
+  assert.equal(d.histoire.fin, 'Un nouvel ami arrive.');
+  assert.ok(d.histoireModifieeLe > avis.scenario.date, 'histoire changée après l’avis');
   assert.deepEqual(erreurs, []);
   assert.deepEqual(horsSite, []);
   await contexte.close();
@@ -1244,10 +1310,19 @@ async function scenarioProfesseur(navigateur, base) {
     for (const [nomBase, base] of bases) {
       try {
         await scenarioProfesseurStopMotion(navigateur, base);
-        noter(`- OK ${nomBase} 1366×768 · professeur du stop motion : 4 équipes fictives, aide en premier, tuiles (titre, scénario, plaque, film), alertes (pas d’image à mi-séance, plaque pas rangée), films prêts et lien vers la séance cinéma, onglets Scénario et Film (lecteur, 36 images dont une enlevée), évaluation à 7 critères avec repères et ceinture, export Excel.`);
+        noter(`- OK ${nomBase} 1366×768 · professeur du stop motion : 4 équipes fictives, aide en premier, tuiles (titre, scénario, plaque, film), alertes (pas d’image à mi-séance, plaque pas rangée), films prêts et lien vers la séance cinéma, histoire et avis sur les tuiles, avis « À revoir » envoyé (professeur.json et dossier de l’équipe), onglets Scénario et Film (lecteur, 36 images dont une enlevée), évaluation à 7 critères avec repères et ceinture, export Excel.`);
       } catch (e) {
         ok = false;
         noter(`- ÉCHEC ${nomBase} 1366×768 · professeur du stop motion : ${e.message.split('\n').slice(0, 6).join(' ')}`);
+      }
+    }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioStopMotionAvis(navigateur, base);
+        noter(`- OK ${nomBase} 1366×768 · stop motion, avis du professeur vu par l’élève : « Je relis mon histoire » montre l’avis « À revoir » et son mot, l’équipe change la fin, relit son histoire ; avis noté comme vu.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · stop motion, avis du professeur : ${e.message.split('\n').slice(0, 6).join(' ')}`);
       }
     }
   } finally {

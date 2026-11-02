@@ -126,6 +126,7 @@
     if (!PARTIES_HISTOIRE.includes(partie)) return histoireDe(d);
     d.histoire = Object.assign(histoireDe(d), { [partie]: String(texte || '').replace(/\s+/g, ' ').trim().slice(0, LONGUEUR_IDEE).trim() });
     d.modifieLe = S.maintenant();
+    d.histoireModifieeLe = d.modifieLe;
     return d.histoire;
   }
   // Le scénario en 3 temps : « Un dragon, dans la forêt, dort tranquillement. » · « Une tempête arrive. Un ami vient
@@ -187,6 +188,36 @@
     };
   }
 
+  // ---------- Avis du professeur sur le scénario ----------
+  // Le professeur donne son avis dans son outil (professeur.json) ; une copie est déposée dans le dossier de l'équipe
+  // (avis-professeur.json) : { application, projet, type: 'avis', equipe, scenario: { avis: 'valide' | 'revoir', mot, date } }.
+  // L'élève le voit à l'écran « Je relis mon histoire » (séances 2, 3 et 4), une fois par avis (d.avisVu = date de l'avis).
+  const AVIS = ['valide', 'revoir'];
+  function lireAvis(texte, projet) {
+    try {
+      const a = typeof texte === 'string' ? JSON.parse(texte) : texte;
+      const sc = a && a.type === 'avis' && (!projet || a.projet === projet) ? a.scenario : null;
+      return sc && AVIS.includes(sc.avis) && sc.date ? { avis: sc.avis, mot: String(sc.mot || '').slice(0, 300), date: sc.date } : null;
+    } catch {
+      return null;
+    }
+  }
+  const avisAMontrer = (avis, d) => !!(avis && avis.date > ((d && d.avisVu) || ''));
+  function noterAvisVu(d, avis) {
+    if (avis && avis.date > (d.avisVu || '')) {
+      d.avisVu = avis.date;
+      d.modifieLe = S.maintenant();
+    }
+    return d;
+  }
+  // Pour le professeur : où en est son avis ? → 'a-donner' (scénario fini, pas d'avis) · 'valide' · 'revoir' ·
+  // 'corrige' (l'équipe a changé son histoire après « À revoir ») · null (scénario pas encore fini, pas d'avis).
+  function etatAvis(d, avis, complet) {
+    if (!avis) return complet ? 'a-donner' : null;
+    if (avis.avis === 'revoir' && d && d.histoireModifieeLe && d.histoireModifieeLe > avis.date) return 'corrige';
+    return avis.avis;
+  }
+
   // Le film de l'équipe, gardé à part des séances (d.film) : la séance 4 continue le film commencé en séance 3.
   const filmDe = (d) => copie(d && d.film);
   function noterFilm(d, valeur) {
@@ -195,7 +226,7 @@
     return d.film;
   }
 
-  const API = { imagesDeSeance, alertesFilm, resumeFilm, PARTIES_HISTOIRE, LONGUEUR_IDEE, histoireDe, noterHistoire, phrasesHistoire, imagesVisibles: visibles, basculerImage, choisirVitesse, noterTitre, LONGUEUR_TITRE, nomsGenerique, sequenceFilm, dureeSequence, filmDe, noterFilm, REGLAGES_FILM: REGLAGES, filmVide, prochainNomFilm: prochainNom, ajouterImageFilm: ajouterImage, enleverImageFilm: enleverImage, compteurFilm: compteur, dernieresImages: dernieres, derniereImage: derniere, imagesParSeconde, dureeFilm: duree, conseilDuMoment: conseil };
+  const API = { AVIS_SCENARIO: AVIS, lireAvis, avisAMontrer, noterAvisVu, etatAvis, imagesDeSeance, alertesFilm, resumeFilm, PARTIES_HISTOIRE, LONGUEUR_IDEE, histoireDe, noterHistoire, phrasesHistoire, imagesVisibles: visibles, basculerImage, choisirVitesse, noterTitre, LONGUEUR_TITRE, nomsGenerique, sequenceFilm, dureeSequence, filmDe, noterFilm, REGLAGES_FILM: REGLAGES, filmVide, prochainNomFilm: prochainNom, ajouterImageFilm: ajouterImage, enleverImageFilm: enleverImage, compteurFilm: compteur, dernieresImages: dernieres, derniereImage: derniere, imagesParSeconde, dureeFilm: duree, conseilDuMoment: conseil };
   Object.assign(S, API);
   if (enNode) module.exports = S;
 })(typeof window !== 'undefined' ? window : globalThis);

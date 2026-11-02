@@ -296,3 +296,20 @@ body::after { content: ''; position: fixed; left: 0; right: 0; bottom: 0; height
 .titre-recap { font-size: 1.875rem; color: var(--jaune); }
 .objets-recap { font-size: 1.5rem; color: var(--encre); margin-top: 0.5rem; }
 .titre-recap .picto, .objets-recap .picto { width: 2rem; height: 2rem; color: var(--jaune); }
+
+/* Avis du professeur sur le scénario (écran « Je relis mon histoire ») */
+.avis-colonne { align-items: center; text-align: center; max-width: 56rem; }
+.avis-colonne .consigne-ligne { justify-content: center; }
+.avis-icone { width: 7rem; height: 7rem; border-radius: 50%; background: var(--jaune); color: var(--jaune-encre); display: flex; align-items: center; justify-content: center; box-shadow: 0 0.4375rem 0 var(--jaune-ombre); }
+.avis-icone .picto { width: 4rem; height: 4rem; }
+.avis-colonne.revoir .avis-icone { background: var(--ambre-clair); color: var(--ambre-fonce); box-shadow: 0 0.4375rem 0 var(--ambre); }
+.avis-mot { margin: 0.5rem 0 0; padding: 1rem 1.5rem; border-radius: 1rem; background: var(--surface); color: var(--encre); font-size: 2rem; font-weight: 700; line-height: 1.3; border: 0.1875rem solid var(--trait); }
+.avis-mot.msg-ambre { background: var(--ambre-clair); color: var(--ambre-fonce); border-color: var(--ambre); }
+.avis-garder { margin-top: 1.25rem; }
+.cartes-parties { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; width: 52rem; }
+.carte-partie { display: flex; flex-direction: column; align-items: flex-start; gap: 0.125rem; min-height: 4.25rem; padding: 0.5rem 1rem; border-radius: 0.75rem; border: 0.1875rem solid var(--trait);
+  background: var(--surface); color: var(--encre); text-align: left; box-shadow: 0 0.3125rem 0 var(--noir-brique); }
+.carte-partie small { font-size: 1rem; font-weight: 700; color: var(--jaune); }
+.carte-partie span { font-size: 1.375rem; font-weight: 700; line-height: 1.2; }
+.carte-partie:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.carte-partie:focus-visible { outline: 0.25rem solid var(--jaune); outline-offset: 0.25rem; }

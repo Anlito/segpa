@@ -1,8 +1,10 @@
 // Outil professeur : ce qui est propre au film en stop motion (plan : docs/PLAN-stop-motion.md §5).
-//   tuile   : titre du film, scénario (parties écrites), plaque prise / rangée, images (gardées / 30), vitesse ;
+//   tuile   : titre du film, l'histoire en résumé (début / milieu / fin), scénario (parties écrites) et l'avis du
+//             professeur, plaque prise / rangée, images (gardées / 30), vitesse ;
 //   alertes : pas encore d'image à mi-séance de tournage ; plaque prise mais rangement pas fait ;
 //   bandeau : films prêts (30 images au moins), lien vers la séance cinéma ;
-//   onglets : « Scénario » (les 7 réponses et le récap) · « Film » (le film tel qu'il sera projeté, toutes les images).
+//   onglets : « Scénario » (les 7 réponses, le récap et l'avis du professeur : « Validé » ou « À revoir » et un petit
+//             mot, vu par l'équipe à l'écran « Je relis mon histoire ») · « Film » (le film projeté, toutes les images).
 (function (global) {
   'use strict';
 
@@ -23,12 +25,23 @@
   const nbParties = (d) => QUESTIONS.filter(([k]) => S.histoireDe(d)[k]).length;
   const NOMS_VITESSE = { lent: 'lent', normal: 'normal', rapide: 'rapide' };
 
-  function lignes(d) {
+  // Un début de phrase pour la tuile : « Un dragon, sur la Lune… ».
+  const court = (t, n) => (t.length > n ? t.slice(0, n).replace(/[\s,.;:!?…]+\S*$/, '') + '…' : t);
+  const TEXTES_AVIS = { 'a-donner': 'avis à donner', valide: 'validé ✓', revoir: 'à revoir', corrige: 'corrigé, à relire' };
+  const avisDe = (notes) => (notes && notes.scenario) || null;
+  const etatAvisDe = (d, notes) => S.etatAvis(d, avisDe(notes), fait(d, 's1', 'histoire'));
+
+  function lignes(d, notes) {
     const l = [];
     const f = S.resumeFilm(d, R());
     if (f.titre) l.push(`« ${f.titre} »`);
+    const ph = S.phrasesHistoire(S.histoireDe(d));
+    const h = S.histoireDe(d);
+    const histoire = [ph.debut, S.phrasesHistoire({ probleme: h.probleme }).milieu, ph.fin].filter(Boolean).map((t) => court(t, 24));
+    if (histoire.length) l.push(`Histoire : ${histoire.join(' / ')}`);
     const n = nbParties(d);
-    if (n) l.push(`Scénario : ${n} / ${QUESTIONS.length}${fait(d, 's1', 'histoire') ? ' ✓' : ''}`);
+    const ea = etatAvisDe(d, notes);
+    if (n) l.push(`Scénario : ${n} / ${QUESTIONS.length}${fait(d, 's1', 'histoire') ? ' ✓' : ''}${ea ? ' · ' + TEXTES_AVIS[ea] : ''}`);
     if (fait(d, 's2', 'plaque')) l.push(`Plaque : prise ✓ · rangée ${coche(fait(d, 's2', 'rangement'))}`);
     if (f.prises) l.push(`Film : ${f.gardees} / ${R().min} images${f.atteint ? ' ✓' : ''}${f.enlevees ? ` (${f.enlevees} enlevée${f.enlevees > 1 ? 's' : ''})` : ''} · ${NOMS_VITESSE[f.vitesse] || f.vitesse}`);
     if (fait(d, 's5', 'mon-film')) l.push('Film monté ✓');
@@ -45,12 +58,12 @@
   }
 
   // Onglet « Scénario » : les 7 réponses de la séance 1 et le récap en 3 temps.
-  function ongletScenario(d) {
+  function ongletScenario(d, outils) {
     const h = S.histoireDe(d);
     const ph = S.phrasesHistoire(h);
     const titre = S.filmDe(d).titre;
     if (!nbParties(d) && !titre) return '<section class="pp-bloc"><h3>Séance 1 · scénario</h3><p class="pp-vide">Pas encore de scénario.</p></section>';
-    return `<section class="pp-bloc"><h3>Séance 1 · scénario${titre ? ` · « ${ech(titre)} »` : ''}</h3>
+    return blocAvis(d, outils) + `<section class="pp-bloc"><h3>Séance 1 · scénario${titre ? ` · « ${ech(titre)} »` : ''}</h3>
         <div class="pp-reponse"><p class="pp-question">Début</p><p>${ech(ph.debut || '—')}</p></div>
         <div class="pp-reponse"><p class="pp-question">Milieu</p><p>${ech(ph.milieu || '—')}</p></div>
         <div class="pp-reponse"><p class="pp-question">Fin</p><p>${ech(ph.fin || '—')}</p></div>
@@ -58,6 +71,48 @@
           ([k, t]) => `<tr><th scope="row">${ech(t)}</th><td>${h[k] ? ech(h[k]) : '<span class="pp-vide">—</span>'}</td></tr>`
         ).join('')}</tbody></table>
       </section>`;
+  }
+
+  // L'avis du professeur sur le scénario : « Validé » ou « À revoir », un petit mot, envoyé à l'équipe.
+  const quand = (iso) => new Date(iso).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  function blocAvis(d, outils) {
+    const o = outils || { notes: {}, peutEcrire: false };
+    const avis = avisDe(o.notes);
+    const ea = etatAvisDe(d, o.notes);
+    const choix = avis ? avis.avis : '';
+    const suivi = avis
+      ? [`Envoyé ${quand(avis.date)}`, d.avisVu && d.avisVu >= avis.date ? 'vu par l’équipe ✓' : 'pas encore vu par l’équipe', ea === 'corrige' ? 'l’équipe a changé son histoire depuis : à relire' : ''].filter(Boolean).join(' · ')
+      : fait(d, 's1', 'histoire') ? 'Scénario fini : à toi de donner ton avis.' : 'Le scénario n’est pas encore fini (tu peux déjà donner ton avis).';
+    return `<section class="pp-bloc pp-avis${ea === 'corrige' ? ' a-relire' : ''}"><h3>Ton avis sur le scénario</h3>
+        <div class="pp-avis-choix" role="group" aria-label="Ton avis">
+          <button type="button" class="pb-btn pp-avis-btn valide" data-action="avis-choisir" data-avis="valide" aria-pressed="${choix === 'valide'}">✓ Validé</button>
+          <button type="button" class="pb-btn pp-avis-btn revoir" data-action="avis-choisir" data-avis="revoir" aria-pressed="${choix === 'revoir'}">✎ À revoir</button>
+        </div>
+        <label class="pp-avis-mot">Un petit mot pour l’équipe (facultatif, lu à voix haute)
+          <textarea rows="2" maxlength="300" data-avis-mot placeholder="Ex. : Super idée ! Pense à construire la fusée pour la fin.">${ech((avis && avis.mot) || '')}</textarea></label>
+        <p class="pp-avis-pied"><button type="button" class="pb-btn pp-principal" data-action="avis-envoyer"${o.peutEcrire && choix ? '' : ' disabled'}>Envoyer à l’équipe</button>
+          <span class="pp-vide">${ech(suivi)}</span></p>
+        ${o.peutEcrire ? '' : '<p class="pp-vide">Ouvrez le dossier de la classe pour envoyer un avis.</p>'}
+        <p class="pp-vide">L’équipe le voit au début de la séance suivante (écran « Je relis mon histoire ») ; avec « À revoir », elle peut changer une réponse. Ni note ni rouge.</p>
+      </section>`;
+  }
+  function actionsScenario(d, outils) {
+    return {
+      'avis-choisir': (b) => {
+        for (const x of document.querySelectorAll('[data-action="avis-choisir"]')) x.setAttribute('aria-pressed', String(x === b));
+        const e = document.querySelector('[data-action="avis-envoyer"]');
+        if (e && outils.peutEcrire) e.disabled = false;
+      },
+      'avis-envoyer': async (b) => {
+        const choisi = document.querySelector('[data-action="avis-choisir"][aria-pressed="true"]');
+        if (!choisi) return;
+        b.disabled = true;
+        const scenario = { avis: choisi.dataset.avis, mot: document.querySelector('[data-avis-mot]').value.trim().slice(0, 300), date: S.maintenant() };
+        const equipe = S.nomEquipe(d.equipe.eleves);
+        const ok = await outils.poserNote('scenario', scenario, { nom: 'avis-professeur.json', contenu: { application: 'segpa', projet: S.projet.id, type: 'avis', equipe, scenario } });
+        if (!ok) alert('L’avis n’a pas pu être enregistré dans le dossier. Vérifiez l’accès au dossier, puis réessayez.');
+      },
+    };
   }
 
   // Onglet « Film » : le film tel qu'il sera projeté (titre, images gardées, générique), puis toutes les images.
@@ -97,7 +152,7 @@
     alertes,
     bandeauClasse,
     onglets: [
-      { id: 'scenario', titre: 'Scénario', html: (d) => ongletScenario(d) },
+      { id: 'scenario', titre: 'Scénario', html: (d, url, outils) => ongletScenario(d, outils), actions: actionsScenario },
       { id: 'film', titre: 'Film', html: (d, url) => ongletFilm(d, url) },
     ],
     // Drapeaux de différenciation (proposition à valider) : notes du professeur, visibles sur la tuile.
