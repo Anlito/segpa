@@ -236,3 +236,7 @@ Professeur (`stop-motion/prof.html`) :
 - [ ] Séance 2 : « Je sors une seule pièce » montre la photo de la pièce ; pendant la mesure, sa photo et, pour le corps, un pavé dessiné avec une flèche sur la hauteur, la largeur, puis la longueur ; « Je remets la pièce dans la boîte. »
 - [ ] Outil professeur → bandeau « Séance 2 » : « Feuilles de dessin (A4, une par équipe) » (prénoms remplis) et « Feuille vierge » ; aussi sur la page professeur.
 - [ ] Imprimée en taille réelle (100 %), un carreau mesure bien 1 cm à la règle ; le corps et la manivelle tiennent dans leur zone.
+
+## Taille-crayon — tailles de référence saisies par le professeur (02/11)
+- [ ] Outil professeur → bandeau « Séance 2 » → « Tailles de référence » : corps (hauteur, largeur, longueur) et manivelle (longueur), tolérance ± 0,5 cm ; « Enregistrer les tailles » écrit `tailles-reference.json` dans le dossier de la classe.
+- [ ] Un élève (dossier de la classe ouvert) est vérifié avec ces tailles dès sa prochaine mesure ; la bonne valeur ne lui est jamais montrée. Sans dossier : les plages du modèle.

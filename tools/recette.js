@@ -884,6 +884,39 @@ async function scenarioStopMotionAvis(navigateur, base) {
   await contexte.close();
 }
 
+// Taille-crayon : les tailles saisies par le professeur (tailles-reference.json) sont celles qui vérifient les élèves.
+// Hauteur du corps à 9,2 cm (± 0,5) : 8,6 cm est « hors de la plage » alors que le modèle (8,5 à 9,5) l'accepterait.
+async function scenarioTaillesProfesseur(navigateur, base) {
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64');
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  await injecterDossier(page, { kind: 'directory', name: 'Taille-crayon', children: [
+    { kind: 'file', name: 'classe.json', data: b64({ classe: '6A', eleves: ['Léa', 'Tom', 'Inès', 'Noah'] }) },
+    { kind: 'file', name: 'tailles-reference.json', data: b64({ application: 'segpa', projet: 'taille-crayon', type: 'tailles', tolerance: 0.5, tailles: { corps: { hauteur: 9.2 } } }) },
+  ] });
+  await page.addInitScript(() => document.addEventListener('DOMContentLoaded', () => {
+    window.Segpa.fichiers.memoriser = async () => {};
+    window.Segpa.fichiers.memorise = async () => null;
+  }));
+  await page.goto(base + 'taille-crayon/index.html');
+  await cliquer(page, '[data-action="commencer"]');
+  await cliquer(page, '[data-action="ouvrir"]');
+  await cliquer(page, '[data-prenom="Léa"]');
+  await cliquer(page, '[data-prenom="Tom"]');
+  await cliquer(page, '[data-action="valider"]');
+  await cliquer(page, '[data-action="seance"][data-id="s2"]');
+  for (let i = 0; i < 4; i++) await cliquer(page, '[data-action="fait"]');
+  await cliquer(page, '[data-action="sortie"]');
+  for (const c of ['8', ',', '6']) await cliquer(page, `[data-c="${c}"]`);
+  await cliquer(page, '[data-action="mesure"]');
+  await page.locator('.msg-ambre', { hasText: 'Mesure encore une fois' }).waitFor();
+  for (const c of ['9', ',', '2']) await cliquer(page, `[data-c="${c}"]`);
+  await cliquer(page, '[data-action="mesure"]');
+  await page.locator('.msg-ok', { hasText: 'Bien mesuré' }).waitFor();
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
 // La course au vidéoprojecteur (démonstration) : voitures (une absente), 3 couloirs, poules, chaque course au chrono
 // (touches 1 à 3, une voiture qui n'arrive pas), finales par niveau, podiums, « Bravo à tous ».
 async function scenarioCourse(navigateur, base, taille, captures) {
@@ -1116,6 +1149,16 @@ async function scenarioProfesseur(navigateur, base) {
   await feuille.goto(base + 'taille-crayon/feuille-dessin.html');
   assert.equal(await feuille.locator('.feuille').count(), 1, 'sans prénoms : une feuille vierge');
   await feuille.close();
+  // Tailles de référence : le professeur tape la hauteur du corps (9,2 cm), enregistrées dans le dossier de la classe.
+  await page.locator('.pp-tailles summary').click();
+  await page.locator('[data-taille="corps|hauteur"]').fill('9,2');
+  await cliquer(page, '[data-tailles-enregistrer]');
+  await page.locator('.pp-tailles', { hasText: 'Enregistré ✓' }).waitFor();
+  const tailles = await page.evaluate(() => window.__lireJson('tailles-reference.json'));
+  assert.equal(tailles.type, 'tailles');
+  assert.equal(tailles.tailles.corps.hauteur, 9.2);
+  await page.locator('.pp-taille', { hasText: 'accepté de 8,7 cm à 9,7 cm' }).waitFor();
+  await page.screenshot({ path: path.join(SORTIE, 'prof-tailles.png'), fullPage: true });
   // « J'y vais » : l'aide est notée vue dans professeur.json, l'alerte disparaît.
   await cliquer(page, '.pc-aide [data-action="vu"]');
   await page.waitForFunction(() => !document.querySelector('.pc-aides'));
@@ -1131,7 +1174,7 @@ async function scenarioProfesseur(navigateur, base) {
   await cliquer(page, '[data-action="onglet"][data-id="pieces"]');
   await page.waitForFunction(() => document.querySelectorAll('.pp-piece').length === 6);
   await cliquer(page, '[data-action="onglet"][data-id="seance2"]');
-  assert.match(await page.locator('.pp-table').textContent(), /Hauteur9 cm1\s*✓ dans la plage8,5 cm à 9,5 cm/);
+  assert.match(await page.locator('.pp-table').textContent(), /Hauteur9 cm1\s*✓ dans la plage8,7 cm à 9,7 cm/);
   await cliquer(page, '[data-action="onglet"][data-id="historique"]');
   assert.ok((await page.locator('.pp-table tbody tr').count()) > 10);
   await cliquer(page, '[data-action="onglet"][data-id="differenciation"]');
@@ -1312,7 +1355,7 @@ async function scenarioProfesseur(navigateur, base) {
     for (const [nomBase, base] of bases) {
       try {
         await scenarioProfesseur(navigateur, base);
-        noter(`- OK ${nomBase} 1366×768 · professeur : 5 équipes fictives, aide en premier avec son étape, alertes (inactivité, pièces dehors, mesure), dernière photo, « J’y vais » écrit dans professeur.json, onglets Bilan, Évaluation (niveaux, note, ceinture), Album, Pièces et réponses, Séance 2, Historique, Différenciation ; exports Excel, CSV, Carnet de classe ; feuilles ceinture.`);
+        noter(`- OK ${nomBase} 1366×768 · professeur : 5 équipes fictives, aide en premier avec son étape, alertes (inactivité, pièces dehors, mesure), dernière photo, « J’y vais » écrit dans professeur.json, onglets Bilan, Évaluation (niveaux, note, ceinture), Album, Pièces et réponses, Séance 2, Historique, Différenciation ; exports Excel, CSV, Carnet de classe ; feuilles ceinture ; feuilles de dessin A4 ; tailles de référence saisies et enregistrées.`);
       } catch (e) {
         ok = false;
         noter(`- ÉCHEC ${nomBase} 1366×768 · professeur : ${e.message.split('\n')[0]}`);
@@ -1343,6 +1386,15 @@ async function scenarioProfesseur(navigateur, base) {
       } catch (e) {
         ok = false;
         noter(`- ÉCHEC ${nomBase} 1366×768 · stop motion, avis du professeur : ${e.message.split('\n').slice(0, 6).join(' ')}`);
+      }
+    }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioTaillesProfesseur(navigateur, base);
+        noter(`- OK ${nomBase} 1366×768 · taille-crayon, tailles du professeur : lues dans tailles-reference.json, une mesure acceptée par le modèle mais hors de la taille du professeur est signalée (« Mesure encore une fois »), la bonne est acceptée.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · taille-crayon, tailles du professeur : ${e.message.split('\n').slice(0, 4).join(' ')}`);
       }
     }
   } finally {
