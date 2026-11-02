@@ -22,6 +22,8 @@ Rien n'est envoyé ailleurs, aucun compte. Une sauvegarde existante n'est jamais
   l'ordre du démontage (nom, photo, geste et conseil pour la retirer, conseil pour la remettre) et les plages de mesure
   de la séance 2 (corps : hauteur 8,5–9,5 cm, largeur 4–5 cm, longueur 5–6 cm ; manivelle : 4,5–5,5 cm). Photos dans
   `site/taille-crayon/img/` (pièces, gestes, l'objet du jour).
+- Feuille de dessin de la séance 2 : `site/taille-crayon/feuille-dessin.html` (A4, 1 carreau = 1 cm, les 2 pièces) ;
+  l'outil professeur la prépare avec les prénoms de chaque équipe (bandeau « Séance 2 »). Imprimer en taille réelle (100 %).
 - `site/taille-crayon/donnees/classes.js` : la classe et le nom du dossier du projet.
 - `site/taille-crayon/donnees/projet.js` : titre et couleur du projet.
 Après une modification : `npm test` vérifie que les données restent lisibles.

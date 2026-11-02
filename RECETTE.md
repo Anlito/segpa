@@ -229,3 +229,10 @@ Professeur (`stop-motion/prof.html`) :
 - [ ] Séance 2 : le corps se mesure en 3 fois (hauteur, largeur, longueur), puis la manivelle ; hors de la plage : « Mesure encore une fois », jamais la valeur.
 - [ ] Séance 3 : pour chaque pièce, son conseil de remontage (ex. « J'enfonce la manivelle, puis je tourne la bague pour la bloquer. »).
 - [ ] Outil professeur : « Mesures : corps H 9 cm ✓, l 4,5 cm ✓, L 5,5 cm ✓ » sur la tuile ; onglet Séance 2 avec une ligne par dimension.
+
+## Taille-crayon — boîte sans compartiment, pièce 8, aide à la mesure, feuille de dessin (retours de Thomas du 02/11)
+- [ ] Séance 1 : « Je pose chaque pièce dans la boîte. » (le tableau garde l'ordre) ; « Je pose la pièce dans la boîte. » ; rangement : « Toutes mes pièces sont dans la boîte. »
+- [ ] Après les 7 pièces : 7 cases cochées, « Toutes les pièces sont dans la boîte ! », gros bouton « J'ai fini de démonter » (plus de « Pièce 8 »).
+- [ ] Séance 2 : « Je sors une seule pièce » montre la photo de la pièce ; pendant la mesure, sa photo et, pour le corps, un pavé dessiné avec une flèche sur la hauteur, la largeur, puis la longueur ; « Je remets la pièce dans la boîte. »
+- [ ] Outil professeur → bandeau « Séance 2 » : « Feuilles de dessin (A4, une par équipe) » (prénoms remplis) et « Feuille vierge » ; aussi sur la page professeur.
+- [ ] Imprimée en taille réelle (100 %), un carreau mesure bien 1 cm à la règle ; le corps et la manivelle tiennent dans leur zone.

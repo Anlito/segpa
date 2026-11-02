@@ -1,6 +1,7 @@
 // Outil professeur : ce qui est propre au taille-crayon (brief §5).
 //   tuile   : pièces démontées (n sur N), mesures de la séance 2 ;
 //   alertes : « Plus de 2 pièces dehors » (séance 2), mesure encore hors de la plage après les essais ;
+//   bandeau : feuilles de dessin de la séance 2 à imprimer (une par équipe, prénoms remplis) ;
 //   onglets : « Pièces et réponses » (tableau de la séance 1, réponses écrites de la séance 3),
 //             « Séance 2 » (longueurs saisies, essais, plage de référence).
 (function (global) {
@@ -88,9 +89,18 @@
       <table class="pp-table"><thead><tr><th>Pièce</th><th>Longueurs saisies</th><th>Essais</th><th>Vérification</th><th>Plage de référence</th><th>Remarque</th></tr></thead><tbody>${lignesHtml}</tbody></table></section>`;
   }
 
+  // Bandeau de la classe : les feuilles de dessin de la séance 2 (A4, quadrillage de 1 cm), une par équipe.
+  function bandeauClasse(equipes) {
+    const noms = equipes.map((eq) => eq.resume.noms).sort((a, b) => a.localeCompare(b, 'fr'));
+    return `<div class="pc-exports pc-piste"><span>Séance 2</span>
+      <a class="pb-btn" href="feuille-dessin.html#${encodeURIComponent(noms.join('|'))}" target="_blank" rel="noopener">Feuilles de dessin (A4, une par équipe)</a>
+      <a class="pb-btn" href="feuille-dessin.html" target="_blank" rel="noopener">Feuille vierge</a></div>`;
+  }
+
   S.profProjet = {
     lignes,
     alertes,
+    bandeauClasse,
     onglets: [
       { id: 'pieces', titre: 'Pièces et réponses', html: ongletPieces },
       { id: 'seance2', titre: 'Séance 2', html: (d) => ongletMesures(d) },

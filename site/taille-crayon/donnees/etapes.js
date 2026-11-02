@@ -2,6 +2,7 @@
 // Textes repris de la fiche élève et de la présentation (docs/sources/), raccourcis à 8 mots au plus si besoin :
 // la suite de la phrase va dans « detail » (lue aussi à voix haute).
 //
+// La boîte n'a pas de compartiment (Thomas, 02/11/2026) : c'est le tableau des pièces qui garde l'ordre.
 // Types d'écran : regle (bouton « J'ai compris ») · consigne (« C'est fait ») · photo · cases (lignes à cocher) ·
 // bilan (phrases + trois visages). Écrans propres au taille-crayon (js/ecrans.js) : ouverture (la présentation),
 // pieces (tableau des pièces), mesure (une pièce au réglet), remontage (le tableau à l'envers), questions (réponse
@@ -32,11 +33,11 @@
           ] },
           ...REGLES,
           { "id": "materiel", "type": "consigne", "picto": "tournevis", "texte": "Je prépare mon matériel.", "detail": "1 taille-crayon, 1 tournevis, 1 boîte." },
-          { "id": "une-case", "type": "consigne", "picto": "boite", "texte": "Une pièce = une case dans la boîte.", "detail": "Pas de mélange avec le binôme voisin." },
+          { "id": "une-case", "type": "consigne", "picto": "boite", "texte": "Je pose chaque pièce dans la boîte.", "detail": "Le tableau garde l’ordre des pièces. Pas de mélange avec le binôme voisin." },
           { "id": "pieces", "type": "pieces", "titre": "Tableau des pièces", "minuteur": 25 },
           { "id": "rangement", "type": "cases", "picto": "balai", "texte": "Je range.", "minuteur": 5, "bravo": "La boîte est rangée",
             "lignes": [
-              { "picto": "boite", "texte": "Mes pièces sont dans la boîte, dans l’ordre." },
+              { "picto": "boite", "texte": "Toutes mes pièces sont dans la boîte." },
               { "picto": "etiquette", "texte": "Mon nom est sur la boîte." },
               { "picto": "table", "texte": "Ma table est propre." }
             ] },

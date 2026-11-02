@@ -1101,6 +1101,21 @@ async function scenarioProfesseur(navigateur, base) {
   await page.waitForFunction(() => [...document.querySelectorAll('.pt-photo img')].some((i) => i.src.startsWith('blob:')));
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'pas de défilement horizontal');
   await page.screenshot({ path: path.join(SORTIE, 'prof-classe.png'), fullPage: true });
+  // Feuilles de dessin de la séance 2 : une par équipe, prénoms remplis, A4, quadrillage de 1 cm (19 × 12 et 19 × 9).
+  const lien = await page.locator('.pc-piste a', { hasText: 'Feuilles de dessin' }).getAttribute('href');
+  assert.match(decodeURIComponent(lien), /^feuille-dessin\.html#.*Léa · Tom/);
+  const feuille = await contexte.newPage();
+  await feuille.goto(base + 'taille-crayon/' + lien);
+  assert.equal(await feuille.locator('.feuille').count(), 5);
+  assert.match(await feuille.locator('.feuille').first().textContent(), /Prénoms : Adam · Jade/);
+  assert.deepEqual(await feuille.locator('.feuille').first().locator('svg.quadrillage').evaluateAll((l) => l.map((x) => [x.getAttribute('width'), x.getAttribute('height')])), [['190mm', '120mm'], ['190mm', '90mm']]);
+  await feuille.screenshot({ path: path.join(SORTIE, 'prof-feuille-dessin.png') });
+  const pdf = await feuille.pdf({ format: 'A4', printBackground: false });
+  assert.equal((pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length, 5, 'une page A4 par équipe');
+  fs.writeFileSync(path.join(SORTIE, 'feuilles-dessin.pdf'), pdf);
+  await feuille.goto(base + 'taille-crayon/feuille-dessin.html');
+  assert.equal(await feuille.locator('.feuille').count(), 1, 'sans prénoms : une feuille vierge');
+  await feuille.close();
   // « J'y vais » : l'aide est notée vue dans professeur.json, l'alerte disparaît.
   await cliquer(page, '.pc-aide [data-action="vu"]');
   await page.waitForFunction(() => !document.querySelector('.pc-aides'));

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Feuille de dessin · Je démonte un objet technique · 6e SEGPA</title>
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<style>
+  /* Feuille A4 de la séance 2 : le quadrillage est un dessin en millimètres, imprimé à 100 % : 1 carreau = 1 cm. */
+  @page { size: A4 portrait; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Lexend', system-ui, 'Segoe UI', sans-serif; color: #111; background: #E9EDF2; }
+  .outils { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 20px; background: #fff; border-bottom: 1px solid #CBD2DC; font-size: 15px; }
+  .outils h1 { margin: 0 auto 0 0; font-size: 19px; }
+  .outils button { font: inherit; font-weight: 700; padding: 10px 16px; border-radius: 10px; border: 0; background: #1D5FB4; color: #fff; cursor: pointer; }
+  .outils p { margin: 0; color: #3D4A5C; flex-basis: 100%; }
+  .feuilles { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 24px 0 48px; }
+  .feuille { width: 190mm; height: 277mm; background: #fff; display: flex; flex-direction: column; padding: 0; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); outline: 10mm solid #fff; }
+  .entete { display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; border-bottom: 0.6mm solid #111; padding-bottom: 2mm; margin-bottom: 3mm; }
+  .entete strong { font-size: 5.2mm; display: block; }
+  .entete small { font-size: 3.4mm; color: #333; }
+  .entete .champ { font-size: 3.8mm; white-space: nowrap; }
+  .entete .ligne { display: inline-block; min-width: 42mm; border-bottom: 0.3mm solid #111; padding: 0 1mm; font-weight: 700; }
+  .zone h2 { margin: 0 0 1.5mm; font-size: 4.4mm; display: flex; justify-content: space-between; align-items: baseline; gap: 4mm; }
+  .zone h2 span { font-size: 3.6mm; font-weight: 600; }
+  .zone + .zone { margin-top: 4mm; }
+  .quadrillage { display: block; width: 190mm; }
+  .rappel { margin-top: auto; padding-top: 2mm; font-size: 3.4mm; line-height: 1.45; border-top: 0.3mm solid #999; }
+  @media print {
+    body { background: #fff; }
+    .outils { display: none; }
+    .feuilles { padding: 0; gap: 0; }
+    .feuille { box-shadow: none; outline: none; break-after: page; }
+    .feuille:last-child { break-after: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="outils">
+  <h1>Feuilles de dessin — séance 2</h1>
+  <button type="button" onclick="print()">Imprimer</button>
+  <p>Imprimer en <b>taille réelle (100 %)</b>, sans « ajuster à la page » : 1 carreau = 1 cm. Une feuille par équipe ; sans prénoms, une feuille vierge.</p>
+</div>
+<main class="feuilles" id="feuilles"></main>
+<script>
+  // Prénoms des équipes : après le # de l'adresse, séparés par « | » (donnés par l'outil professeur, dans ce navigateur :
+  // rien n'est envoyé). Sans prénoms : une feuille vierge à compléter à la main.
+  (function () {
+    var ech = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var equipes = decodeURIComponent((location.hash || '').slice(1)).split('|').map(function (x) { return x.trim(); }).filter(Boolean);
+    if (!equipes.length) equipes = [''];
+    // Quadrillage de 1 cm : largeur 190 mm (19 carreaux), hauteur donnée en carreaux ; lignes plus foncées tous les 5 cm.
+    function quadrillage(carreaux) {
+      var w = 190, h = carreaux * 10, l = '';
+      for (var x = 0; x <= w; x += 10) l += '<line x1="' + x + '" y1="0" x2="' + x + '" y2="' + h + '" class="' + (x % 50 ? 'f' : 'g') + '"/>';
+      for (var y = 0; y <= h; y += 10) l += '<line x1="0" y1="' + y + '" x2="' + w + '" y2="' + y + '" class="' + (y % 50 ? 'f' : 'g') + '"/>';
+      return '<svg class="quadrillage" width="' + w + 'mm" height="' + h + 'mm" viewBox="0 0 ' + w + ' ' + h + '" aria-label="Quadrillage de 1 cm">' +
+        '<style>.f{stroke:#9AA6B6;stroke-width:0.2}.g{stroke:#5B6778;stroke-width:0.35}</style>' + l + '</svg>';
+    }
+    var aujourdhui = new Date().toLocaleDateString('fr-FR');
+    document.getElementById('feuilles').innerHTML = equipes.map(function (noms) {
+      return '<section class="feuille">' +
+        '<div class="entete"><div><strong>Je démonte un objet technique</strong><small>Séance 2 · Je mesure et je dessine · 1 carreau = 1 cm</small></div>' +
+        '<div class="champ">Prénoms : <span class="ligne">' + (noms ? ech(noms) : '&nbsp;') + '</span>&nbsp;&nbsp;Date : <span class="ligne" style="min-width:22mm">' + (noms ? aujourdhui : '&nbsp;') + '</span></div></div>' +
+        '<div class="zone"><h2>Pièce 1 : le corps <span>Hauteur : ....... cm &nbsp; Largeur : ....... cm &nbsp; Longueur : ....... cm</span></h2>' + quadrillage(12) + '</div>' +
+        '<div class="zone"><h2>Pièce 2 : la manivelle <span>Longueur : ....... cm</span></h2>' + quadrillage(9) + '</div>' +
+        '<p class="rappel">Je trace les bords droits à la règle. Les arrondis, à main levée. ' +
+        'Je trace la flèche d’une autre couleur, et j’écris la mesure à côté.</p>' +
+        '</section>';
+    }).join('');
+  })();
+</script>
+</body>
+</html>

@@ -5,7 +5,7 @@
 //   geste    : avant de retirer la pièce n, la photo du geste (img/demontage/) et un conseil — sans dire le nom de
 //              la pièce (l'élève le retrouve ensuite).
 //   remonter : conseil pour la remettre en séance 3 (tableau à l'envers).
-// mesures : séance 2, plages de référence en cm (« pas à 1 mm près », décision de Thomas) ; une mesure hors de la
+// mesures : séance 2, photo de la pièce à sortir (image) et plages de référence en cm (« pas à 1 mm près », décision de Thomas) ; une mesure hors de la
 //           plage affiche seulement « Mesure encore une fois », jamais la bonne valeur.
 definirModele({
   // Modèle acheté (affiché seulement au professeur).
@@ -41,12 +41,12 @@ definirModele({
 
   // Séance 2 : les pièces mesurées et dessinées. Le corps se mesure en 3 dimensions, la manivelle sur toute sa longueur.
   "mesures": {
-    "corps": { "titre": "Pièce 1 : le corps", "nom": "le corps du taille-crayon", "dimensions": [
+    "corps": { "titre": "Pièce 1 : le corps", "nom": "le corps du taille-crayon", "image": "img/pieces/piece-07.jpg", "dimensions": [
       { "id": "hauteur", "nom": "Hauteur", "reference": { "min": 8.5, "max": 9.5 } },
       { "id": "largeur", "nom": "Largeur", "reference": { "min": 4, "max": 5 } },
       { "id": "longueur", "nom": "Longueur", "reference": { "min": 5, "max": 6 } }
     ] },
-    "manivelle": { "titre": "Pièce 2 : la manivelle", "nom": "la manivelle", "reference": { "min": 4.5, "max": 5.5 } }
+    "manivelle": { "titre": "Pièce 2 : la manivelle", "nom": "la manivelle", "image": "img/pieces/piece-05.jpg", "reference": { "min": 4.5, "max": 5.5 } }
   },
   "tolerance": 0.5,
   // Après ce nombre de mesures hors de la plage : « Montre ta mesure au professeur. »
