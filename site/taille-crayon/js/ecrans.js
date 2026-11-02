@@ -112,13 +112,22 @@
       O.rafraichir();
     };
 
-    if (sous.temps === 'devisser')
+    // Le geste pour la pièce n (ordre du démontage de donnees/modele.js) : photo et conseil, sans donner le nom.
+    if (sous.temps === 'devisser') {
+      const g = (M().pieces || [])[n - 1];
+      const geste = g && g.geste;
       return {
-        milieu: O.blocConsigne({ picto: 'tournevis', texte: 'Je dévisse une pièce.', detail: 'Si ça bloque, je lève la main.' }, `Pièce ${n}`),
+        milieu: O.blocConsigne(
+          geste
+            ? { picto: 'tournevis', image: geste.image, texte: geste.texte, detail: [geste.detail, 'Si ça bloque, je lève la main.'].filter(Boolean).join(' ') }
+            : { picto: 'tournevis', texte: 'Je retire une pièce.', detail: 'Si ça bloque, je lève la main.' },
+          `Pièce ${n}`
+        ),
         gauche: O.boutonRetour('tableau'),
         principal: O.boutonPrincipal('devissee', 'C’est fait'),
         actions: { tableau: vers('tableau'), devissee: vers('photo') },
       };
+    }
 
     if (sous.temps === 'photo') {
       const vue = O.vuePhoto({
@@ -292,9 +301,23 @@
   S.ajouterEcran('mesure', (etape, O) => {
     const sous = O.sous();
     const info = (M().mesures || {})[etape.piece] || { titre: etape.piece, nom: etape.piece };
-    const plage = S.plageDe(info.reference, M().tolerance);
     const essaisMax = M().essaisMesure || 2;
     const valeur = brouillon(O, etape, { essais: [], longueur: null, verdict: null, tropDehors: false, photo: null });
+    // Plusieurs dimensions (le corps : hauteur, largeur, longueur), mesurées l'une après l'autre.
+    const dims = S.dimensionsDe(info);
+    const multi = Array.isArray(info.dimensions) && info.dimensions.length > 0;
+    sous.dim = Math.min(sous.dim || 0, dims.length - 1);
+    const dim = dims[sous.dim];
+    const plage = S.plageDe(dim.reference, M().tolerance);
+    if (multi && !valeur.dimensions) valeur.dimensions = {};
+    const saisie = () => (multi ? (valeur.dimensions[dim.id] = valeur.dimensions[dim.id] || { essais: [], longueur: null, verdict: null }) : valeur);
+    const motDim = multi ? dim.nom.toLowerCase() : 'longueur';
+    const dimensionSuivante = () => {
+      if (sous.dim + 1 < dims.length) {
+        Object.assign(sous, { dim: sous.dim + 1, saisie: '', verdict: null });
+        O.rafraichir();
+      } else vers('dessiner')();
+    };
     sous.temps = sous.temps || 'sortir';
     const vers = (temps) => () => {
       sous.temps = temps;
@@ -322,7 +345,7 @@
 
     if (sous.temps === 'mesurer') {
       sous.saisie = sous.saisie || '';
-      const essais = valeur.essais.length;
+      const essais = saisie().essais.length;
       let msg = '';
       if (sous.verdict === 'dedans') msg = `<div class="msg msg-ok" role="status">${S.picto('coche')}Bien mesuré !</div>`;
       else if (sous.verdict === 'dehors' && essais < essaisMax) msg = `<div class="msg msg-ambre" role="alert">${S.picto('remonter')}Mesure encore une fois, en partant du 0 du réglet.</div>`;
@@ -330,16 +353,22 @@
       const termine = sous.verdict === 'dedans' || (sous.verdict === 'dehors' && essais >= essaisMax);
       return {
         milieu: `<div class="colonne" style="gap:1.5rem">
-            <div style="display:flex;gap:1rem;align-items:center"><span class="pastille">${O.ech(pastille)}</span>${dehors}</div>
-            <div class="consigne-ligne" style="align-items:center"><span class="tuile-picto">${S.picto('regle')}</span><p class="consigne-texte" style="font-size:2.75rem">Je mesure avec mon réglet.</p>${O.boutonVoix('Je mesure avec mon réglet. Je tape la longueur en centimètres.')}</div>
-            <div class="ligne-mesure">Longueur : <output class="affichage-mesure" aria-live="polite">${O.ech(sous.saisie) || '&nbsp;'}</output><span class="unite">cm</span></div>
+            <div style="display:flex;gap:1rem;align-items:center"><span class="pastille">${O.ech(pastille)}</span>${multi ? `<span class="pastille">${O.ech(dim.nom)} · ${sous.dim + 1} sur ${dims.length}</span>` : dehors}</div>
+            <div class="consigne-ligne" style="align-items:center"><span class="tuile-picto">${S.picto('regle')}</span><p class="consigne-texte" style="font-size:2.75rem">${multi ? `Je mesure la ${O.ech(motDim)}.` : 'Je mesure avec mon réglet.'}</p>${O.boutonVoix(multi ? `Je mesure la ${motDim} avec mon réglet. Je tape la mesure en centimètres.` : 'Je mesure avec mon réglet. Je tape la longueur en centimètres.')}</div>
+            <div class="ligne-mesure">${multi ? O.ech(dim.nom) : 'Longueur'} : <output class="affichage-mesure" aria-live="polite">${O.ech(sous.saisie) || '&nbsp;'}</output><span class="unite">cm</span></div>
             ${msg}
           </div>
           ${termine ? '' : O.pave.html()}`,
         gauche: O.boutonRetour('retour-mesure'),
         principal: termine ? O.boutonPrincipal('mesure-suivant', 'Suivant', 'suivant') : O.boutonPrincipal('mesure', 'C’est mesuré', 'coche', S.lireNombre(sous.saisie) === null),
         actions: {
-          'retour-mesure': vers('sortir'),
+          'retour-mesure': () => {
+            if (sous.dim > 0) {
+              Object.assign(sous, { dim: sous.dim - 1, saisie: '', verdict: null });
+              return O.rafraichir();
+            }
+            vers('sortir')();
+          },
           touche: (b) => {
             sous.saisie = O.pave.appui(sous.saisie, b.dataset.c);
             if (sous.verdict === 'dehors') sous.verdict = null;
@@ -351,17 +380,18 @@
           mesure: () => {
             const n = S.lireNombre(sous.saisie);
             const verdict = S.verifierMesure(n, plage);
-            valeur.essais.push(n);
-            valeur.longueur = n;
-            valeur.verdict = verdict;
+            const x = saisie();
+            x.essais.push(n);
+            x.longueur = n;
+            x.verdict = verdict;
             garderBrouillon(O, etape, valeur);
-            if (verdict === 'sans-reference') return vers('dessiner')();
+            if (verdict === 'sans-reference') return dimensionSuivante();
             sous.verdict = verdict;
-            if (verdict === 'dehors' && valeur.essais.length < essaisMax) sous.saisie = '';
+            if (verdict === 'dehors' && x.essais.length < essaisMax) sous.saisie = '';
             S.voix.son(verdict === 'dedans' ? 'ok' : 'aide');
             O.rafraichir();
           },
-          'mesure-suivant': vers('dessiner'),
+          'mesure-suivant': dimensionSuivante,
         },
       };
     }
@@ -377,7 +407,9 @@
 
     if (sous.temps === 'fleche')
       return {
-        milieu: blocDessin(O, 'fleche', 'Je trace la flèche à la règle.', 'D’une autre couleur. J’écris la longueur à côté.', pastille),
+        milieu: multi
+          ? blocDessin(O, 'fleche', 'Je trace les flèches à la règle.', 'D’une autre couleur. J’écris chaque mesure à côté.', pastille)
+          : blocDessin(O, 'fleche', 'Je trace la flèche à la règle.', 'D’une autre couleur. J’écris la longueur à côté.', pastille),
         gauche: O.boutonRetour('retour-fleche'),
         principal: O.boutonPrincipal('fleche-faite', 'C’est fait'),
         actions: { 'retour-fleche': vers('dessiner'), 'fleche-faite': vers('photo') },
@@ -413,6 +445,12 @@
   // ---------- Séance 3 : le tableau à l'envers ----------
   // Les photos de la séance 1, de la dernière pièce à la première, une à la fois (aide visuelle, pas de contrôle).
 
+  // Conseil pour remettre une pièce (donnees/modele.js, « remonter »), d'après le nom choisi par l'élève.
+  const conseilRemontage = (p) => {
+    const m = (M().pieces || []).find((x) => p.nom && x.nom === p.nom);
+    return (m && m.remonter) || '';
+  };
+
   S.ajouterEcran('remontage', (etape, O) => {
     const sous = O.sous();
     const pieces = piecesDemontees(O.D()).slice().reverse();
@@ -428,8 +466,11 @@
       milieu: `<div class="zone-camera photo-piece">${vignette(O, p.photo, nomPiece(p))}<span class="num-grand">${p.numero}</span></div>
         <div class="colonne">
           <span class="pastille">${sous.i + 1} sur ${pieces.length}</span>
-          <div class="consigne-ligne"><p class="consigne-texte" style="font-size:2.875rem">Je remets cette pièce.</p>${O.boutonVoix(`Je remets cette pièce : ${nomPiece(p)}.`)}</div>
+          <div class="consigne-ligne"><p class="consigne-texte" style="font-size:${conseilRemontage(p) ? '2.5rem' : '2.875rem'}">Je remets cette pièce.</p>${O.boutonVoix(`Je remets cette pièce : ${nomPiece(p)}. ${conseilRemontage(p)}`)}</div>
           <p class="consigne-detail">${O.ech(nomPiece(p))}</p>
+          ${conseilRemontage(p)
+            ? `<p class="consigne-detail conseil-remontage" style="font-size:1.625rem;font-weight:600;color:var(--encre)">${O.ech(conseilRemontage(p))}</p>`
+            : ''}
           <p class="consigne-detail" style="font-size:1.5rem">Si ça bloque, je lève la main. Je ne force pas.</p>
         </div>`,
       gauche: O.boutonRetour('retour-remontage'),

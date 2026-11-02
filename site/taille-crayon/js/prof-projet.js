@@ -20,16 +20,21 @@
       .find((s) => s.id === 's2')
       .etapes.filter((e) => e.type === 'mesure')
       .map((e) => ({ id: e.id, piece: e.piece, info: (M().mesures || {})[e.piece] || { titre: e.piece, nom: e.piece } }));
-  const plage = (info) => S.plageDe(info.reference, M().tolerance);
+  const plage = (reference) => S.plageDe(reference, M().tolerance);
+  // Les mesures d'une étape, dimension par dimension (le corps : hauteur, largeur, longueur ; la manivelle : longueur).
+  const saisies = (d, id, info) => S.mesuresSaisies(mesure(d, id), info);
+  const SIGNE = { dedans: ' ✓', dehors: ' ~' };
+  const ABREGE = { hauteur: 'H', largeur: 'l', longueur: 'L' }; // comme sur un dessin technique
   const cm = (n) => (n === null || n === undefined ? '—' : `${S.ecrireNombre(n)} cm`);
   const VERDICT = { dedans: '✓ dans la plage', dehors: '~ hors de la plage', 'sans-reference': 'pas de référence' };
 
   function lignes(d) {
     const l = [`Pièces démontées : ${pieces(d).length} sur ${M().nombrePieces || 8}`];
     const m = MESURES()
-      .map(({ id, piece }) => {
-        const v = mesure(d, id);
-        return v && v.longueur !== null && v.longueur !== undefined ? `${piece} ${cm(v.longueur)}${v.verdict === 'dedans' ? ' ✓' : v.verdict === 'dehors' ? ' ~' : ''}` : null;
+      .map(({ id, piece, info }) => {
+        const l = saisies(d, id, info).filter((x) => x.longueur !== null);
+        if (!l.length) return null;
+        return `${piece} ${l.map((x) => `${l.length > 1 || S.dimensionsDe(info).length > 1 ? (ABREGE[x.id] || x.nom) + ' ' : ''}${cm(x.longueur)}${SIGNE[x.verdict] || ''}`).join(', ')}`;
       })
       .filter(Boolean);
     if (m.length) l.push('Mesures : ' + m.join(' · '));
@@ -40,10 +45,7 @@
     const a = [];
     if (MESURES().some(({ id }) => (mesure(d, id) || {}).tropDehors)) a.push({ sorte: 'dehors', texte: 'Plus de 2 pièces dehors (séance 2)' });
     const essais = M().essaisMesure || 2;
-    if (MESURES().some(({ id }) => {
-      const v = mesure(d, id);
-      return v && v.verdict === 'dehors' && v.essais.length >= essais;
-    }))
+    if (MESURES().some(({ id, info }) => saisies(d, id, info).some((x) => x.verdict === 'dehors' && x.essais.length >= essais)))
       a.push({ sorte: 'mesure', texte: 'Mesure hors de la plage : à revoir au réglet' });
     return a;
   }
@@ -73,9 +75,13 @@
     const lignesHtml = MESURES()
       .map(({ id, info }) => {
         const v = mesure(d, id);
-        const pl = plage(info);
-        return `<tr><th scope="row">${ech(info.titre)}</th><td>${v && v.essais.length ? v.essais.map(cm).join(' puis ') : '—'}</td><td>${v ? v.essais.length : 0}</td>
-          <td>${v && v.verdict ? VERDICT[v.verdict] || '' : '—'}</td><td>${pl ? `${cm(pl[0])} à ${cm(pl[1])}` : 'à renseigner (modele.js)'}</td><td>${v && v.tropDehors ? '⚠ a sorti plus de 2 pièces' : ''}</td></tr>`;
+        return saisies(d, id, info)
+          .map((x, k) => {
+            const pl = plage(x.reference);
+            return `<tr><th scope="row">${k ? '' : ech(info.titre)}${x.id !== 'longueur' || S.dimensionsDe(info).length > 1 ? ` <small>${ech(x.nom)}</small>` : ''}</th><td>${x.essais.length ? x.essais.map(cm).join(' puis ') : '—'}</td><td>${x.essais.length}</td>
+              <td>${x.verdict ? VERDICT[x.verdict] || '' : '—'}</td><td>${pl ? `${cm(pl[0])} à ${cm(pl[1])}` : 'à renseigner (modele.js)'}</td><td>${!k && v && v.tropDehors ? '⚠ a sorti plus de 2 pièces' : ''}</td></tr>`;
+          })
+          .join('');
       })
       .join('');
     return `<section class="pp-bloc"><h3>Séance 2 · longueurs saisies</h3>
@@ -107,6 +113,13 @@
   const S = global.Segpa;
   const fait = (d, s, e) => S.etapeFaite(d, s, e);
   const coche = (b) => (b ? '✓' : '○');
+  const M = () => S.modele || {};
+  const MESURES = () =>
+    S.etapes.seances
+      .find((s) => s.id === 's2')
+      .etapes.filter((e) => e.type === 'mesure')
+      .map((e) => ({ id: e.id, piece: e.piece, info: (M().mesures || {})[e.piece] || { titre: e.piece, nom: e.piece } }));
+  const saisies = (d, id, info) => S.mesuresSaisies(S.valeurEtape(d, 's2', id), info);
 
   function repere(id, d) {
     const pieces = ((S.valeurEtape(d, 's1', 'pieces') || {}).pieces || []);
@@ -118,8 +131,13 @@
       case 'securite':
         return `Règles comprises : ${['s1', 's2', 's3'].map((s, i) => `S${i + 1} ${coche(['regle-force', 'regle-vis', 'regle-lames'].every((r) => fait(d, s, r)))}`).join(' ')} · demandes d’aide : ${aides()}${mesures.some((m) => m.v && m.v.tropDehors) ? ' · a sorti plus de 2 pièces en séance 2' : ''}`;
       case 'mesure':
-        return mesures
-          .map(({ e, v }) => `${e === 'mesure-corps' ? 'corps' : 'manivelle'} : ${v && v.longueur !== null && v.longueur !== undefined ? `${S.ecrireNombre(v.longueur)} cm (${v.essais.length} essai${v.essais.length > 1 ? 's' : ''}${v.verdict === 'dedans' ? ', dans la plage' : v.verdict === 'dehors' ? ', hors de la plage' : ''})` : '—'}`)
+        return MESURES()
+          .map(({ id, piece, info }) => {
+            const l = saisies(d, id, info);
+            return `${piece} : ${l
+              .map((x) => `${l.length > 1 ? x.nom.toLowerCase() + ' ' : ''}${x.longueur !== null ? `${S.ecrireNombre(x.longueur)} cm (${x.essais.length} essai${x.essais.length > 1 ? 's' : ''}${x.verdict === 'dedans' ? ', dans la plage' : x.verdict === 'dehors' ? ', hors de la plage' : ''})` : '—'}`)
+              .join(', ')}`;
+          })
           .join(' · ');
       case 'dessin': {
         const n = mesures.filter((m) => m.v && m.v.photo).length;

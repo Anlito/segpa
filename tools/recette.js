@@ -192,7 +192,11 @@ async function faireEcran(page, nom, captures, demo) {
   } else if (await visible(page, '.pave')) {
     // Démonstration : une première mesure hors de la plage (message ambre), puis la bonne.
     const premiere = demo && !(await visible(page, '.msg-ambre'));
-    for (const c of premiere ? ['9', ',', '5'] : ['7', ',', '5']) await cliquer(page, `[data-c="${c}"]`);
+    // Sans démonstration : le modèle de Thomas (corps : hauteur, largeur, longueur ; manivelle) → une mesure dans la plage.
+    const ligne = await page.locator('.ligne-mesure').textContent();
+    const manivelle = /manivelle/.test(await page.locator('.pastille').first().textContent());
+    const juste = demo ? '7,5' : /Hauteur/.test(ligne) ? '9' : /Largeur/.test(ligne) ? '4,5' : manivelle ? '5' : '5,5';
+    for (const c of premiere ? ['9', ',', '5'] : juste.split('')) await cliquer(page, `[data-c="${c}"]`);
     await cliquer(page, '[data-action="mesure"]');
     if (premiere) {
       await page.locator('.msg-ambre').waitFor();
@@ -992,7 +996,7 @@ async function scenarioDossier(navigateur, base, taille) {
   assert.equal(d.projet, 'taille-crayon');
   assert.deepEqual(d.equipe, { eleves: ['Ines', 'Noah'], classe: '6A' });
   assert.ok(d.photos.some((p) => p.fichier === 'photos/s1-boite-01.jpg'), 'photo de la boîte notée');
-  assert.ok(d.photos.some((p) => p.fichier === 'photos/s1-piece-01-01.jpg' && p.legende === 'Pièce 1 : Ressort'), 'photo de la pièce 1 notée avec son nom');
+  assert.ok(d.photos.some((p) => p.fichier === 'photos/s1-piece-01-01.jpg' && p.legende === 'Pièce 1 : Réceptacle à copeaux'), 'photo de la pièce 1 notée avec son nom');
   assert.equal(d.seances.s1.etapes.pieces.valeur.pieces.length, 2, 'deux pièces dans le tableau');
   assert.deepEqual(fichiers.debut, [0xff, 0xd8, 0xff], 'la photo est un JPEG');
   assert.ok(fichiers.taille > 5000);
@@ -1092,7 +1096,8 @@ async function scenarioProfesseur(navigateur, base) {
   assert.match(await tuile('Inès · Noah'), /Rien depuis 15 min/);
   assert.match(await tuile('Adam · Jade'), /Plus de 2 pièces dehors/);
   assert.match(await tuile('Adam · Jade'), /Mesure hors de la plage/);
-  assert.match(await tuile('Léa · Tom'), /Pièces démontées : 6 sur 8/);
+  assert.match(await tuile('Léa · Tom'), /Pièces démontées : 6 sur 7/);
+  assert.match(await tuile('Léa · Tom'), /Mesures : corps H 9 cm ✓, l 4,5 cm ✓, L 5,5 cm ✓/);
   await page.waitForFunction(() => [...document.querySelectorAll('.pt-photo img')].some((i) => i.src.startsWith('blob:')));
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'pas de défilement horizontal');
   await page.screenshot({ path: path.join(SORTIE, 'prof-classe.png'), fullPage: true });
@@ -1111,7 +1116,7 @@ async function scenarioProfesseur(navigateur, base) {
   await cliquer(page, '[data-action="onglet"][data-id="pieces"]');
   await page.waitForFunction(() => document.querySelectorAll('.pp-piece').length === 6);
   await cliquer(page, '[data-action="onglet"][data-id="seance2"]');
-  assert.match(await page.locator('.pp-table').textContent(), /7,5 cm/);
+  assert.match(await page.locator('.pp-table').textContent(), /Hauteur9 cm1\s*✓ dans la plage8,5 cm à 9,5 cm/);
   await cliquer(page, '[data-action="onglet"][data-id="historique"]');
   assert.ok((await page.locator('.pp-table tbody tr').count()) > 10);
   await cliquer(page, '[data-action="onglet"][data-id="differenciation"]');
@@ -1195,7 +1200,7 @@ async function scenarioProfesseur(navigateur, base) {
       for (const taille of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
         const t = `${taille.width}×${taille.height}`;
         for (const demo of [false, true]) {
-          const quoi = demo ? 'modèle de démonstration' : 'modele.js vide';
+          const quoi = demo ? 'modèle de démonstration' : 'modèle de Thomas (Cat NO.722A)';
           try {
             const ecrans = await scenarioEnseignant(navigateur, base, taille, nomBase === 'file://' && taille.width === 1366 && demo, demo);
             noter(`- OK ${nomBase} ${t} · mode enseignant, ${quoi} : séances de ${ecrans.join(', ')} écrans faites jusqu’à « Bravo » puis retour à « Ma mission » (présentation, 2 pièces démontées, 2 mesures${demo ? ' dont une hors plage' : ''}, remontage, questions écrites), album, aide, rien ne dépasse, aucune erreur, aucune requête hors du site.`);

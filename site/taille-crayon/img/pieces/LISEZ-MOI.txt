@@ -1,11 +1,3 @@
-Photos des pièces du taille-crayon (séance 1, écran « Quel est son nom ? »)
-
-1. Démonter le taille-crayon et photographier chaque pièce, seule, sur une feuille blanche.
-2. Nommer les fichiers dans l'ordre du démontage : piece-01.jpg, piece-02.jpg, piece-03.jpg…
-3. Dans site/taille-crayon/donnees/modele.js, remplir la liste « pieces » dans le même ordre, par exemple :
-     "pieces": [
-       { "nom": "Nom de la pièce 1", "image": "img/pieces/piece-01.jpg" },
-       { "nom": "Nom de la pièce 2", "image": "img/pieces/piece-02.jpg" }
-     ],
-   (ou envoyer les photos et les noms à Claude, qui remplira le fichier).
-Une carte sans photo montre seulement le nom.
+Photos des pièces du taille-crayon (séance 1, écran « Quel est son nom ? »), dans l'ordre du démontage :
+piece-01 réceptacle à copeaux · 02 vis · 03 ressorts · 04 serre-crayon · 05 manivelle avec la fraise · 06 plaque rose · 07 corps.
+Découpées dans la photo de Thomas où toutes les pièces sont posées (02/11/2026). Les noms sont dans donnees/modele.js.
