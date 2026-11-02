@@ -57,7 +57,7 @@ fs.writeFileSync(path.join(DOSSIER, 'classe.json'), JSON.stringify({ classe: '6A
 // Léa et Tom : séance 1 finie, en train de mesurer, aide demandée il y a 2 minutes.
 equipe(['Léa', 'Tom'], { debut: 120, derniere: 2, aide: 2, aide_seance: 's2', aide_etape: 'mesure-manivelle', faire: ({ faire, pieces }) => {
   faire('s1', null, { pieces: pieces(6) });
-  faire('s2', 'mesure-manivelle', { 'mesure-corps': { essais: [7.5], longueur: 7.5, verdict: 'sans-reference', tropDehors: false, photo: null } });
+  faire('s2', 'mesure-manivelle', { 'mesure-corps': { dimensions: { hauteur: { essais: [9], longueur: 9, verdict: 'dedans' }, largeur: { essais: [4.5], longueur: 4.5, verdict: 'dedans' }, longueur: { essais: [5.5], longueur: 5.5, verdict: 'dedans' } }, tropDehors: false, photo: null } });
 } });
 // Inès et Noah : 2 pièces démontées, rien depuis 15 minutes.
 equipe(['Inès', 'Noah'], { debut: 40, derniere: 15, faire: ({ faire, pieces, d }) => {
@@ -67,14 +67,14 @@ equipe(['Inès', 'Noah'], { debut: 40, derniere: 15, faire: ({ faire, pieces, d 
 // Adam et Jade : ont sorti trop de pièces, mesure hors de la plage deux fois.
 equipe(['Adam', 'Jade'], { debut: 110, derniere: 1, faire: ({ faire, pieces }) => {
   faire('s1', null, { pieces: pieces(8) });
-  faire('s2', 'mesure-manivelle', { 'mesure-corps': { essais: [12, 11.5], longueur: 11.5, verdict: 'dehors', tropDehors: true, photo: null } });
+  faire('s2', 'mesure-manivelle', { 'mesure-corps': { dimensions: { hauteur: { essais: [12, 11.5], longueur: 11.5, verdict: 'dehors' } }, tropDehors: true, photo: null } });
 } });
 // Chloé et Sami : tout le projet est fini.
 equipe(['Chloé', 'Sami'], { debut: 200, derniere: 3, faire: ({ faire, pieces }) => {
   faire('s1', null, { pieces: pieces(7) });
   faire('s2', null, {
-    'mesure-corps': { essais: [7.5], longueur: 7.5, verdict: 'sans-reference', tropDehors: false, photo: null },
-    'mesure-manivelle': { essais: [6], longueur: 6, verdict: 'sans-reference', tropDehors: false, photo: null },
+    'mesure-corps': { dimensions: { hauteur: { essais: [9.5, 9], longueur: 9, verdict: 'dedans' }, largeur: { essais: [4.5], longueur: 4.5, verdict: 'dedans' }, longueur: { essais: [5.5], longueur: 5.5, verdict: 'dedans' } }, tropDehors: false, photo: null },
+    'mesure-manivelle': { essais: [5], longueur: 5, verdict: 'dedans', tropDehors: false, photo: null },
   });
   faire('s3', null, { questions: { reponses: { manivelle: { mode: 'texte', valeur: 'Elle fait tourner les lames.' }, tourner: { mode: 'texte', valeur: 'La manivelle.' }, difficile: { mode: 'texte', valeur: 'Le couvercle.' } } } });
 } });

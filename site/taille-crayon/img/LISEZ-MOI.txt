@@ -1,9 +1,7 @@
-Photos du taille-crayon (à prendre par Thomas, avec un vrai exemplaire)
+Photos du taille-crayon « Cat » NO.722A (prises par Thomas le 02/11/2026, objets et mains seulement)
 
-taille-crayon.jpg    le taille-crayon entier, posé sur une table, fond clair, bien éclairé.
-                     Il s'affiche sur l'accueil et sur la page « L'objet du jour » de la présentation.
-                     Tant que ce fichier n'est pas là, le pictogramme dessiné s'affiche.
+taille-crayon.jpg    le taille-crayon entier : accueil et page « L'objet du jour » de la présentation.
+pieces/              une photo par pièce, dans l'ordre du démontage (écran « Quel est son nom ? ») — voir donnees/modele.js.
+demontage/           le geste avant de retirer chaque pièce (geste-01.jpg…), sans le nom de la pièce.
 
-pieces/              une photo par pièce démontée (voir pieces/LISEZ-MOI.txt).
-
-Conseils : format paysage, JPEG, environ 1280 × 720, l'objet au centre, pas de visage ni de main au premier plan.
+Conseils : format paysage, JPEG, environ 1280 × 720, l'objet au centre, pas de visage ; aucun nom d'élève visible.

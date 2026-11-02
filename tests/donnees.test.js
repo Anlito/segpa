@@ -53,16 +53,29 @@ test('les trois règles reviennent au début de chaque séance', () => {
   }
 });
 
-test('modèle du taille-crayon : forme attendue (même vide, en attendant les mesures de Thomas)', () => {
+test('modèle du taille-crayon « Cat » NO.722A : 7 pièces dans l’ordre du démontage, photos, gestes et mesures', () => {
   const { modele } = donnees('taille-crayon');
-  assert.ok(Array.isArray(modele.pieces));
-  for (const p of modele.pieces) assert.ok(p.nom && S.nombreDeMots(p.nom) <= 4, `nom de pièce : ${p.nom}`);
-  assert.ok(modele.nombrePieces >= 1 && modele.maxPieces >= modele.nombrePieces);
-  for (const cle of ['corps', 'manivelle']) {
-    const m = modele.mesures[cle];
-    assert.ok(m && m.titre && m.nom, cle);
-    if (m.reference !== null) assert.ok(S.plageDe(m.reference, modele.tolerance), `${cle} : référence lisible`);
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const existe = (f) => fs.existsSync(path.join(__dirname, '..', 'site', 'taille-crayon', f));
+  assert.deepEqual(modele.pieces.map((p) => p.nom), ['Réceptacle à copeaux', 'Vis', 'Ressorts', 'Serre-crayon', 'Manivelle avec la fraise', 'Plaque rose', 'Corps']);
+  for (const p of modele.pieces) {
+    assert.ok(p.nom && S.nombreDeMots(p.nom) <= 4, `nom de pièce : ${p.nom}`);
+    assert.ok(existe(p.image), `photo : ${p.image}`);
+    assert.ok(p.geste && existe(p.geste.image), `geste : ${p.nom}`);
+    assert.ok(S.nombreDeMots(p.geste.texte) <= 8, `« ${p.geste.texte} »`);
+    // Le conseil ne donne jamais le nom de la pièce (l'élève le retrouve sur l'écran suivant).
+    const mot = p.nom.toLowerCase().split(' ')[0];
+    const mots = (p.geste.texte + ' ' + (p.geste.detail || '')).toLowerCase().split(/[^a-zàâçéèêëîïôûùüÿœ-]+/);
+    assert.ok(!mots.includes(mot), `le geste de « ${p.nom} » ne dit pas son nom`);
+    assert.ok(p.remonter, `conseil de remontage : ${p.nom}`);
   }
+  assert.equal(modele.nombrePieces, 7);
+  assert.ok(modele.maxPieces >= modele.nombrePieces);
+  assert.deepEqual(S.dimensionsDe(modele.mesures.corps).map((d) => d.id), ['hauteur', 'largeur', 'longueur']);
+  for (const d of S.dimensionsDe(modele.mesures.corps)) assert.ok(S.plageDe(d.reference), `corps : ${d.id}`);
+  assert.deepEqual(S.plageDe(modele.mesures.manivelle.reference), [4.5, 5.5]);
+  assert.ok(existe('img/taille-crayon.jpg'));
   const mesures = etapes.seances.find((s) => s.id === 's2').etapes.filter((e) => e.type === 'mesure').map((e) => e.piece);
   assert.deepEqual(mesures, ['corps', 'manivelle'], 'les étapes de mesure correspondent au modèle');
 });

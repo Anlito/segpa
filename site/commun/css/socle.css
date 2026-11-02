@@ -363,7 +363,7 @@ input.champ-libre { height: 6rem; }
 /* ---------- Photos du professeur (objet du jour, accueil) ---------- */
 .logo-projet.avec-photo { background: var(--surface); border: 0.1875rem solid var(--trait); overflow: hidden; }
 .logo-projet .photo-objet { width: 100%; height: 100%; object-fit: cover; }
-.revele .photo-objet { width: 30rem; height: 17rem; object-fit: contain; border-radius: 1.5rem; background: var(--surface); }
+.revele .photo-objet { width: 30rem; height: 15rem; object-fit: contain; border-radius: 1.5rem; background: var(--surface); }
 
 /* ---------- Photo de Thomas dans une consigne, dépannage ---------- */
 .picto-grand.avec-photo { overflow: hidden; padding: 0; }

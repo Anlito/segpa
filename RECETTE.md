@@ -5,7 +5,7 @@ La recette automatique (`npm run recette`, résultat dans `RECETTE-AUTO.md`) a d
 caméra simulée ; ici on vérifie ce qu'une machine de test ne peut pas vérifier.
 
 ## Préparer
-0. Remplir `site/taille-crayon/donnees/modele.js` (noms des pièces, longueurs du corps et de la manivelle) — l'outil marche aussi sans, mais sans aide au nom ni vérification de la mesure.
+0. `site/taille-crayon/donnees/modele.js` est rempli pour le « Cat » NO.722A (02/11/2026) : pièces, photos, gestes, plages de mesure.
 1. Copier le dossier `site/` du dépôt sur le réseau (ou ouvrir `site/index.html` depuis une clé USB).
 2. Dans `Bureau › Classe › 6A › COMMUN › TECHNOLOGIE`, créer le dossier **`Taille-crayon`**.
 3. Y déposer **`classe.json`** avec les prénoms de la classe (modèle : `docs/exemple-classe.json`) :
@@ -221,3 +221,11 @@ Professeur (`stop-motion/prof.html`) :
 Élèves (séance suivante, écran « Je relis mon histoire », en séances 2, 3 et 4) :
 - [ ] Validé : « Ton professeur a lu ton histoire. » avec le mot (🔊), puis le récap.
 - [ ] À revoir : le mot en ambre, « Je change une réponse » (choisir la réponse, puis la carte-idée ou le clavier) ou « Je garde mon histoire ». Le même avis n'est montré qu'une fois.
+
+## Taille-crayon — le modèle « Cat » NO.722A (retours de Thomas du 02/11)
+- [ ] « L'objet du jour » : la photo du taille-crayon.
+- [ ] Séance 1, avant chaque pièce : la photo du geste et un conseil, sans le nom de la pièce (1 la boîte transparente · 2 dévisser à l'arrière · 3 les 2 pièces qui poussent · 4 la tête bleue, ses oreilles l'ouvrent · 5 tourner la bague · 6 déclipser sans forcer · 7 la dernière pièce).
+- [ ] « Quel est son nom ? » : 7 cartes avec photo (réceptacle à copeaux, vis, ressorts, serre-crayon, manivelle avec la fraise, plaque rose, corps) ; tableau de 7 cases.
+- [ ] Séance 2 : le corps se mesure en 3 fois (hauteur, largeur, longueur), puis la manivelle ; hors de la plage : « Mesure encore une fois », jamais la valeur.
+- [ ] Séance 3 : pour chaque pièce, son conseil de remontage (ex. « J'enfonce la manivelle, puis je tourne la bague pour la bloquer. »).
+- [ ] Outil professeur : « Mesures : corps H 9 cm ✓, l 4,5 cm ✓, L 5,5 cm ✓ » sur la tuile ; onglet Séance 2 avec une ligne par dimension.

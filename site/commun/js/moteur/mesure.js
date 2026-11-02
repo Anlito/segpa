@@ -36,6 +36,26 @@
     return null;
   }
 
-  Object.assign(S, { lireNombre, ecrireNombre, verifierMesure, plageDe });
+  // Une pièce peut se mesurer en plusieurs dimensions (ex. le corps : hauteur, largeur, longueur) :
+  // info = { dimensions: [{ id, nom, reference }] } ; sans dimensions, une seule « longueur » (info.reference).
+  function dimensionsDe(info) {
+    const i = info || {};
+    return Array.isArray(i.dimensions) && i.dimensions.length ? i.dimensions : [{ id: 'longueur', nom: 'Longueur', reference: i.reference || null }];
+  }
+
+  // Ce que l'élève a saisi, dimension par dimension : [{ id, nom, reference, essais, longueur, verdict }].
+  // Valeur d'étape : { dimensions: { hauteur: { essais, longueur, verdict }, … } } ou, pour une seule dimension (et
+  // les anciennes sauvegardes), { essais, longueur, verdict } directement.
+  function mesuresSaisies(valeur, info) {
+    const v = valeur || {};
+    const dims = dimensionsDe(info);
+    const multi = Array.isArray((info || {}).dimensions) && info.dimensions.length;
+    return dims.map((d) => {
+      const x = multi ? (v.dimensions || {})[d.id] || {} : v;
+      return { id: d.id, nom: d.nom, reference: d.reference || null, essais: Array.isArray(x.essais) ? x.essais : [], longueur: typeof x.longueur === 'number' ? x.longueur : null, verdict: x.verdict || null };
+    });
+  }
+
+  Object.assign(S, { lireNombre, ecrireNombre, verifierMesure, plageDe, dimensionsDe, mesuresSaisies });
   if (enNode) module.exports = S;
 })(typeof window !== 'undefined' ? window : globalThis);

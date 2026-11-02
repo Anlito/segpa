@@ -18,8 +18,10 @@ Rien n'est envoyé ailleurs, aucun compte. Une sauvegarde existante n'est jamais
 
 ## Modifier le contenu sans toucher au code
 - `site/taille-crayon/donnees/etapes.js` : les séances, les écrans, les textes (8 mots au plus), les minuteurs.
-- `site/taille-crayon/donnees/modele.js` : **à remplir** — noms des pièces du modèle acheté, longueurs de référence du
-  corps et de la manivelle (vérification de la séance 2).
+- `site/taille-crayon/donnees/modele.js` : le taille-crayon « Cat » NO.722A (rempli le 02/11/2026) — les 7 pièces dans
+  l'ordre du démontage (nom, photo, geste et conseil pour la retirer, conseil pour la remettre) et les plages de mesure
+  de la séance 2 (corps : hauteur 8,5–9,5 cm, largeur 4–5 cm, longueur 5–6 cm ; manivelle : 4,5–5,5 cm). Photos dans
+  `site/taille-crayon/img/` (pièces, gestes, l'objet du jour).
 - `site/taille-crayon/donnees/classes.js` : la classe et le nom du dossier du projet.
 - `site/taille-crayon/donnees/projet.js` : titre et couleur du projet.
 Après une modification : `npm test` vérifie que les données restent lisibles.
