@@ -89,12 +89,92 @@
       <table class="pp-table"><thead><tr><th>Pièce</th><th>Longueurs saisies</th><th>Essais</th><th>Vérification</th><th>Plage de référence</th><th>Remarque</th></tr></thead><tbody>${lignesHtml}</tbody></table></section>`;
   }
 
-  // Bandeau de la classe : les feuilles de dessin de la séance 2 (A4, quadrillage de 1 cm), une par équipe.
+  // ---------- Les tailles de référence (séance 2), saisies par le professeur ----------
+  // Écrites dans « tailles-reference.json » à la racine du dossier du projet : les écrans des élèves les lisent à la
+  // place des plages de donnees/modele.js (taille ± tolérance). Le fichier est relu à chaque ouverture du dossier.
+  const ORIGINE = JSON.parse(JSON.stringify(M().mesures || {}));
+  let taillesLues = null; // { dossier, lu }
+  let messageTailles = '';
+  // Ce qui est en cours de saisie et l'ouverture du panneau survivent à la relecture automatique (toutes les 20 s).
+  const brouillon = {};
+  let panneauOuvert = false;
+  document.addEventListener('input', (e) => {
+    const t = e.target;
+    if (t.dataset && (t.dataset.taille || 'tolerance' in t.dataset)) brouillon[t.dataset.taille || 'tolerance'] = t.value;
+  });
+  document.addEventListener('toggle', (e) => e.target.classList && e.target.classList.contains('pp-tailles') && (panneauOuvert = e.target.open), true);
+  async function chargerTailles(dossier) {
+    taillesLues = { dossier, lu: null };
+    try {
+      taillesLues.lu = S.lireTailles(await (await (await dossier.getFileHandle(S.TAILLES_FICHIER)).getFile()).text(), S.projet.id);
+    } catch {
+      /* pas encore de tailles : les plages du modèle */
+    }
+    S.modele.mesures = S.appliquerTailles(ORIGINE, taillesLues.lu);
+    if (taillesLues.lu && S.prof) S.prof.relire(true);
+  }
+  const valeurDe = (info, dimId) => {
+    const ref = Array.isArray(info.dimensions) && info.dimensions.length ? (info.dimensions.find((d) => d.id === dimId) || {}).reference : info.reference;
+    const pl = S.plageDe(ref, M().tolerance);
+    return pl ? Math.round(((pl[0] + pl[1]) / 2) * 10) / 10 : null;
+  };
+  function formulaireTailles() {
+    const dossier = S.prof && S.prof.etat.dossier;
+    if (dossier && (!taillesLues || taillesLues.dossier !== dossier)) chargerTailles(dossier);
+    const lignes = MESURES()
+      .flatMap(({ piece, info }) =>
+        S.dimensionsDe(info).map((d) => {
+          const v = valeurDe(info, d.id);
+          const pl = S.plageDe(d.reference, M().tolerance);
+          return `<label class="pp-taille"><span>${ech(S.majuscule(info.titre.replace(/^Pièce \d+ : (le |la )?/, '')))} · ${ech(d.nom.toLowerCase())}</span>
+            <input type="text" inputmode="decimal" data-taille="${ech(piece)}|${ech(d.id)}" value="${ech(brouillon[piece + '|' + d.id] !== undefined ? brouillon[piece + '|' + d.id] : v === null ? '' : S.ecrireNombre(v))}" aria-label="${ech(info.nom)}, ${ech(d.nom)} en cm"> cm
+            <small>${pl ? `accepté de ${cm(pl[0])} à ${cm(pl[1])}` : 'pas de vérification'}</small></label>`;
+        })
+      )
+      .join('');
+    const tol = (taillesLues && taillesLues.lu && taillesLues.lu.tolerance) || M().tolerance || 0.5;
+    return `<details class="pp-tailles"${messageTailles || panneauOuvert ? ' open' : ''}><summary>Tailles de référence${taillesLues && taillesLues.lu ? ' (les vôtres)' : ' (du modèle)'}</summary>
+      <p class="pp-vide">Mesurez votre taille-crayon et tapez les bonnes tailles : les élèves sont vérifiés à ± <input type="text" inputmode="decimal" data-tolerance value="${ech(brouillon.tolerance !== undefined ? brouillon.tolerance : S.ecrireNombre(tol))}" aria-label="Tolérance en cm" style="width:3.5rem"> cm près. La bonne valeur ne leur est jamais montrée.</p>
+      <div class="pp-tailles-grille">${lignes}</div>
+      <p class="pp-tailles-pied"><button type="button" class="pb-btn pp-principal" data-tailles-enregistrer${dossier ? '' : ' disabled'}>Enregistrer les tailles</button>
+        <span class="pp-vide">${messageTailles || (dossier ? 'Écrit dans tailles-reference.json, dans le dossier de la classe.' : 'Ouvrez le dossier de la classe pour enregistrer.')}</span></p>
+    </details>`;
+  }
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest && e.target.closest('[data-tailles-enregistrer]');
+    const dossier = S.prof && S.prof.etat.dossier;
+    if (!b || !dossier) return;
+    const lire = (t) => S.lireNombre(String(t || '').trim());
+    const tailles = {};
+    for (const input of document.querySelectorAll('[data-taille]')) {
+      const [piece, dim] = input.dataset.taille.split('|');
+      const v = lire(input.value);
+      if (v) (tailles[piece] = tailles[piece] || {})[dim] = v;
+    }
+    const tolerance = lire(document.querySelector('[data-tolerance]').value) || 0.5;
+    b.disabled = true;
+    try {
+      const h = await dossier.getFileHandle(S.TAILLES_FICHIER, { create: true });
+      const flux = await h.createWritable();
+      await flux.write(JSON.stringify(S.fichierTailles(S.projet.id, tailles, tolerance), null, 1));
+      await flux.close();
+      messageTailles = 'Enregistré ✓ : les élèves les utilisent dès leur prochaine mesure.';
+      for (const k of Object.keys(brouillon)) delete brouillon[k];
+      taillesLues = null; // relu au prochain affichage
+    } catch {
+      messageTailles = '⚠ L’enregistrement n’a pas marché : vérifiez l’accès au dossier, puis réessayez.';
+    }
+    S.prof.relire(true);
+  });
+
+  // Bandeau de la classe : les feuilles de dessin de la séance 2 (A4, quadrillage de 1 cm), une par équipe, et les
+  // tailles de référence.
   function bandeauClasse(equipes) {
     const noms = equipes.map((eq) => eq.resume.noms).sort((a, b) => a.localeCompare(b, 'fr'));
     return `<div class="pc-exports pc-piste"><span>Séance 2</span>
       <a class="pb-btn" href="feuille-dessin.html#${encodeURIComponent(noms.join('|'))}" target="_blank" rel="noopener">Feuilles de dessin (A4, une par équipe)</a>
-      <a class="pb-btn" href="feuille-dessin.html" target="_blank" rel="noopener">Feuille vierge</a></div>`;
+      <a class="pb-btn" href="feuille-dessin.html" target="_blank" rel="noopener">Feuille vierge</a>
+      ${formulaireTailles()}</div>`;
   }
 
   S.profProjet = {

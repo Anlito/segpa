@@ -323,7 +323,29 @@
     return `<div class="aide-mesure">${info.image ? `<img class="photo-mesure" src="${O.ech(info.image)}" alt="${O.ech(info.nom)}">` : ''}${idDimension ? schemaDimension(idDimension) : ''}</div>`;
   }
 
+  // Les tailles saisies par le professeur (tailles-reference.json dans le dossier du projet) remplacent les plages du
+  // modèle ; lues une fois par page. Sans dossier (mode enseignant, poste sans dossier) : les plages du modèle.
+  let tailles = null;
+  function chargerTailles(O) {
+    if (tailles) return tailles;
+    tailles = (async () => {
+      const d = O.etat.dossierProjet;
+      if (!d || !S.lireTailles) return false;
+      try {
+        const lu = S.lireTailles(await (await (await d.getFileHandle(S.TAILLES_FICHIER)).getFile()).text(), S.projet.id);
+        if (!lu) return false;
+        S.modele.mesures = S.appliquerTailles(M().mesures, lu);
+        return true;
+      } catch {
+        return false;
+      }
+    })();
+    tailles.then((change) => change && O.rafraichir());
+    return tailles;
+  }
+
   S.ajouterEcran('mesure', (etape, O) => {
+    chargerTailles(O);
     const sous = O.sous();
     const info = (M().mesures || {})[etape.piece] || { titre: etape.piece, nom: etape.piece };
     const essaisMax = M().essaisMesure || 2;
