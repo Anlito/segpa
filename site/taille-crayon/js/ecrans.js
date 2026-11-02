@@ -98,7 +98,8 @@
   });
 
   // ---------- Séance 1 : le tableau des pièces ----------
-  // Pour chaque pièce : je dévisse → je photographie → je nomme → je range dans la case n. Retour au tableau.
+  // Pour chaque pièce : je la retire → je la photographie → je la nomme → je la pose dans la boîte (sans compartiment :
+  // le tableau garde l'ordre). Après la dernière pièce du modèle (nombrePieces), plus de case ni de bouton « Pièce n ».
 
   S.ajouterEcran('pieces', (etape, O) => {
     const sous = O.sous();
@@ -207,7 +208,7 @@
 
     if (sous.temps === 'ranger')
       return {
-        milieu: O.blocConsigne({ picto: 'boite', texte: `Je range la pièce dans la case ${n}.`, detail: sous.nom ? `${sous.nom}.` : '' }, `Pièce ${n}`),
+        milieu: O.blocConsigne({ picto: 'boite', texte: 'Je pose la pièce dans la boîte.', detail: sous.nom ? `${sous.nom}.` : '' }, `Pièce ${n}`),
         gauche: O.boutonRetour('retour-ranger'),
         principal: O.boutonPrincipal('rangee', 'C’est rangé'),
         actions: {
@@ -226,7 +227,9 @@
       };
 
     // Le tableau : les pièces rangées, dans l'ordre, et la case suivante.
-    const cases = Math.max(M().nombrePieces || 8, Math.min(max, pieces.length + 1));
+    const total = M().nombrePieces || 8;
+    const fini = pieces.length >= total; // toutes les pièces du modèle sont rangées : pas de « Pièce 8 »
+    const cases = fini ? pieces.length : Math.max(total, Math.min(max, pieces.length + 1));
     const grille = Array.from({ length: cases }, (_, i) => {
       const p = pieces[i];
       if (p)
@@ -234,14 +237,16 @@
       if (i === pieces.length) return `<div class="case-piece ici"><span class="num">${i + 1}</span><strong>À toi !</strong>${S.picto('tournevis')}</div>`;
       return `<div class="case-piece vide"><span class="num">${i + 1}</span></div>`;
     }).join('');
-    const texte = pieces.length ? `${pieces.length} pièce${pieces.length > 1 ? 's' : ''} dans la boîte` : 'Une pièce à la fois';
+    const texte = fini ? 'Toutes les pièces sont dans la boîte !' : pieces.length ? `${pieces.length} pièce${pieces.length > 1 ? 's' : ''} dans la boîte` : 'Une pièce à la fois';
     return {
       milieu: `<div class="colonne" style="gap:1rem;align-self:stretch;justify-content:center">
           <div class="consigne-ligne" style="align-items:center"><p class="consigne-texte" style="font-size:2.25rem">${texte}</p>${O.boutonVoix('Je dévisse une pièce, je la photographie, je la range. ' + texte + '.')}</div>
           <div class="grille-pieces${cases > 8 ? ' cinq' : ''}">${grille}</div>
         </div>`,
-      gauche: `<div class="gauche" style="display:flex;gap:1rem">${O.boutonRetour('precedent').replace(' gauche', '')}<button type="button" class="btn btn-second" data-action="fin-demontage"${pieces.length ? '' : ' disabled'}>${S.picto('coche')}J’ai fini de démonter</button></div>`,
-      principal: pieces.length < max ? O.boutonPrincipal('piece', `Pièce ${n}`, 'tournevis') : '',
+      gauche: fini
+        ? O.boutonRetour('precedent')
+        : `<div class="gauche" style="display:flex;gap:1rem">${O.boutonRetour('precedent').replace(' gauche', '')}<button type="button" class="btn btn-second" data-action="fin-demontage"${pieces.length ? '' : ' disabled'}>${S.picto('coche')}J’ai fini de démonter</button></div>`,
+      principal: fini ? O.boutonPrincipal('fin-demontage', 'J’ai fini de démonter', 'coche') : pieces.length < max ? O.boutonPrincipal('piece', `Pièce ${n}`, 'tournevis') : '',
       actions: {
         piece: vers('devisser'),
         'fin-demontage': () => O.suivant(valeur),
@@ -298,6 +303,26 @@
   // Je sors une pièce → je mesure (vérification douce) → je trace les bords à la règle → je trace la flèche de
   // dimension à la règle, d'une autre couleur → photo du dessin → je la remets.
 
+  // Pendant la mesure : la photo de la pièce et, pour une pièce à plusieurs dimensions, un pavé dessiné avec une flèche
+  // de couleur sur la dimension en cours (hauteur, largeur ou longueur). Il montre le sens du réglet, jamais la valeur.
+  function schemaDimension(id) {
+    // Pavé en perspective : face avant (largeur) 0..60, profondeur (longueur) décalée de 34 / -20, hauteur 90.
+    const F = [[20, 40], [80, 40], [80, 130], [20, 130]];
+    const d = [34, -20];
+    const arr = { hauteur: [[8, 40], [8, 130]], largeur: [[20, 144], [80, 144]], longueur: [[92, 136], [126, 116]] }[id];
+    const trait = (p, q, c) => `<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" ${c}/>`;
+    const fleche = arr
+      ? `<g class="fleche-dim">${trait(arr[0], arr[1], '')}<circle cx="${arr[0][0]}" cy="${arr[0][1]}" r="4"/><circle cx="${arr[1][0]}" cy="${arr[1][1]}" r="4"/></g>`
+      : '';
+    return `<svg class="schema-dimension" viewBox="0 0 140 160" role="img" aria-label="Le corps : je mesure la ${id}">
+      <path class="pave-dessin" d="M${F[0]} L${F[1]} L${F[2]} L${F[3]} Z M${F[0]} L${F[0][0] + d[0]},${F[0][1] + d[1]} L${F[1][0] + d[0]},${F[1][1] + d[1]} L${F[1]} M${F[1][0] + d[0]},${F[1][1] + d[1]} L${F[2][0] + d[0]},${F[2][1] + d[1]} L${F[2]}"/>
+      <circle class="trou" cx="50" cy="70" r="7"/>${fleche}</svg>`;
+  }
+  function aideMesure(O, info, idDimension) {
+    if (!info.image && !idDimension) return '';
+    return `<div class="aide-mesure">${info.image ? `<img class="photo-mesure" src="${O.ech(info.image)}" alt="${O.ech(info.nom)}">` : ''}${idDimension ? schemaDimension(idDimension) : ''}</div>`;
+  }
+
   S.ajouterEcran('mesure', (etape, O) => {
     const sous = O.sous();
     const info = (M().mesures || {})[etape.piece] || { titre: etape.piece, nom: etape.piece };
@@ -328,7 +353,7 @@
 
     if (sous.temps === 'sortir')
       return {
-        milieu: `${O.blocConsigne({ picto: 'boite', texte: 'Je sors une seule pièce de la boîte.', detail: `${info.nom.charAt(0).toUpperCase() + info.nom.slice(1)}.` }, pastille)}
+        milieu: `${O.blocConsigne({ picto: 'boite', image: info.image, texte: 'Je sors une seule pièce de la boîte.', detail: `${info.nom.charAt(0).toUpperCase() + info.nom.slice(1)}.` }, pastille)}
           ${sous.trop ? `<div class="msg msg-ambre msg-flottant" role="alert">${S.picto('boite')}Remets les pièces en trop dans la boîte.</div>` : ''}`,
         gauche: `<div class="gauche" style="display:flex;gap:1rem">${O.boutonRetour('precedent').replace(' gauche', '')}<button type="button" class="btn btn-second" data-action="trop">J’en ai sorti plus</button></div>`,
         principal: O.boutonPrincipal('sortie', 'J’ai sorti 1 pièce'),
@@ -352,9 +377,10 @@
       else if (sous.verdict === 'dehors') msg = `<div class="msg msg-ambre" role="alert">${S.picto('aide')}Montre ta mesure au professeur.</div>`;
       const termine = sous.verdict === 'dedans' || (sous.verdict === 'dehors' && essais >= essaisMax);
       return {
-        milieu: `<div class="colonne" style="gap:1.5rem">
+        milieu: `<div class="colonne" style="gap:1rem">
             <div style="display:flex;gap:1rem;align-items:center"><span class="pastille">${O.ech(pastille)}</span>${multi ? `<span class="pastille">${O.ech(dim.nom)} · ${sous.dim + 1} sur ${dims.length}</span>` : dehors}</div>
-            <div class="consigne-ligne" style="align-items:center"><span class="tuile-picto">${S.picto('regle')}</span><p class="consigne-texte" style="font-size:2.75rem">${multi ? `Je mesure la ${O.ech(motDim)}.` : 'Je mesure avec mon réglet.'}</p>${O.boutonVoix(multi ? `Je mesure la ${motDim} avec mon réglet. Je tape la mesure en centimètres.` : 'Je mesure avec mon réglet. Je tape la longueur en centimètres.')}</div>
+            <div class="consigne-ligne" style="align-items:center"><span class="tuile-picto">${S.picto('regle')}</span><p class="consigne-texte" style="font-size:2.5rem">${multi ? `Je mesure la ${O.ech(motDim)}.` : 'Je mesure avec mon réglet.'}</p>${O.boutonVoix(multi ? `Je mesure la ${motDim} avec mon réglet. Je tape la mesure en centimètres.` : 'Je mesure avec mon réglet. Je tape la longueur en centimètres.')}</div>
+            ${aideMesure(O, info, multi ? dim.id : null)}
             <div class="ligne-mesure">${multi ? O.ech(dim.nom) : 'Longueur'} : <output class="affichage-mesure" aria-live="polite">${O.ech(sous.saisie) || '&nbsp;'}</output><span class="unite">cm</span></div>
             ${msg}
           </div>
@@ -435,7 +461,7 @@
 
     // remettre
     return {
-      milieu: O.blocConsigne({ picto: 'boite', texte: 'Je remets la pièce dans sa case.' }, pastille),
+      milieu: O.blocConsigne({ picto: 'boite', texte: 'Je remets la pièce dans la boîte.' }, pastille),
       gauche: O.boutonRetour('retour-remettre'),
       principal: O.boutonPrincipal('remise', 'C’est fait'),
       actions: { 'retour-remettre': vers('photo'), remise: () => O.suivant(valeur) },
