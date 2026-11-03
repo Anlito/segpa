@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Présentation du projet · Je démonte un objet technique · 6e SEGPA</title>
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../commun/css/socle.css">
+<style>
+  /* Présentation du début de projet, à projeter (plein écran). Une diapositive de 1920 × 1080, mise à l'échelle de l'écran.
+     ← → (ou Espace, ou clic) pour avancer, F plein écran, N les notes du professeur. Marche aussi en file://. */
+  :root { --bleu: #1D5FB4; --bleu-fonce: #123F7A; --bleu-clair: #E6EEF9; --encre: #172033; --doux: #55617A; --fond-diapo: #F2F5FA; --trait: #C9D2DF; --orange: #C2410C; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0E1420; }
+  body { font-family: 'Lexend', system-ui, 'Segoe UI', sans-serif; }
+  .scene { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .diapo { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: 0 0; background: var(--fond-diapo); color: var(--encre);
+    box-sizing: border-box; padding: 128px; display: none; flex-direction: column; gap: 56px; overflow: hidden; }
+  .diapo.active { display: flex; animation: apparait 0.35s ease-out; }
+  @keyframes apparait { from { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .diapo.active { animation: none; } }
+  .diapo.bleue { background: var(--bleu); color: #fff; }
+  .diapo.nuit { background: var(--encre); color: #fff; }
+  .quadrillage { position: absolute; inset: 0; pointer-events: none; }
+  .diapo > *:not(.quadrillage) { position: relative; }
+  h1, h2, h3, p { margin: 0; }
+  h2 { font-size: 80px; font-weight: 700; line-height: 1.1; }
+  .etiquette { align-self: flex-start; font-size: 32px; font-weight: 700; background: var(--bleu); color: #fff; padding: 8px 28px; border-radius: 20px; }
+  .tuile { display: flex; align-items: center; justify-content: center; flex: none; }
+  .tuile .picto { stroke-width: 1.8; }
+  .cartes { display: flex; gap: 28px; }
+  .carte { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 22px; background: #fff; padding: 44px 24px; border-radius: 32px; border: 3px solid var(--trait); text-align: center; }
+  .carte h3 { font-size: 40px; font-weight: 700; line-height: 1.15; }
+  .carte p { font-size: 28px; color: var(--doux); }
+  .carte.forte { border-color: var(--bleu); }
+  .seance-titre { display: flex; align-items: center; gap: 32px; }
+  .seance-titre p { font-size: 40px; font-weight: 700; background: var(--encre); color: #fff; padding: 6px 26px; border-radius: 16px; }
+  .etapes { display: flex; align-items: center; gap: 80px; }
+  .liste { display: flex; flex-direction: column; gap: 44px; }
+  .liste div { display: flex; align-items: center; gap: 28px; }
+  .liste i { width: 20px; height: 20px; border-radius: 10px; background: var(--orange); flex: none; }
+  .liste p { font-size: 52px; font-weight: 700; line-height: 1.2; width: 1050px; }
+  .regles { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .regle { display: flex; align-items: center; gap: 36px; background: #fff; padding: 32px 40px; border-radius: 32px; color: var(--encre); }
+  .regle .tuile { width: 130px; height: 130px; border-radius: 65px; background: #FFEDD5; color: #9A3412; }
+  .regle strong { display: block; font-size: 42px; line-height: 1.2; }
+  .regle span { display: block; font-size: 30px; color: var(--doux); margin-top: 8px; }
+  /* Commandes du professeur : discrètes, en bas ; cachées en plein écran tant que la souris ne bouge pas. */
+  .commandes { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 14px;
+    background: rgba(14, 20, 32, 0.78); color: #fff; font-size: 15px; transition: opacity 0.3s; z-index: 5; }
+  .commandes button { font: inherit; font-weight: 600; color: #fff; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 10px; padding: 8px 14px; cursor: pointer; }
+  .commandes button:hover { background: rgba(255, 255, 255, 0.24); }
+  .commandes .numero { min-width: 64px; text-align: center; font-weight: 700; }
+  body.calme .commandes { opacity: 0; }
+  .notes { position: fixed; left: 16px; right: 16px; bottom: 76px; max-width: 900px; margin: 0 auto; background: #FFFBEB; color: #422006; border: 2px solid #D97706; border-radius: 14px;
+    padding: 14px 18px; font-size: 18px; line-height: 1.5; z-index: 5; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); }
+  .notes strong { display: block; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; color: #92400E; }
+</style>
+</head>
+<body>
+<main class="scene" id="scene" aria-live="polite"></main>
+<div class="notes" id="notes" hidden><strong>Notes du professeur</strong><span></span></div>
+<nav class="commandes" aria-label="Commandes de la présentation">
+  <button type="button" data-cmd="precedent" aria-label="Diapositive précédente">←</button>
+  <span class="numero" id="numero">1 / 11</span>
+  <button type="button" data-cmd="suivant" aria-label="Diapositive suivante">→</button>
+  <button type="button" data-cmd="notes" title="Touche N">Notes</button>
+  <button type="button" data-cmd="plein" title="Touche F">Plein écran</button>
+</nav>
+<noscript>Cette page a besoin de JavaScript : ouvre-la avec Chrome ou Edge.</noscript>
+<script src="../commun/js/outils.js"></script>
+<script src="../commun/js/pictos.js"></script>
+<script>
+  (function () {
+    'use strict';
+    var S = window.Segpa;
+    var pic = function (nom, taille, couleur) { return '<span style="color:' + couleur + ';display:flex">' + S.picto(nom, taille) + '</span>'; };
+    var tuile = function (nom, cote, rayon, fond, couleur, taille) {
+      return '<div class="tuile" style="width:' + cote + 'px;height:' + cote + 'px;border-radius:' + rayon + 'px;background:' + fond + '">' + pic(nom, taille, couleur) + '</div>';
+    };
+    // Fond quadrillé (comme le papier de la séance 2), en dessin.
+    var quadrillage = function (trait) {
+      return '<svg class="quadrillage" viewBox="0 0 1920 1080" aria-hidden="true"><defs><pattern id="q' + trait.slice(1) + '" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="' + trait + '" stroke-width="1.2"/></pattern>' +
+        '<pattern id="Q' + trait.slice(1) + '" width="200" height="200" patternUnits="userSpaceOnUse"><path d="M200 0H0V200" fill="none" stroke="' + trait + '" stroke-width="2.6"/></pattern></defs>' +
+        '<rect width="1920" height="1080" fill="url(#q' + trait.slice(1) + ')"/><rect width="1920" height="1080" fill="url(#Q' + trait.slice(1) + ')"/></svg>';
+    };
+    var carte = function (p, titre, sous, forte) {
+      return '<div class="carte' + (forte ? ' forte' : '') + '">' + tuile(p, 150, 40, forte ? '#1D5FB4' : '#E6EEF9', forte ? '#fff' : '#1D5FB4', 96) + '<h3>' + titre + '</h3>' + (sous ? '<p>' + sous + '</p>' : '') + '</div>';
+    };
+    var seance = function (n, titre, picto, lignes) {
+      return '<div class="seance-titre"><p>Séance ' + n + '</p><h2>' + titre + '</h2></div>' +
+        '<div class="etapes">' + tuile(picto, 340, 72, '#1D5FB4', '#fff', 220) +
+        '<div class="liste">' + lignes.map(function (l) { return '<div><i></i><p>' + l + '</p></div>'; }).join('') + '</div></div>';
+    };
+    var regle = function (p, t, d) { return '<div class="regle">' + '<div class="tuile">' + pic(p, 84, '#9A3412') + '</div><div><strong>' + t + '</strong><span>' + d + '</span></div></div>'; };
+
+    var DIAPOS = [
+      { classe: '', style: 'justify-content:center;gap:36px', html: quadrillage('#C9D7EC') +
+          '<div style="position:absolute;left:1240px;top:300px">' + tuile('taille-crayon', 520, 120, '#1D5FB4', '#fff', 360) + '</div>' +
+          '<p class="etiquette">Technologie · 6e SEGPA</p>' +
+          '<h1 style="font-size:124px;font-weight:700;line-height:1.05;width:1000px">Je démonte un objet technique</h1>' +
+          '<p style="font-size:52px;font-weight:600;color:#123F7A">Le taille-crayon à manivelle</p>',
+        notes: 'Bienvenue ! Un nouveau projet : on va ouvrir un vrai objet pour voir comment il est fait à l’intérieur.' },
+      { html: '<h2>C’est quoi, un objet technique ?</h2><p style="font-size:52px;font-weight:700;line-height:1.25;width:1500px">Un objet fabriqué par l’Homme, qui répond à un besoin.</p>' +
+          '<div class="cartes">' + carte('velo', 'Un vélo', 'pour se déplacer') + carte('stylo', 'Un stylo', 'pour écrire') + carte('jouet', 'Une manette', 'pour jouer') + carte('taille-crayon', 'Un taille-crayon', 'pour tailler', true) + '</div>',
+        notes: 'Demander d’autres exemples d’objets techniques dans la classe, et à quel besoin ils répondent. Une pomme n’est pas un objet technique : elle n’est pas fabriquée par l’Homme.' },
+      { html: '<h2>Notre mission</h2><div class="cartes">' + carte('tournevis', 'Je démonte') + carte('oeil', 'J’observe') + carte('regle', 'Je mesure') + carte('remonter', 'Je remonte') + '</div>' +
+          '<p style="font-size:44px;font-weight:700;color:#123F7A">Toujours en binôme, une pièce à la fois.</p>',
+        notes: 'Insister : une seule pièce à la fois, et on regarde bien avant de retirer. À la fin, le taille-crayon doit marcher à nouveau.' },
+      { classe: 'bleue', style: 'justify-content:center', html: quadrillage('#2E6FC4') +
+          '<div style="display:flex;align-items:center;gap:96px">' +
+          '<img src="img/taille-crayon.jpg" alt="Le taille-crayon à manivelle" style="width:470px;height:740px;object-fit:cover;border-radius:48px;border:8px solid #fff">' +
+          '<div style="display:flex;flex-direction:column;gap:36px;width:1050px"><p style="font-size:40px;font-weight:700;color:#E6EEF9">L’objet du jour</p>' +
+          '<p style="font-size:96px;font-weight:700;line-height:1.1">Le taille-crayon à manivelle</p><p style="font-size:48px;font-weight:600;line-height:1.3">Qu’y a-t-il à l’intérieur ?</p></div></div>',
+        notes: 'Montrer le vrai taille-crayon, le faire passer dans les mains, tourner la manivelle. Laisser les élèves imaginer les pièces sans donner de réponse : ils répondront aux questions par écrit à la fin.' },
+      { html: '<h2>Le programme</h2><div class="cartes" style="gap:40px">' +
+          carte('tournevis', 'Je démonte', 'Séance 1 · et j’observe', true) + carte('regle', 'Je mesure', 'Séance 2 · et je dessine') + carte('remonter', 'Je remonte', 'Séance 3 · et je teste') + '</div>' +
+          '<p style="font-size:36px;font-weight:600;color:#55617A">3 séances de 55 minutes.</p>',
+        notes: 'La frise est la même que l’écran « Ma mission » de l’ordinateur : les élèves la retrouveront à chaque séance.' },
+      { html: seance(1, 'Je démonte et j’observe', 'tournevis', ['Je retire une pièce à la fois.', 'Je la prends en photo.', 'Je la pose dans la boîte.']),
+        notes: '7 pièces à retirer, dans l’ordre. Avant chaque pièce, l’écran montre le geste en photo. Le tableau des pièces se remplit à l’écran, avec la photo et le nom de chaque pièce : c’est lui qui garde l’ordre, la boîte n’a pas de compartiment. Attention à ne pas perdre les vis et les ressorts.' },
+      { html: seance(2, 'Je mesure et je dessine', 'regle', ['Je mesure le corps et la manivelle.', 'Je dessine sur la feuille : 1 carreau = 1 cm.', 'Les flèches des mesures, en couleur.']),
+        notes: 'Deux pièces à mesurer au réglet, en cm : le corps (hauteur, largeur, longueur) et la manivelle (sa longueur). L’écran montre la photo de la pièce et, pour le corps, la mesure à prendre. Le dessin se fait sur la feuille quadrillée (1 carreau = 1 cm), à la règle sauf les arrondis, les flèches de cotes d’une autre couleur.' },
+      { html: seance(3, 'Je remonte et je teste', 'remonter', ['Je reprends mon tableau à l’envers.', 'Je remets les pièces dans l’ordre inverse.', 'Je teste, puis je réponds par écrit.']),
+        notes: 'On repart de la dernière pièce démontée ; l’écran donne un conseil pour chaque pièce. À la fin : le taille-crayon marche-t-il ? Puis trois questions, toujours avec une réponse écrite.' },
+      { classe: 'nuit', html: '<h2>Nos règles</h2><div class="regles">' +
+          regle('main-stop', 'Je ne force jamais une pièce.', 'Si ça bloque, je lève la main.') + regle('vis', 'Chaque vis va dans la boîte.', 'Tout de suite. Jamais dans les mains.') +
+          regle('lame', 'Je ne touche pas aux lames.', 'Elles restent dans le taille-crayon.') + regle('boite', 'Toutes les pièces dans la boîte.', 'Pas de mélange avec le voisin.') + '</div>',
+        notes: 'Les mêmes règles reviennent à l’écran au début des séances (« J’ai compris »).' },
+      { html: '<h2>Comment on travaille</h2><div class="cartes" style="gap:32px">' +
+          carte('maison', 'Ma mission à l’ordinateur', '', true) + carte('tournevis', 'En binôme, un taille-crayon', '', true) + carte('photo', 'Je prends des photos', '', true) + carte('aide', 'Bouton Aide : le professeur vient', '', true) + '</div>',
+        notes: 'Chaque binôme a son dossier sur le réseau : son travail et ses photos y sont enregistrés. Le bouton 🔊 lit les consignes à voix haute. Matériel : une boîte, un tournevis et un taille-crayon par binôme.' },
+      { classe: 'bleue', style: 'align-items:center;justify-content:center;gap:28px', html: quadrillage('#2E6FC4') +
+          tuile('tournevis', 240, 64, '#fff', '#1D5FB4', 160) + '<p style="font-size:56px;font-weight:700;color:#E6EEF9">À vos tournevis…</p>' +
+          '<h1 style="font-size:150px;font-weight:700;line-height:1.05">C’est parti !</h1>',
+        notes: 'On ouvre « Ma mission » et on commence la séance 1.' },
+    ];
+
+    var scene = document.getElementById('scene');
+    scene.innerHTML = DIAPOS.map(function (d, i) {
+      return '<section class="diapo ' + (d.classe || '') + '" style="' + (d.style || '') + '" aria-label="Diapositive ' + (i + 1) + ' sur ' + DIAPOS.length + '">' + d.html + '</section>';
+    }).join('');
+    var diapos = scene.querySelectorAll('.diapo');
+    var notes = document.getElementById('notes');
+    var i = Math.min(Math.max(0, (parseInt((location.hash || '').replace('#', ''), 10) || 1) - 1), DIAPOS.length - 1);
+
+    function ajuster() {
+      var e = Math.min(innerWidth / 1920, innerHeight / 1080);
+      for (var k = 0; k < diapos.length; k++) diapos[k].style.transform = 'scale(' + e + ') translate(-50%, -50%)';
+    }
+    function montrer(n) {
+      i = Math.min(Math.max(0, n), DIAPOS.length - 1);
+      for (var k = 0; k < diapos.length; k++) diapos[k].classList.toggle('active', k === i);
+      document.getElementById('numero').textContent = (i + 1) + ' / ' + DIAPOS.length;
+      notes.querySelector('span').textContent = DIAPOS[i].notes || '';
+      history.replaceState(null, '', '#' + (i + 1));
+    }
+    function plein() {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {});
+    }
+    var actions = { precedent: function () { montrer(i - 1); }, suivant: function () { montrer(i + 1); }, notes: function () { notes.hidden = !notes.hidden; }, plein: plein };
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-cmd]');
+      if (b) return actions[b.dataset.cmd]();
+      if (e.target.closest('.notes')) return;
+      montrer(e.clientX < innerWidth / 3 ? i - 1 : i + 1);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (['ArrowRight', 'PageDown', ' ', 'Enter'].indexOf(e.key) >= 0) { e.preventDefault(); montrer(i + 1); }
+      else if (['ArrowLeft', 'PageUp', 'Backspace'].indexOf(e.key) >= 0) { e.preventDefault(); montrer(i - 1); }
+      else if (e.key === 'Home') montrer(0);
+      else if (e.key === 'End') montrer(DIAPOS.length - 1);
+      else if (e.key === 'f' || e.key === 'F') plein();
+      else if (e.key === 'n' || e.key === 'N') actions.notes();
+    });
+    // Les commandes s'effacent quand la souris ne bouge plus (elles reviennent au moindre mouvement).
+    var minuteur = null;
+    document.addEventListener('mousemove', function () {
+      document.body.classList.remove('calme');
+      clearTimeout(minuteur);
+      minuteur = setTimeout(function () { document.body.classList.add('calme'); }, 2500);
+    });
+    addEventListener('resize', ajuster);
+    ajuster();
+    montrer(i);
+  })();
+</script>
+</body>
+</html>

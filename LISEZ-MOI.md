@@ -24,6 +24,8 @@ Rien n'est envoyé ailleurs, aucun compte. Une sauvegarde existante n'est jamais
   `site/taille-crayon/img/` (pièces, gestes, l'objet du jour).
 - Feuille de dessin de la séance 2 : `site/taille-crayon/feuille-dessin.html` (A4, 1 carreau = 1 cm, les 2 pièces) ;
   l'outil professeur la prépare avec les prénoms de chaque équipe (bandeau « Séance 2 »). Imprimer en taille réelle (100 %).
+- Présentation du début de projet, à projeter : `site/taille-crayon/presentation.html` (11 diapositives ; ← → ou clic
+  pour avancer, F plein écran, N notes du professeur) ; liens sur la page professeur et dans l'outil professeur.
 - Tailles de référence de la séance 2 : à saisir dans l'outil professeur (bandeau « Séance 2 » → « Tailles de référence »),
   enregistrées dans `tailles-reference.json` du dossier de la classe ; elles remplacent les plages de `modele.js`.
 - `site/taille-crayon/donnees/classes.js` : la classe et le nom du dossier du projet.

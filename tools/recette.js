@@ -1149,6 +1149,19 @@ async function scenarioProfesseur(navigateur, base) {
   await feuille.goto(base + 'taille-crayon/feuille-dessin.html');
   assert.equal(await feuille.locator('.feuille').count(), 1, 'sans prénoms : une feuille vierge');
   await feuille.close();
+  // Présentation du début de projet (à projeter) : 11 diapositives, flèches du clavier, notes du professeur.
+  const pres = await contexte.newPage();
+  await pres.goto(base + 'taille-crayon/' + (await page.locator('.pc-piste a', { hasText: 'Présentation du projet' }).getAttribute('href')));
+  assert.equal(await pres.locator('.diapo').count(), 11);
+  await pres.keyboard.press('ArrowRight');
+  await pres.keyboard.press('ArrowRight');
+  await pres.keyboard.press('ArrowRight');
+  assert.match(await pres.locator('.diapo.active').textContent(), /L’objet du jour/);
+  await pres.waitForFunction(() => document.querySelector('.diapo.active img').naturalWidth > 0);
+  await pres.keyboard.press('n');
+  assert.match(await pres.locator('#notes').textContent(), /faire passer dans les mains/);
+  assert.equal(await pres.locator('#numero').textContent(), '4 / 11');
+  await pres.close();
   // Tailles de référence : le professeur tape la hauteur du corps (9,2 cm), enregistrées dans le dossier de la classe.
   await page.locator('.pp-tailles summary').click();
   await page.locator('[data-taille="corps|hauteur"]').fill('9,2');
