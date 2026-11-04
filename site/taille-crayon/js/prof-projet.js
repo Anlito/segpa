@@ -171,7 +171,8 @@
   // tailles de référence.
   function bandeauClasse(equipes) {
     const noms = equipes.map((eq) => eq.resume.noms).sort((a, b) => a.localeCompare(b, 'fr'));
-    return `<div class="pc-exports pc-piste"><span>Séance 2</span>
+    return `<div class="pc-exports pc-piste"><span>Projet</span><a class="pb-btn" href="presentation.html" target="_blank" rel="noopener">Présentation du projet (à projeter)</a></div>
+      <div class="pc-exports pc-piste"><span>Séance 2</span>
       <a class="pb-btn" href="feuille-dessin.html#${encodeURIComponent(noms.join('|'))}" target="_blank" rel="noopener">Feuilles de dessin (A4, une par équipe)</a>
       <a class="pb-btn" href="feuille-dessin.html" target="_blank" rel="noopener">Feuille vierge</a>
       ${formulaireTailles()}</div>`;

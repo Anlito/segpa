@@ -106,7 +106,7 @@
       lp
         ? `<span>longueur proposée <b>${S.ecrireNombre(lp.longueur / 100)} m</b> (${lp.depassent} voiture${lp.depassent > 1 ? 's' : ''} sur ${lp.sur} l’ont dépassée à leur meilleur essai)</span>`
         : '<span>longueur proposée après les essais de la séance 4 (2 équipes mesurées au moins)</span>'
-    }<a class="pb-btn" href="course.html" target="_blank" rel="noopener">La course (vidéoprojecteur)</a>${tousLesPatrons(equipes)}</div>`;
+    }<a class="pb-btn" href="course.html" target="_blank" rel="noopener">La course (vidéoprojecteur)</a>${tousLesPatrons(equipes)}<a class="pb-btn" href="presentation.html" target="_blank" rel="noopener">Présentation du projet (à projeter)</a></div>`;
   }
 
   // « Tous les patrons (.zip) » : un SVG par équipe qui a décoré sa carrosserie.

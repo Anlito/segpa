@@ -54,7 +54,7 @@
     const prets = equipes.filter((eq) => S.resumeFilm(eq.donnees, R()).atteint).length;
     const commences = equipes.filter((eq) => S.resumeFilm(eq.donnees, R()).prises).length;
     return `<div class="pc-exports pc-piste"><span>Films :</span><span><b>${prets}</b> avec ${R().min} images ou plus · ${commences} commencé${commences > 1 ? 's' : ''} sur ${equipes.length}</span>
-      <a class="pb-btn" href="cinema.html" target="_blank" rel="noopener">La séance cinéma (vidéoprojecteur)</a></div>`;
+      <a class="pb-btn" href="cinema.html" target="_blank" rel="noopener">La séance cinéma (vidéoprojecteur)</a><a class="pb-btn" href="presentation.html" target="_blank" rel="noopener">Présentation du projet (à projeter)</a></div>`;
   }
 
   // Onglet « Scénario » : les 7 réponses de la séance 1 et le récap en 3 temps.
