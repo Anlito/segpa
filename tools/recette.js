@@ -919,6 +919,42 @@ async function scenarioTaillesProfesseur(navigateur, base) {
 
 // La course au vidéoprojecteur (démonstration) : voitures (une absente), 3 couloirs, poules, chaque course au chrono
 // (touches 1 à 3, une voiture qui n'arrive pas), finales par niveau, podiums, « Bravo à tous ».
+// Présentations du début de projet (moteur commun, commun/js/presentation.js) : les 3 projets, toutes les diapos sans
+// débordement ni erreur, ← → et Fin, notes du professeur (N), numéro dans l'adresse ; liens du portail professeur.
+async function scenarioPresentations(navigateur, base) {
+  const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, { width: 1366, height: 768 });
+  const attendu = { 'taille-crayon': 11, 'voiture-ballon': 14, 'stop-motion': 13 };
+  for (const [projet, n] of Object.entries(attendu)) {
+    await page.goto(base + projet + '/presentation.html');
+    assert.equal(await page.locator('.diapo').count(), n, projet);
+    for (let k = 1; k <= n; k++) {
+      assert.equal(await page.locator('#numero').textContent(), `${k} / ${n}`);
+      const deborde = await page.evaluate(() => {
+        const d = document.querySelector('.diapo.active');
+        const r = d.getBoundingClientRect();
+        return [...d.querySelectorAll('*')].filter((e) => { const q = e.getBoundingClientRect(); return q.width && (q.right > r.right + 1 || q.bottom > r.bottom + 1); }).length;
+      });
+      assert.equal(deborde, 0, `${projet} diapo ${k} déborde`);
+      assert.ok((await page.locator('#notes span').textContent()).length > 10, `${projet} diapo ${k} sans notes`);
+      await page.keyboard.press('ArrowRight');
+    }
+    assert.equal(await page.locator('#numero').textContent(), `${n} / ${n}`, 'reste sur la dernière');
+    await page.keyboard.press('Home');
+    await page.keyboard.press('ArrowRight');
+    assert.match(page.url(), /#2$/);
+    await page.keyboard.press('n');
+    assert.ok(await page.locator('#notes').isVisible());
+    await page.goto(base + projet + '/presentation.html#4');
+    await page.reload();
+    assert.equal(await page.locator('#numero').textContent(), `4 / ${n}`);
+  }
+  await page.goto(base + 'professeur.html');
+  for (const projet of Object.keys(attendu)) assert.equal(await page.locator(`a[href="${projet}/presentation.html"]`).count(), 1, projet);
+  assert.deepEqual(erreurs, []);
+  assert.deepEqual(horsSite, []);
+  await contexte.close();
+}
+
 async function scenarioCourse(navigateur, base, taille, captures) {
   const { contexte, page, erreurs, horsSite } = await nouvellePage(navigateur, taille);
   await page.goto(base + 'voiture-ballon/course.html');
@@ -1408,6 +1444,15 @@ async function scenarioProfesseur(navigateur, base) {
       } catch (e) {
         ok = false;
         noter(`- ÉCHEC ${nomBase} 1366×768 · taille-crayon, tailles du professeur : ${e.message.split('\n').slice(0, 4).join(' ')}`);
+      }
+    }
+    for (const [nomBase, base] of bases) {
+      try {
+        await scenarioPresentations(navigateur, base);
+        noter(`- OK ${nomBase} 1366×768 · présentations du début de projet (taille-crayon 11, voiture 14, stop motion 13 diapos) : aucune diapo ne déborde, chacune a ses notes, ← → Début, notes (N), numéro dans l’adresse ; liens du portail professeur.`);
+      } catch (e) {
+        ok = false;
+        noter(`- ÉCHEC ${nomBase} 1366×768 · présentations du début de projet : ${e.message.split('\n').slice(0, 4).join(' ')}`);
       }
     }
   } finally {

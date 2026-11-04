@@ -1,4 +1,4 @@
-# Recette automatique — 03/11/2026 15:43:47
+# Recette automatique — 04/11/2026 06:10:31
 
 Navigateur : Chromium (Playwright) 153.0.8010.12 · caméra simulée
 
@@ -45,5 +45,7 @@ Navigateur : Chromium (Playwright) 153.0.8010.12 · caméra simulée
 - OK serveur 1366×768 · stop motion, avis du professeur vu par l’élève : « Je relis mon histoire » montre l’avis « À revoir » et son mot, l’équipe change la fin, relit son histoire ; avis noté comme vu.
 - OK file:// 1366×768 · taille-crayon, tailles du professeur : lues dans tailles-reference.json, une mesure acceptée par le modèle mais hors de la taille du professeur est signalée (« Mesure encore une fois »), la bonne est acceptée.
 - OK serveur 1366×768 · taille-crayon, tailles du professeur : lues dans tailles-reference.json, une mesure acceptée par le modèle mais hors de la taille du professeur est signalée (« Mesure encore une fois »), la bonne est acceptée.
+- OK file:// 1366×768 · présentations du début de projet (taille-crayon 11, voiture 14, stop motion 13 diapos) : aucune diapo ne déborde, chacune a ses notes, ← → Début, notes (N), numéro dans l’adresse ; liens du portail professeur.
+- OK serveur 1366×768 · présentations du début de projet (taille-crayon 11, voiture 14, stop motion 13 diapos) : aucune diapo ne déborde, chacune a ses notes, ← → Début, notes (N), numéro dans l’adresse ; liens du portail professeur.
 
 À faire à la main sur un poste du collège (voir RECETTE.md) : vraie webcam, voix française, dossier réseau.

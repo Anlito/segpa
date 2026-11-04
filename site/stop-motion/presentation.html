@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Présentation du projet · Mon film en briques · 6e SEGPA</title>
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../commun/css/socle.css">
+<link rel="stylesheet" href="../commun/css/presentation.css">
+<style>
+  /* Présentation du début de projet, à projeter (univers « Cinéma en briques ») : le moteur et les commandes sont dans le
+     socle (commun/js/presentation.js). Les dessins sont en SVG : rien n'est chargé. */
+  :root { --fond: #15131F; --surface: #25223A; --encre: #F4F1E8; --doux: #C9C4DD; --trait: #5A5574; --jaune: #FACC15; --jaune-encre: #1A1505; --clair: #F4F1E8; }
+  .diapo { background: var(--fond); color: var(--encre); padding-top: 140px; }
+  .diapo.claire { background: var(--clair); color: #1A1726; }
+  .diapo.jaune { background: var(--jaune); color: var(--jaune-encre); }
+  .diapo > * { position: relative; }
+  .diapo > .decor { position: absolute; }
+  /* Le clap en haut, la bande de film en bas (comme les écrans des élèves). */
+  .clap { left: 0; top: 0; width: 1920px; height: 36px; background: repeating-linear-gradient(135deg, #111 0 52px, #F4F1E8 52px 104px); }
+  .pellicule { left: 0; bottom: 0; width: 1920px; height: 48px; background: radial-gradient(circle, #15131F 0 9px, transparent 10px) 0 50% / 48px 100% repeat-x, #0B0A12; }
+  h2 { font-size: 80px; font-weight: 700; line-height: 1.1; }
+  .etiquette { align-self: flex-start; font-size: 32px; font-weight: 700; background: var(--jaune); color: var(--jaune-encre); padding: 8px 28px; border-radius: 20px; }
+  .tuile { display: flex; align-items: center; justify-content: center; flex: none; position: relative; }
+  .tuile .picto { stroke-width: 1.8; }
+  /* Une brique : les tenons au-dessus. */
+  .tenons::before { content: ''; position: absolute; left: 18%; right: 18%; top: -18px; height: 18px;
+    background: radial-gradient(ellipse at 50% 100%, currentColor 0 60%, transparent 62%) 0 0 / 33.3% 100% repeat-x; color: inherit; opacity: 1; }
+  .cartes { display: flex; gap: 28px; }
+  .carte { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 22px; background: var(--surface); padding: 52px 24px 44px; border-radius: 28px; border: 3px solid var(--trait); text-align: center; }
+  .claire .carte { background: #fff; border-color: #D6D1E4; }
+  .carte h3 { font-size: 40px; font-weight: 700; line-height: 1.15; }
+  .carte p { font-size: 28px; color: var(--doux); }
+  .claire .carte p { color: #4A4560; }
+  .carte.forte { border-color: var(--jaune); }
+  .seance-titre { display: flex; align-items: center; gap: 32px; }
+  .seance-titre p { font-size: 40px; font-weight: 700; background: var(--jaune); color: var(--jaune-encre); padding: 6px 26px; border-radius: 16px; }
+  .etapes { display: flex; align-items: center; gap: 80px; }
+  .liste { display: flex; flex-direction: column; gap: 44px; }
+  .liste div { display: flex; align-items: center; gap: 28px; }
+  .liste i { width: 26px; height: 20px; border-radius: 4px; background: var(--jaune); flex: none; }
+  .liste p { font-size: 52px; font-weight: 700; line-height: 1.2; width: 1050px; }
+  .regles { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .regle { display: flex; align-items: center; gap: 36px; background: var(--clair); padding: 32px 40px; border-radius: 28px; color: #1A1726; }
+  .regle .tuile { width: 130px; height: 130px; border-radius: 65px; background: #FEF3C7; }
+  .regle strong { display: block; font-size: 42px; line-height: 1.2; }
+  .regle span { display: block; font-size: 30px; color: #4A4560; margin-top: 8px; }
+  .images { display: flex; gap: 0; background: #0B0A12; padding: 44px 36px; border-radius: 20px; align-self: center; }
+  .images figure { margin: 0 14px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .images svg { display: block; background: #F4F1E8; border-radius: 10px; }
+  .images figcaption { font-size: 30px; font-weight: 700; color: var(--jaune); }
+</style>
+</head>
+<body>
+<noscript>Cette page a besoin de JavaScript : ouvre-la avec Chrome ou Edge.</noscript>
+<script src="../commun/js/outils.js"></script>
+<script src="../commun/js/pictos.js"></script>
+<script src="../commun/js/presentation.js"></script>
+<script>
+  (function () {
+    'use strict';
+    var S = window.Segpa;
+    var JAUNE = '#FACC15', NUIT = '#15131F';
+    var pic = function (nom, taille, couleur) { return '<span style="color:' + couleur + ';display:flex">' + S.picto(nom, taille) + '</span>'; };
+    var tuile = function (nom, cote, rayon, fond, couleur, taille, brique) {
+      return '<div class="tuile' + (brique ? ' tenons' : '') + '" style="width:' + cote + 'px;height:' + cote + 'px;border-radius:' + rayon + 'px;background:' + fond + ';color:' + fond + '">' + pic(nom, taille, couleur) + '</div>';
+    };
+    var decor = '<div class="decor clap" aria-hidden="true"></div><div class="decor pellicule" aria-hidden="true"></div>';
+    var carte = function (p, titre, sous, forte) {
+      return '<div class="carte' + (forte ? ' forte' : '') + '">' + tuile(p, 150, 24, forte ? JAUNE : '#3A3654', forte ? NUIT : '#F4F1E8', 96, true) + '<h3>' + titre + '</h3>' + (sous ? '<p>' + sous + '</p>' : '') + '</div>';
+    };
+    var seance = function (n, titre, picto, lignes) {
+      return decor + '<div class="seance-titre"><p>Séance ' + n + '</p><h2>' + titre + '</h2></div>' +
+        '<div class="etapes">' + tuile(picto, 340, 56, JAUNE, NUIT, 220, true) +
+        '<div class="liste">' + lignes.map(function (l) { return '<div><i></i><p>' + l + '</p></div>'; }).join('') + '</div></div>';
+    };
+    var regle = function (p, t, d) { return '<div class="regle"><div class="tuile">' + pic(p, 84, '#92400E') + '</div><div><strong>' + t + '</strong><span>' + d + '</span></div></div>'; };
+    // Un personnage en briques, dessiné : il avance d'un petit pas à chaque image.
+    var image = function (x, n) {
+      return '<figure><svg width="300" height="220" viewBox="0 0 150 110" role="img" aria-label="Image ' + n + '">' +
+        '<rect x="0" y="92" width="150" height="18" fill="#16A34A"/><rect x="104" y="58" width="30" height="34" fill="#DC2626" stroke="#111" stroke-width="2"/><rect x="100" y="50" width="38" height="10" fill="#7C2D12" stroke="#111" stroke-width="2"/>' +
+        '<g transform="translate(' + x + ' 0)" stroke="#111" stroke-width="2"><rect x="8" y="22" width="20" height="18" rx="3" fill="#FACC15"/><rect x="5" y="40" width="26" height="26" fill="#2563EB"/>' +
+        '<rect x="5" y="66" width="11" height="26" fill="#1E293B"/><rect x="20" y="66" width="11" height="26" fill="#1E293B"/><circle cx="14" cy="30" r="1.6" fill="#111" stroke="none"/><circle cx="22" cy="30" r="1.6" fill="#111" stroke="none"/></g>' +
+        '</svg><figcaption>Photo ' + n + '</figcaption></figure>';
+    };
+
+    var DIAPOS = [
+      { style: 'justify-content:center;gap:36px', html: decor +
+          '<div class="decor" style="left:1250px;top:300px">' + tuile('film', 500, 96, JAUNE, NUIT, 340, true) + '</div>' +
+          '<p class="etiquette">Technologie · 6e SEGPA</p>' +
+          '<h1 style="font-size:132px;font-weight:700;line-height:1.05;width:1050px">Mon film en briques</h1>' +
+          '<p style="font-size:52px;font-weight:600;color:#C9C4DD">Un film en stop motion</p>',
+        notes: 'Bienvenue ! Un nouveau projet : on va inventer une histoire, la construire en briques, et en faire un vrai petit film.' },
+      { html: decor + '<h2>C’est quoi, un stop motion ?</h2>' +
+          '<div class="images">' + image(10, 1) + image(30, 2) + image(50, 3) + image(70, 4) + '</div>' +
+          '<p style="font-size:52px;font-weight:700;line-height:1.25">Une photo, je bouge un tout petit peu, une photo…</p>',
+        notes: 'Montrer les 4 images : le personnage avance d’un petit pas à chaque photo. Passées très vite, l’une après l’autre, on croit qu’il marche : c’est un dessin animé avec des photos. On peut montrer un court extrait de film en stop motion pour l’exemple.' },
+      { html: decor + '<h2>Notre mission</h2><div class="cartes">' + carte('crayon', 'J’invente une histoire') + carte('brique', 'Je la construis') + carte('camera', 'Je la filme') + carte('film', 'Je la projette', '', true) + '</div>' +
+          '<p style="font-size:44px;font-weight:700;color:#FACC15">En binôme : une histoire, un film.</p>',
+        notes: 'Le film est muet. À la fin, on regarde tous les films ensemble, comme au cinéma.' },
+      { classe: 'claire', html: '<h2>Le matériel</h2><div class="cartes">' +
+          carte('brique', 'Une plaque', 'une par binôme', true) + carte('boite', 'Des briques', 'pour toute la classe') + carte('camera', 'Une webcam', 'sur son support') + carte('maison', 'L’ordinateur', 'Ma mission') + '</div>' +
+          '<p style="font-size:40px;font-weight:600;color:#4A4560">La webcam reste sur son support : elle ne bouge jamais.</p>',
+        notes: 'Une plaque par binôme, avec le nom dessus ; les briques sont communes. La webcam est sur un support imprimé en 3D : le même point de vue d’une photo à l’autre.' },
+      { html: decor + '<h2>Le programme</h2><div class="cartes" style="gap:24px">' +
+          carte('crayon', 'J’invente', 'Séance 1', true) + carte('brique', 'Je construis', 'Séance 2') + carte('camera', 'Je filme', 'Séance 3') + carte('camera', 'Je filme encore', 'Séance 4') + carte('film', 'Je projette', 'Séance 5') + '</div>' +
+          '<p style="font-size:36px;font-weight:600;color:#C9C4DD">5 séances de 55 minutes.</p>',
+        notes: 'La frise est la même que l’écran « Ma mission » de l’ordinateur : les élèves la retrouveront à chaque séance.' },
+      { html: seance(1, 'J’invente mon histoire', 'crayon', ['Mon héros, le lieu, le problème…', 'Je choisis une idée, ou j’écris la mienne.', 'Je choisis le titre de mon film.']),
+        notes: '7 petites questions : le héros, le lieu, ce qu’il fait au début, le problème, comment il est réglé, la fin, les objets à construire. Des cartes-idées sont proposées, ou on écrit la sienne. À la fin, le récap : l’histoire en 3 temps (début, milieu, fin). Le professeur la relit dans son outil, la valide ou demande de revoir une réponse.' },
+      { html: seance(2, 'Je construis mon décor', 'brique', ['Je construis le décor sur la plaque.', 'Puis mon héros et les objets.', 'Je secoue la table : rien ne tombe ?']),
+        notes: 'On relit d’abord son histoire. Chaque construction est prise en photo. Le héros doit tenir debout tout seul. Si quelque chose tombe quand on secoue doucement la table, on renforce.' },
+      { html: seance(3, 'Je filme mon histoire', 'camera', ['Je bouge un tout petit peu.', 'Les mains sortent de l’image.', 'Clic, une photo. Et je recommence !']),
+        notes: 'L’écran montre l’image de la webcam en grand, avec l’image précédente en transparence (bouton fantôme) pour bouger juste un peu. Il faut 30 photos au moins ; le compteur l’affiche. Le bouton « Enlever la dernière » efface une photo ratée.' },
+      { html: seance(4, 'Je filme encore', 'camera', ['Je reprends où je m’étais arrêté.', 'Je filme la fin de mon histoire.', 'Mon film est fini !']),
+        notes: 'Le film reprend à la dernière photo : le décor n’a pas bougé, il est resté sur la plaque. 120 photos au plus.' },
+      { html: seance(5, 'Je projette mon film', 'film', ['Je regarde mon film et je choisis la vitesse.', 'J’enlève les images ratées.', 'On regarde tous les films ensemble !']),
+        notes: 'Le titre au début, les prénoms au générique à la fin. Trois vitesses : lent, normal, rapide. Pour la séance cinéma, le professeur ouvre « La séance cinéma » depuis son outil et projette les films de la classe.' },
+      { html: decor + '<h2>Nos règles</h2><div class="regles">' +
+          regle('camera', 'Je ne touche pas l’objectif.', 'Sinon, l’image devient floue.') + regle('brique', 'Je compte mes briques.', 'Rien ne se perd.') +
+          regle('balai', 'Je range les briques par couleur.', 'À la fin de chaque séance.') + regle('photo', 'Je filme les briques.', 'Pas les personnes.') + '</div>',
+        notes: 'Les mêmes règles reviennent à l’écran au début des séances (« J’ai compris »). Aucun visage dans les photos : les mains sortent de l’image avant chaque photo.' },
+      { html: decor + '<h2>Comment on travaille</h2><div class="cartes" style="gap:32px">' +
+          carte('maison', 'Ma mission à l’ordinateur', '', true) + carte('brique', 'En binôme, une plaque', '', true) + carte('voix', 'Le bouton 🔊 lit les consignes', '', true) + carte('aide', 'Bouton Aide : le professeur vient', '', true) + '</div>',
+        notes: 'Chaque binôme a son dossier sur le réseau : son histoire et les photos du film y sont enregistrées. Rien n’est envoyé sur Internet.' },
+      { classe: 'jaune', style: 'align-items:center;justify-content:center;gap:28px', html:
+          '<div class="decor clap" aria-hidden="true"></div>' + tuile('camera', 240, 56, NUIT, JAUNE, 160, true) +
+          '<p style="font-size:56px;font-weight:700">Silence… Moteur…</p>' +
+          '<h1 style="font-size:160px;font-weight:700;line-height:1.05">Action !</h1>',
+        notes: 'On ouvre « Ma mission » et on commence la séance 1 : j’invente mon histoire.' },
+    ];
+
+    S.lancerPresentation(DIAPOS);
+  })();
+</script>
+</body>
+</html>

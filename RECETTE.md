@@ -240,3 +240,8 @@ Professeur (`stop-motion/prof.html`) :
 ## Taille-crayon — tailles de référence saisies par le professeur (02/11)
 - [ ] Outil professeur → bandeau « Séance 2 » → « Tailles de référence » : corps (hauteur, largeur, longueur) et manivelle (longueur), tolérance ± 0,5 cm ; « Enregistrer les tailles » écrit `tailles-reference.json` dans le dossier de la classe.
 - [ ] Un élève (dossier de la classe ouvert) est vérifié avec ces tailles dès sa prochaine mesure ; la bonne valeur ne lui est jamais montrée. Sans dossier : les plages du modèle.
+
+## Présentations du début de projet (à projeter)
+- [ ] Portail professeur → « Présentation du projet (à projeter) » pour chacun des 3 projets (taille-crayon 11 diapos, voiture 14, stop motion 13).
+- [ ] Sur le vidéoprojecteur : F plein écran, ← → ou clic pour avancer, N pour les notes du professeur ; texte lisible au fond de la classe.
+- [ ] Le lien « Présentation du projet » est aussi dans le bandeau de chaque outil professeur.
